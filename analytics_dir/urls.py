@@ -8,4 +8,5 @@ router.register(r'participants', views.ParticipantViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('directory/', views.AnalyticsDirPageView.as_view(), name='analytics_dir'),
 ]

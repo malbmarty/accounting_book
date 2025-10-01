@@ -11,4 +11,5 @@ router.register(r'payment-types', views.PaymentTypeViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
+    path('directory/', views.PayrollDirPageView.as_view(), name='payroll_dir'),
 ]

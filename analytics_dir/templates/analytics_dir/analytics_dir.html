@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Управление справочником для аналитики{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+<script src="{% static 'js/analytics_dir.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Управление справочником для аналитики</h1>
+
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+    
+    <!-- Проекты -->
+    <div>
+        <h3>Проекты</h3>
+        <form id="projectForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="projectId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название проекта" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('projectForm')">Отмена</button>
+        </form>
+        <ul id="projectList">
+            {% for project in projects %}
+            <li>
+                {{ project.name }}
+                <button class="icon-btn" onclick="editItem('project', '{{ project.id }}', '{{ project.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('projects', '{{ project.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+        <!-- Плательщики/Получатели -->
+    <div>
+        <h3>Плательщики/Получатели</h3>
+        <form id="participantForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="participantId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название/имя" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('participantForm')">Отмена</button>
+        </form>
+        <ul id="participantList">
+            {% for participant in participants %}
+            <li>
+                {{ participant.name }}
+                <button class="icon-btn" onclick="editItem('participant', '{{ participant.id }}', '{{ participant.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('participants', '{{ participant.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+
+</div>
+<script src="{% static 'js/analytics_dir.js' %}"></script>
+{% endblock %}

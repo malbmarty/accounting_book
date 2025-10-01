@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Управление справочником для Зарплатной ведомости{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+<script src="{% static 'js/payroll_dir.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<h1>Управление справочником для зарплатной ведомости</h1>
+
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+    
+    <!-- Должности -->
+    <div>
+        <h3>Должности</h3>
+        <form id="positionForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="positionId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название должности" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('positionForm')">Отмена</button>
+        </form>
+        <ul id="positionList">
+            {% for position in positions %}
+            <li>
+                {{ position.name }}
+                <button class="icon-btn" onclick="editItem('position', '{{ position.id }}', '{{ position.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('positions', '{{ position.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+        <!-- Отделы -->
+    <div>
+        <h3>Отделы</h3>
+        <form id="departmentForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="departmentId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название отдела" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('positionForm')">Отмена</button>
+        </form>
+        <ul id="departmentList">
+            {% for department in departments %}
+            <li>
+                {{ department.name }}
+                <button class="icon-btn" onclick="editItem('department', '{{ department.id }}', '{{ department.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('departments', '{{ department.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Статусы сотрудников -->
+    <div>
+        <h3>Статусы сотрудников</h3>
+        <form id="statusForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="statusId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название статуса" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('statusForm')">Отмена</button>
+        </form>
+        <ul id="statusList">
+            {% for status in statuses %}
+            <li>
+                {{ status.name }}
+                <button class="icon-btn" onclick="editItem('status', '{{ status.id }}', '{{ status.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('statuses', '{{ status.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Типы сотрудников -->
+    <div>
+        <h3>Типы сотрудников</h3>
+        <form id="employeeTypeForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="employeeTypeId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название типа" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('employeeTypeForm')">Отмена</button>
+        </form>
+        <ul id="employeeTypeList">
+            {% for employee_type in employee_types %}
+            <li>
+                {{ employee_type.name }}
+                <button class="icon-btn" onclick="editItem('employeeType', '{{ employee_type.id }}', '{{ employee_type.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('employee-types', '{{ employee_type.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Типы выплат -->
+    <div>
+        <h3>Типы выплат</h3>
+        <form id="paymentTypeForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="paymentTypeId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название типа" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('paymentTypeForm')">Отмена</button>
+        </form>
+        <ul id="paymentTypeList">
+            {% for payment_type in payment_types %}
+            <li>
+                {{ payment_type.name }}
+                <button class="icon-btn" onclick="editItem('paymentType', '{{ payment_type.id }}', '{{ payment_type.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('payment-types', '{{ payment_type.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+<script src="{% static 'js/payroll_dir.js' %}"></script>
+{% endblock %}

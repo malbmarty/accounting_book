@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-@nvlt1sdi4e6zf4mx68co^!rle_6xwyb_2sc2u-ydh0urtd4@_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['213.226.127.204', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -122,6 +122,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Указываем, куда собирать файлы для продакшена
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 

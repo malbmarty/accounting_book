@@ -34,6 +34,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
     status_name = serializers.CharField(source='status.name', read_only=True)
     employee_type_name = serializers.CharField(source='employee_type.name', read_only=True)
+    bank_name = serializers.CharField(allow_blank=True, required=False)
+    card_number = serializers.CharField(allow_blank=True, required=False)
 
     class Meta:
         model = Employee
@@ -53,7 +55,7 @@ class AccrualSerializer(serializers.ModelSerializer):
     class Meta:
         model = Accrual
         fields = [
-            'id', 'data', 'employee', 'employee_name', 'department', 'department_name',
+            'id', 'date', 'employee', 'employee_name', 'department', 'department_name',
             'project', 'project_name', 'hourly_pay', 'salary', 'addition_pay',
             'deduction', 'comment'
         ]
@@ -74,7 +76,7 @@ class AccrualSerializer(serializers.ModelSerializer):
         
         errors = {}
         
-        # Проверка подкатегории
+        # Проверка сотрудника и отдела
         if employee and department and employee.department != department:
             errors['employee'] = 'Выбранный сотрудник не принадлежит выбранному отделу'
         
@@ -94,7 +96,7 @@ class PayoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payout
         fields = [
-            'id', 'data', 'project', 'project_name', 'payer', 'payer_name',
+            'id', 'date', 'project', 'project_name', 'payer', 'payer_name',
             'recipient', 'recipient_name', 'department', 'department_name',
             'employee', 'employee_name', 'payment_type', 'payment_type_name',
             'amount', 'comment'
@@ -116,7 +118,7 @@ class PayoutSerializer(serializers.ModelSerializer):
         
         errors = {}
         
-        # Проверка подкатегории
+        # Проверка плательщика и получателя
         if payer and recipient and recipient == payer:
             errors['recipient'] = 'Плательщик и получатель не могут быть одинаковыми'
         

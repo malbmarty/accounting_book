@@ -46,10 +46,10 @@ class Employee(models.Model):
         return self.full_name
 
 class Accrual(models.Model):
-    data = models.DateField(verbose_name="Дата начисления")
-    employee =  models.ForeignKey(Employee, on_delete=models.PROTECT, verbose_name="Сотрудник")
-    department = models.ForeignKey(Department, on_delete=models.PROTECT, verbose_name="Отдел")
+    date = models.DateField(verbose_name="Дата начисления")
     project = models.ForeignKey('analytics_dir.Project', on_delete=models.PROTECT, verbose_name="Проект")
+    department = models.ForeignKey(Department, on_delete=models.PROTECT, verbose_name="Отдел")
+    employee =  models.ForeignKey(Employee, on_delete=models.PROTECT, verbose_name="Сотрудник")
     hourly_pay = models.DecimalField(decimal_places=2, max_digits=20, null=True, blank = True, verbose_name="Почасовая")
     salary = models.DecimalField(decimal_places=2, max_digits=20, null=True, blank = True, verbose_name="Оклад")
     addition_pay = models.DecimalField(decimal_places=2, max_digits=20, null=True, blank = True, verbose_name="Премия/доплаты")
@@ -70,7 +70,7 @@ class Accrual(models.Model):
         super().save(*args, **kwargs)
 
 class Payout(models.Model):
-    data = models.DateField(verbose_name="Дата ОДДС")
+    date = models.DateField(verbose_name="Дата ОДДС")
     project = models.ForeignKey('analytics_dir.Project', on_delete=models.PROTECT, verbose_name="Проект")
     payer = models.ForeignKey(
         'analytics_dir.Participant', 

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование записи - Выплаты{% endblock %}
+
+{% block content %}
+{% load static %}
+<h1>Редактирование записи выплаты</h1>
+
+<form id="editPayoutForm" data-success-url="{% url 'payouts' %}">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label>Дата ОДДС:</label>
+        <input type="date" name="date" id = "currentDate" value="{{ date }}" required>
+    </div>
+
+    <div class="form-group">
+        <label>Проект</label>
+        <select name="project" required>
+            <option value="">Выберите проект</option>
+            {% for project in projects %}
+            <option value="{{ project.id }} " {% if project.id == payout.project %}selected{% endif %}>{{ project.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Плательщик ОТКУДА</label>
+        <select name="payer" id="payer" required >
+            <option value="">Выберите плательщика</option>
+            {% for payer in participants %}
+            <option value="{{ payer.id }}" {% if payer.id == payout.payer %}selected{% endif %}>{{ payer.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Плательщик КУДА</label>
+        <select name="recipient" id="recipient" required >
+            <option value="">Выберите получателя</option>
+            {% for recipient in participants %}
+            <option value="{{ recipient.id }}" {% if recipient.id == payout.recipient %}selected{% endif %}>{{ recipient.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Отдел</label>
+        <select name="department" id="department" onchange="loadEmployees()" required>
+            <option value="">Выберите отдел</option>
+            {% for department in departments %}
+            <option value="{{ department.id }}" {% if department.id == payout.department %}selected{% endif %}>{{ department.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Сотрудник:</label>
+        <select name="employee" id="employee" required data-selected-employee="{{ payout.employee }}">
+
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Тип выплаты</label>
+        <select name="payment_type" id="payment_type" required>
+            <option value="">Выберите тип выплаты</option>
+            {% for payment_type in payment_types %}
+            <option value="{{ payment_type.id }}" {% if payment_type.id == payout.payment_type %}selected{% endif %}>{{ payment_type.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Сумма выплаты:</label>
+        <input type="number" name="amount" step="0.01" value="{{ payout.amount }}">
+    </div>
+
+    <div class="form-group">
+        <label>Комментарий:</label>
+        <textarea name="comment" rows="3">{{ payout.comment }}</textarea>
+    </div>
+
+
+
+    <button type="submit">Сохранить изменения</button>
+</form>
+
+<script src="{% static 'js/edit_payout.js' %}"></script>
+{% endblock %}

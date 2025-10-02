@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Выплаты{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<h2>Выплаты</h2>
+
+<h3>Создание новой записи</h3>
+
+<form id="createPayoutForm">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label>Дата ОДДС:</label>
+        <input type="date" name="date" id = "currentDate" required>
+    </div>
+
+    <div class="form-group">
+        <label>Проект</label>
+        <select name="project" required>
+            <option value="">Выберите проект</option>
+            {% for project in projects %}
+            <option value="{{ project.id }}" >{{ project.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Плательщик ОТКУДА</label>
+        <select name="payer" id="payer" required>
+            <option value="">Выберите плательщика</option>
+            {% for payer in participants %}
+            <option value="{{ payer.id }}" >{{ payer.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Плательщик КУДА</label>
+        <select name="recipient" id="recipient" required>
+            <option value="">Выберите получателя</option>
+            {% for recipient in participants %}
+            <option value="{{ recipient.id }}" >{{ recipient.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Отдел</label>
+        <select name="department" id="department" onchange="loadEmployees()" required>
+            <option value="">Выберите отдел</option>
+            {% for department in departments %}
+            <option value="{{ department.id }}" >{{ department.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Сотрудник</label>
+        <select name="employee" id="employee" required>
+            <option value="">Сначала выберите отдел</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Тип выплаты</label>
+        <select name="payment_type" id="payment_type" required>
+            <option value="">Выберите тип выплаты</option>
+            {% for payment_type in payment_types %}
+            <option value="{{ payment_type.id }}" >{{ payment_type.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Сумма выплаты:</label>
+        <input type="number" name="amount" step="0.01">
+    </div>
+
+    <div class="form-group">
+        <label>Комментарий:</label>
+        <textarea name="comment" rows="3"></textarea>
+    </div>
+
+    <button type="submit">Внести</button>
+
+</form>
+
+
+
+
+<div id="payoutsTable">
+    <table>
+        <thead>
+            <tr>
+                <th>Дата ОДДС</th>
+                <th>Проект</th>
+                <th>Плательщик ОТКУДА</th>
+                <th>Получатель КУДА</th>
+                <th>Отдел</th>
+                <th>Сотрудник</th>
+                <th>Тип выплаты</th>
+                <th>Сумма/вычеты</th>
+                <th>Комментарий</th>
+            </tr>
+        </thead>
+        <tbody id="payoutsBody">
+            <!-- Данные будут загружены через JavaScript -->
+        </tbody>
+    </table>
+</div>
+<script src="{% static 'js/payouts.js' %}"></script>
+{% endblock %}

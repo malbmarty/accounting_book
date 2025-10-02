@@ -10,7 +10,74 @@
 
 {% block content %}
 {% load static %}
-<h1>Штат сотрудников</h1>
+<h2>Штат сотрудников</h2>
+
+<h3>Создание новой записи</h3>
+
+<form id="createEmployeeForm">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label>ФИО</label>
+        <input type="text" name="full_name" value="" required>
+    </div>
+
+    <div class="form-group">
+        <label>Должность</label>
+        <select name="position" required>
+            <option value="">Выберите должность</option>
+            {% for position in positions %}
+            <option value="{{ position.id }}" >{{ position.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Отдел</label>
+        <select name="department" required>
+            <option value="">Выберите отдел</option>
+            {% for department in departments %}
+            <option value="{{ department.id }}" >{{ department.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Статус</label>
+        <select name="status" required>
+            <option value="">Выберите статус</option>
+            {% for status in statuses %}
+            <option value="{{ status.id }}" >{{ status.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Тип</label>
+        <select name="employee_type" required>
+            <option value="">Выберите тип</option>
+            {% for employee_type in employee_types %}
+            <option value="{{ employee_type.id }}" >{{ employee_type.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Банк</label>
+        <textarea name="bank" rows="1"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Номер карты</label>
+        <textarea name="card" rows="1"></textarea>
+    </div>
+
+    <button type="submit">Внести</button>
+
+</form>
+
+
+
 
 
 <div id="employeesTable">
@@ -19,12 +86,11 @@
             <tr>
                 <th>ФИО</th>
                 <th>Должность</th>
-                <th>Тип</th>
-                <th>Категория</th>
-                <th>Подкатегория</th>
-                <th>Сумма</th>
-                <th>Комментарий</th>
-                <th>Действия</th>
+                <th>Отдел</th>
+                <th>Статус</th>
+                <th>Тип сотрудника</th>
+                <th>Банк</th>
+                <th>Номер карты</th>
             </tr>
         </thead>
         <tbody id="employeesBody">

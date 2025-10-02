@@ -15,6 +15,7 @@
             min-height: 100vh;
         }
         .header { background: #f4f4f4; padding: 10px; margin-bottom: 20px; }
+        .header a { text-decoration: none; color: #333; padding: 5px 10px; }
         .nav { display: flex; gap: 15px; }
         .nav a { text-decoration: none; color: #333; padding: 5px 10px; }
         .nav a:hover { background: #ddd; }
@@ -23,6 +24,56 @@
         th { background-color: #f2f2f2; }
         .filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
         .form-group { margin: 8px 0; }
+        /* Форма */
+        #createAccrualForm {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
+            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+            margin-bottom: 20px;
+        }
+
+        #createPayoutForm {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
+            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+            margin-bottom: 20px;
+        }
+
+
+        #createEmployeeForm {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
+            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+            margin-bottom: 20px;
+        }
+
+        #createAccrualForm .form-group,
+        #createPayoutForm .form-group,
+        #createEmployeeForm .form-group {
+            margin: 0;
+        }
+
+        #createAccrualForm label,
+        #createPayoutForm label,
+        #createEmployeeForm label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        #createAccrualForm input,
+        #createPayoutForm input,
+        #createEmployeeForm input,
+        #createAccrualForm select,
+        #createPayoutForm select,
+        #createEmployeeForm select,
+        #createAccrualForm textarea,
+        #createPayoutForm textarea, 
+        #createEmployeeForm textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
         label { display: block; margin-bottom: 5px; }
         input, select, textarea { width: 80%; padding: 10px; font-size: 16px;}
         button { padding: 10px 15px; background: #3386d8; color: white; border: none; cursor: pointer; font-size: 16px;}
@@ -59,14 +110,22 @@
 <body>
 
 <div class="header">
-  <a href="{% url 'home' %}">Главная</a>
+    <a href="{% url 'home' %}">Главная</a>
+
+    <div class="nav">
+    <a href="#">Зарплатная ведомость ▾</a>
+    <div class="dropdown-content">
+      <a href="{% url 'employees' %}">Сотрудники</a>
+      <a href="{% url 'accruals' %}">Начисления</a>
+      <a href="{% url 'payouts' %}">Выплаты</a>
+    </div>
+  </div>
+
   <div class="nav">
     <a href="#">Управление справочниками ▾</a>
     <div class="dropdown-content">
       <a href="{% url 'payroll_dir' %}">Для зарплатной ведомости</a>
       <a href="{% url 'analytics_dir' %}">Для аналитики</a>
-
-
     </div>
   </div>
 </div>

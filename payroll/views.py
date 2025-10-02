@@ -4,10 +4,12 @@ from django.views.generic import TemplateView
 
 from .serializers import (
     PositionSerializer, DepartmentSerializer, StatusSerializer,
-    EmployeeTypeSerializer, PaymentTypeSerializer
+    EmployeeTypeSerializer, PaymentTypeSerializer,
+    EmployeeSerializer, AccrualSerializer, PayoutSerializer
 )
 from .models import (
-    Position, Department, Status, EmployeeType, PaymentType
+    Position, Department, Status, EmployeeType, PaymentType,
+    Employee, Accrual, Payout
 )
 
 # HTML Views
@@ -47,3 +49,18 @@ class EmployeeTypeViewSet(viewsets.ModelViewSet):
 class PaymentTypeViewSet(viewsets.ModelViewSet):
     queryset = PaymentType.objects.all()
     serializer_class = PaymentTypeSerializer
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+class AccrualViewSet(viewsets.ModelViewSet):
+    queryset = Accrual.objects.all()
+    serializer_class = AccrualSerializer
+
+class PayoutViewSet(viewsets.ModelViewSet):
+    queryset = Payout.objects.all()
+    serializer_class = PayoutSerializer
+
+
+

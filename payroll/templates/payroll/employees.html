@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Штат{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<h1>Штат сотрудников</h1>
+
+
+<div id="employeesTable">
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО</th>
+                <th>Должность</th>
+                <th>Тип</th>
+                <th>Категория</th>
+                <th>Подкатегория</th>
+                <th>Сумма</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="employeesBody">
+            <!-- Данные будут загружены через JavaScript -->
+        </tbody>
+    </table>
+</div>
+<script src="{% static 'js/employees.js' %}"></script>
+{% endblock %}

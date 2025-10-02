@@ -8,6 +8,10 @@ router.register(r'departments', views.DepartmentViewSet)
 router.register(r'statuses', views.StatusViewSet)
 router.register(r'employee-types', views.EmployeeTypeViewSet)
 router.register(r'payment-types', views.PaymentTypeViewSet)
+router.register(r'employees', views.EmployeeViewSet)
+router.register(r'accruals', views.AccrualViewSet)
+router.register(r'payouts', views.PayoutViewSet)
+
 
 urlpatterns = [
     path('api/', include(router.urls)),

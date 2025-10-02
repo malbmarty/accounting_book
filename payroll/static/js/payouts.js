@@ -34,8 +34,8 @@ function loadPayouts() {
                     <tr>
                         <td>${formattedDate}</td>  
                         <td>${payout.project_name}</td>
-                        <td>${payout.payer}</td>
-                        <td>${payout.recipient}</td>  
+                        <td>${payout.payer_name}</td>
+                        <td>${payout.recipient_name}</td>  
                         <td>${payout.department_name}</td>
                         <td>${payout.employee_name}</td>  
                         <td>${payout.payment_type}</td>

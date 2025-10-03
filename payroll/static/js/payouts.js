@@ -41,6 +41,11 @@ function loadPayouts() {
                         <td>${payout.payment_type}</td>
                         <td>${payout.amount}</td>
                         <td>${payout.comment || ''}</td>
+                        <td>${payout.accrued_total_for_month}</td>
+                        <td>${payout.net_amount_to_pay}</td>
+                        <td>${payout.monthly_period}</td>
+                        <td>${payout.accrued_total_for_all_time}</td>
+                        <td>${payout.net_accrued_total_for_all_time}</td>
                         <td>
                             <a href="/payroll/edit-payout/${payout.id}/">Редактировать</a>
                             <button onclick="deletepayout(${payout.id})">Удалить</button>

@@ -1,8 +1,12 @@
 from rest_framework import serializers
+from django.db.models import Sum, F, DecimalField
 from .models import (
     Position, Department, Status, EmployeeType, PaymentType,
     Employee, Accrual, Payout
 )
+
+import locale
+
 
 class PositionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,15 +55,48 @@ class AccrualSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
     project_name = serializers.CharField(source='project.name', read_only=True)
+    # Новые вычисляемые поля
+    hourly_sum_for_employee = serializers.SerializerMethodField()
+    total_amount_to_pay = serializers.SerializerMethodField()
+    monthly_period = serializers.SerializerMethodField()
 
     class Meta:
         model = Accrual
         fields = [
             'id', 'date', 'employee', 'employee_name', 'department', 'department_name',
             'project', 'project_name', 'hourly_pay', 'salary', 'addition_pay',
-            'deduction', 'comment'
+            'deduction', 'comment',  'hourly_sum_for_employee', 'total_amount_to_pay', 'monthly_period' 
         ]
 
+    def get_hourly_sum_for_employee(self, obj):
+        # если аннотированное поле есть (GET списка), используем его
+        if hasattr(obj, 'hourly_sum_for_employee'):
+            return obj.hourly_sum_for_employee or 0
+
+        # иначе (POST/PUT/PATCH) считаем через ORM
+        if obj.date and obj.department and obj.employee:
+            return Accrual.objects.filter(
+                date=obj.date,
+                department=obj.department,
+                employee=obj.employee
+            ).aggregate(total=Sum('hourly_pay'))['total'] or 0
+
+        # fallback
+        return 0
+
+    def get_total_amount_to_pay(self, obj):
+        hourly_sum = self.get_hourly_sum_for_employee(obj) or 0
+        salary = obj.salary or 0
+        addition = obj.addition_pay or 0
+        deduction = obj.deduction or 0
+        return hourly_sum + salary + addition - deduction
+
+    def get_monthly_period(self, obj):
+        if not obj.date:
+            return ""
+        locale.setlocale(locale.LC_TIME,'Russian_Russia')  
+        return obj.date.strftime("%B %y")
+    
         # Проверка выполнения бизнес-правил
     def validate(self, attrs):
         # Комплексная проверка для всех HTTP-методов
@@ -93,14 +130,92 @@ class PayoutSerializer(serializers.ModelSerializer):
     recipient_name = serializers.CharField(source='recipient.name', read_only=True)
     payment_type_name = serializers.CharField(source='payment_type.name', read_only=True)
 
+    accrued_total_for_month = serializers.SerializerMethodField()
+    net_amount_to_pay = serializers.SerializerMethodField()
+    monthly_period = serializers.SerializerMethodField()
+    accrued_total_for_all_time = serializers.SerializerMethodField()
+    net_accrued_total_for_all_time = serializers.SerializerMethodField()
+
     class Meta:
         model = Payout
         fields = [
             'id', 'date', 'project', 'project_name', 'payer', 'payer_name',
             'recipient', 'recipient_name', 'department', 'department_name',
             'employee', 'employee_name', 'payment_type', 'payment_type_name',
-            'amount', 'comment'
+            'amount', 'comment', 'accrued_total_for_month', 'net_amount_to_pay', 'monthly_period', 'accrued_total_for_all_time', 'net_accrued_total_for_all_time'
         ]
+
+    def get_accrued_total_for_month(self, obj):
+        """Считает сумму начислений по сотруднику, отделу и месяцу выплаты"""
+        if not obj.date or not obj.employee or not obj.department:
+            return 0
+
+        # месяц и год выплаты
+        month = obj.date.month
+        year = obj.date.year
+
+        total = Accrual.objects.filter(
+            employee=obj.employee,
+            department=obj.department,
+            date__year=year,
+            date__month=month
+        ).aggregate(
+            total=Sum(F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'), output_field=DecimalField(max_digits=20, decimal_places=2))
+        )['total'] or 0
+
+        return total
+    
+    def get_net_amount_to_pay(self, obj):
+        """accrued_total_for_month минус все выплаты за месяц"""
+        month = obj.date.month
+        year = obj.date.year
+
+        total_paid = Payout.objects.filter(
+            employee=obj.employee,
+            department=obj.department,
+            date__year=year,
+            date__month=month
+        ).aggregate(
+            total=Sum('amount', output_field=DecimalField(max_digits=20, decimal_places=2))
+        )['total'] or 0
+
+        return (self.get_accrued_total_for_month(obj) or 0) - total_paid
+
+    def get_monthly_period(self, obj):
+        if not obj.date:
+            return ""
+        locale.setlocale(locale.LC_TIME,'Russian_Russia')  
+        return obj.date.strftime("%B %y")
+    
+    def get_accrued_total_for_all_time(self, obj):
+        if not obj.employee or not obj.department:
+            return 0
+
+        total = Accrual.objects.filter(
+            employee=obj.employee,
+            department=obj.department
+        ).aggregate(
+            total=Sum(
+                F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'),
+                output_field=DecimalField(max_digits=20, decimal_places=2)
+            )
+        )['total'] or 0
+
+        return total
+    
+    def get_net_accrued_total_for_all_time(self, obj):
+        accrued_total = self.get_accrued_total_for_all_time(obj) or 0
+        if accrued_total == 0:
+            return None  # аналог пустой строки в Excel
+
+        total_paid = Payout.objects.filter(
+            employee=obj.employee,
+            department=obj.department
+        ).aggregate(
+            total=Sum('amount', output_field=DecimalField(max_digits=20, decimal_places=2))
+        )['total'] or 0
+
+        return accrued_total - total_paid
 
         # Проверка выполнения бизнес-правил
     def validate(self, attrs):

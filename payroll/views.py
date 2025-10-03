@@ -4,7 +4,11 @@ from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404
 from django_filters import FilterSet, DateFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.db.models import OuterRef, Subquery, Sum, DecimalField
+from django.db.models import Sum, F, DecimalField
+from django.utils import timezone
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from .serializers import (
     PositionSerializer, DepartmentSerializer, StatusSerializer,
@@ -193,12 +197,109 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     filterset_class = EmployeesFilter
 
 class AccrualViewSet(viewsets.ModelViewSet):
-    queryset = Accrual.objects.all()
     serializer_class = AccrualSerializer
+    queryset = Accrual.objects.all() 
+
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    ordering = ['-date']
+
+    def get_queryset(self):
+        # подзапрос для суммы по комбинации date+department+employee
+        subquery = Accrual.objects.filter(
+            date=OuterRef('date'),
+            department=OuterRef('department'),
+            employee=OuterRef('employee')
+        ).values('date').annotate(total=Sum('hourly_pay')).values('total')
+
+        return Accrual.objects.annotate(
+            hourly_sum_for_employee=Subquery(subquery, output_field=DecimalField(max_digits=20, decimal_places=2))
+        )
 
 class PayoutViewSet(viewsets.ModelViewSet):
     queryset = Payout.objects.all()
     serializer_class = PayoutSerializer
+
+    def get_queryset(self):
+        # подзапрос для суммы начислений за месяц
+        accruals_subquery = Accrual.objects.filter(
+            employee=OuterRef('employee'),
+            department=OuterRef('department'),
+            date__year=OuterRef('date__year'),
+            date__month=OuterRef('date__month')
+        ).values('employee').annotate(
+            total=Sum(F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'), output_field=DecimalField(max_digits=20, decimal_places=2))
+        ).values('total')
+
+        return Payout.objects.annotate(
+            accrued_total_for_month=Subquery(accruals_subquery, output_field=DecimalField(max_digits=20, decimal_places=2))
+        )
+
+
+class SummaryPageView(TemplateView):
+    template_name = 'payroll/summary.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_year = 2025
+        context['years'] = list(range(2025, 2030))  # диапазон лет
+        context['current_year'] = current_year
+        return context
+
+from django.db.models.functions import Coalesce
+
+class YearlyPivotDataView(APIView):
+    def get(self, request, *args, **kwargs):
+        year = int(request.GET.get("year", timezone.now().year))
+
+        result = []
+        employees = Employee.objects.all().select_related("department")
+
+        for emp in employees:
+            months_data = {}
+            for month in range(1, 13):
+                accruals = Accrual.objects.filter(
+                    employee=emp,
+                    date__year=year,
+                    date__month=month
+                ).aggregate(
+                    total_accrued=Sum(
+                        Coalesce(F("hourly_pay"), 0) +
+                        Coalesce(F("salary"), 0) +
+                        Coalesce(F("addition_pay"), 0) -
+                        Coalesce(F("deduction"), 0),
+                        output_field=DecimalField(max_digits=20, decimal_places=2)
+                    )
+                )
+
+                payouts = Payout.objects.filter(
+                    employee=emp,
+                    date__year=year,
+                    date__month=month
+                ).aggregate(
+                    total_payout=Sum(
+                        Coalesce(F("amount"), 0),
+                        output_field=DecimalField(max_digits=20, decimal_places=2)
+                    )
+                )
+
+                accrued = accruals["total_accrued"] or 0
+                payout = payouts["total_payout"] or 0
+                balance = accrued - payout
+
+                months_data[f"{month:02d}"] = {
+                    "accrued": float(accrued),
+                    "payout": float(payout),
+                    "balance": float(balance),
+                }
+
+            result.append({
+                "department": emp.department.name if emp.department else "",
+                "employee": emp.full_name,
+                "opening_balance": 0,  # пока руками
+                "months": months_data
+            })
+
+        return Response(result)
 
 
 

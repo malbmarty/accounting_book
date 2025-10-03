@@ -42,6 +42,9 @@ function loadAccruals() {
                         <td>${accrual.addition_pay}</td>
                         <td>${accrual.deduction}</td>
                         <td>${accrual.comment || ''}</td>
+                        <td>${accrual.hourly_sum_for_employee}</td>
+                        <td>${accrual.total_amount_to_pay}</td>
+                        <td>${accrual.monthly_period}</td>
                         <td>
                             <a href="/payroll/edit-accrual/${accrual.id}/">Редактировать</a>
                             <button onclick="deleteaccrual(${accrual.id})">Удалить</button>

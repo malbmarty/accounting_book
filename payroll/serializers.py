@@ -94,7 +94,8 @@ class AccrualSerializer(serializers.ModelSerializer):
     def get_monthly_period(self, obj):
         if not obj.date:
             return ""
-        locale.setlocale(locale.LC_TIME,'Russian_Russia')  
+        # locale.setlocale(locale.LC_TIME,'Russian_Russia') 
+        locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8') 
         return obj.date.strftime("%B %y")
     
         # Проверка выполнения бизнес-правил

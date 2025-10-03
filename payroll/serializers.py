@@ -184,7 +184,8 @@ class PayoutSerializer(serializers.ModelSerializer):
     def get_monthly_period(self, obj):
         if not obj.date:
             return ""
-        locale.setlocale(locale.LC_TIME,'Russian_Russia')  
+        # locale.setlocale(locale.LC_TIME,'Russian_Russia') 
+        locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8') 
         return obj.date.strftime("%B %y")
     
     def get_accrued_total_for_all_time(self, obj):

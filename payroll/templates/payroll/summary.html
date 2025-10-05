@@ -1,140 +1,174 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="utf-8" />
-<title>Сводная ведомость — таблица</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  :root{
-    --col-dept-w: 260px;     /* ширина столбца Отдел */
-    --col-emp-w: 220px;      /* ширина столбца Сотрудник */
-    --col-in-w: 140px;       /* ширина столбца Входящий остаток */
-    --subcol-w: 110px;       /* ширина каждой из подколонок (Начислено/Выплачено/Остаток) */
-    --head-height: 40px;     /* высота первой строки заголовка */
-    --subhead-height: 34px;  /* высота второй строки заголовка */
-  }
-
-  body{font-family: Arial, Helvetica, sans-serif; margin: 12px; background:#fff;}
-  h2{margin:8px 0 12px 0;}
-
-  /* обертка фиксированного окна для скролла */
-  #summaryTableWrapper{
-    width: 100%;
-    height: 82vh;
-    border: 1px solid #cfcfcf;
-    overflow: auto; /* оба направления */
-    background: #fff;
-    position: relative;
-  }
-
-  table.pivot {
-    border-collapse: collapse;
-    width: max-content; /* будет шире контейнера */
-    min-width: 100%;
-    table-layout: fixed;
-  }
-
-  th, td {
-    border: 1px solid #ddd;
-    padding: 6px 8px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 13px;
-  }
-
-  /* Оформление заголовков */
-  thead th {
-    background: linear-gradient(#e6f2ff,#d6ebff);
-    font-weight: 700;
-    top: 0;
-  }
-
-  .subhead {
-    background: #f4f8fb;
-    top: calc(var(--head-height));
-    font-weight: 600;
-  }
-
-  /* фиксация левых столбцов (три столбца) */
-  .col-dept {
-    position: sticky;
-    left: 0;
-    min-width: var(--col-dept-w);
-    max-width: var(--col-dept-w);
-    background: #fff;
-    z-index: 5;
-    text-align: left;
-    padding-left: 10px;
-  }
-
-  .col-emp {
-    position: sticky;
-    left: calc(var(--col-dept-w));
-    min-width: var(--col-emp-w);
-    max-width: var(--col-emp-w);
-    background: #fff;
-    z-index: 5;
-    text-align: left;
-    padding-left: 10px;
-  }
-
-  .col-in {
-    position: sticky;
-    left: calc(var(--col-dept-w) + var(--col-emp-w));
-    min-width: var(--col-in-w);
-    max-width: var(--col-in-w);
-    background: #fff;
-    z-index: 5;
-  }
-
-  /* фиксируем заголовки сверху */
-  thead tr:first-child th { position: sticky; top: 0; z-index: 10; }
-  thead tr:nth-child(2) th { position: sticky; top: var(--head-height); z-index: 9; }
-
-  /* строка группы отдела */
-  .dept-group {
-    background: #e9f5ff;
-    font-weight: 700;
-    color: #0a4d7b;
-  }
-
-  /* выделение для сотрудника */
-  tbody tr td:first-child { padding-left: 8px; }
-
-  /* широкие подколонки */
-  .month-sub { min-width: var(--subcol-w); max-width: var(--subcol-w); }
-
-  /* total row (по отделу) */
-  .dept-total { background: #f3f7f9; font-weight:700; }
-
-  /* editable входящий остаток */
-  .incoming { text-align: right; padding-right: 12px; }
-
-  /* визуал для отрицательных значений */
-  .negative { color: #c62828; }
-
-  /* небольшой responsive: если окно сильно узкое, уменьшаем subcol */
-  @media (max-width: 900px){
-    :root{ --subcol-w: 80px; --col-in-w: 110px; }
-  }
-</style>
-</head>
-<body>
+{% extends "base.html" %}
+{% load custom_tags %}
+{% block content %}
 {% load static %}
-<h2>Сводная ведомость</h2>
+<h1>Сводка по зарплатам за {{ current_year }} год</h1>
 
-<label for="yearSelect">Год</label>
-<select id="yearSelect" style="margin-left:10px; padding:4px 8px;">
-  <!-- начальное заполнение — JS перезапишет список при загрузке -->
-</select>
+<!-- Форма выбора года -->
+<form method="get" action="" style="margin-bottom:20px;">
+    <label for="year">Выберите год:</label>
+    <select name="year" id="year" onchange="this.form.submit()">
+        {% for year in years %}
+            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+    </select>
+</form>
 
-<div id="summaryTableWrapper" aria-hidden="false">
-  <table id="summaryTable" class="pivot" role="table" aria-label="Сводная ведомость"></table>
+<div class="table-container">
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th rowspan="2" class="left">Сотрудник</th>
+                <th rowspan="2">Входящий остаток</th>
+                {% for month in months %}
+                    <th colspan="3">{{ month }} мес.</th>
+                {% endfor %}
+                <th colspan="3">Итого</th>
+            </tr>
+            <tr>
+                {% for month in months %}
+                    <th>Начислено</th>
+                    <th>Выплачено</th>
+                    <th>Остаток</th>
+                {% endfor %}
+                <th>Начислено</th>
+                <th>Выплачено</th>
+                <th>Остаток</th>
+            </tr>
+        </thead>
+
+        {% for dept_name, employees in department_data.items %}
+        <tbody>
+            <!-- Заголовок отдела -->
+            <tr>
+                <td class="left" style="background:#d9edf7; font-weight:bold;">
+                    {{ dept_name }}
+                </td>
+            </tr>
+
+            {% for emp_data in employees %}
+            <tr>
+                <td class="left">{{ emp_data.employee.full_name }}</td>
+                <td>
+                    <input type="number" step="0.01" 
+                        value="{{ emp_data.incoming_balance }}" 
+                        class="incoming-balance" 
+                        data-employee="{{ emp_data.employee.id }}"
+                        data-year="{{ current_year }}" 
+                        style="width:80px; text-align:right;">
+                        
+                </td>
+                {% with total_accrued=0 total_paid=0 total_balance=emp_data.incoming_balance %}
+                    {% for month in months %}
+                        {% with month_data=emp_data.monthly|dict_get:month %}
+                            {% if month_data %}
+                                <td>{{ month_data.accrued|stringformat:".2f" }}</td>
+                                <td>{{ month_data.paid|stringformat:".2f" }}</td>
+                                <td class="{% if month_data.balance < 0 %}negative{% endif %}">{{ month_data.balance|stringformat:".2f" }}</td>
+                                {% with total_accrued=total_accrued|add:month_data.accrued %}
+                                {% with total_paid=total_paid|add:month_data.paid %}
+                                {% with total_balance=month_data.balance %}
+                                {% endwith %}{% endwith %}{% endwith %}
+                            {% else %}
+                                <td>0</td><td>0</td><td>0</td>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %}
+                    <td>{{ emp_data.year_total.accrued|stringformat:".2f" }}</td>
+                    <td>{{ emp_data.year_total.paid|stringformat:".2f" }}</td>
+                    <td class="{% if total_balance < 0 %}negative{% endif %}">{{ emp_data.year_total.balance|stringformat:".2f" }}</td>
+                {% endwith %}
+            </tr>
+            {% endfor %}
+
+            <!-- Итоги по отделу -->
+            <tr style="font-weight:bold; background:#e0e0e0;">
+                <td class="left">Итого по отделу</td>
+                <td>-</td>
+                {% with dept_tot=department_totals|dict_get:dept_name %}
+                    {% for month in months %}
+                        {% with month_tot=dept_tot.monthly|dict_get:month %}
+                            <td>{{ month_tot.accrued|stringformat:".2f" }}</td>
+                            <td>{{ month_tot.paid|stringformat:".2f" }}</td>
+                            <td class="{% if month_tot.balance < 0 %}negative{% endif %}">{{ month_tot.balance|stringformat:".2f" }}</td>
+                        {% endwith %}
+                    {% endfor %}
+                    <td>{{ dept_tot.year_total.accrued|stringformat:".2f" }}</td>
+                    <td>{{ dept_tot.year_total.paid|stringformat:".2f" }}</td>
+                    <td class="{% if dept_tot.year_total.balance < 0 %}negative{% endif %}">{{ dept_tot.year_total.balance|stringformat:".2f" }}</td>
+                {% endwith %}
+            </tr>
+        </tbody>
+        {% endfor %}
+        <tfoot>
+            <tr style="background-color: #d0e9c6; font-weight: bold;">
+                <td class="left">Итого по компании</td>
+                <td>-</td>
+                {% for month in months %}
+                    {% with month_tot=company_totals.monthly|dict_get:month %}
+                        <td>{{ month_tot.accrued|stringformat:".2f" }}</td>
+                        <td>{{ month_tot.paid|stringformat:".2f" }}</td>
+                        <td class="{% if month_tot.balance < 0 %}negative{% endif %}">{{ month_tot.balance|stringformat:".2f" }}</td>
+                    {% endwith %}
+                {% endfor %}
+                <td>{{ company_totals.year_total.accrued|stringformat:".2f" }}</td>
+                <td>{{ company_totals.year_total.paid|stringformat:".2f" }}</td>
+                <td class="{% if company_totals.year_total.balance < 0 %}negative{% endif %}">{{ company_totals.year_total.balance|stringformat:".2f" }}</td>
+            </tr>
+        </tfoot>
+    </table>
 </div>
 
+<style>
+.table-container {
+    overflow: auto;
+    width: 100%;
+    max-height: 80vh;
+}
+
+table.summary-table {
+    border-collapse: collapse;
+    min-width: 1400px;
+}
+
+table.summary-table th,
+table.summary-table td {
+    border: 1px solid #999;
+    padding: 6px;
+    white-space: nowrap;
+    text-align: right;
+}
+
+table.summary-table th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+
+
+td.left, th.left {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background-color: #f9f9f9;
+    z-index: 2;
+}
+
+/* Пересечение шапки и левой колонки */
+thead th.left {
+    z-index: 6; /* самое высокое значение, чтобы оставалась сверху и при вертикальном, и при горизонтальном скролле */
+}
+
+.negative {
+    color: red;
+    font-weight: bold;
+}
+</style>
+
 <script src="{% static 'js/summary.js' %}"></script>
-</body>
-</html>
+{% endblock %}
+
+
 

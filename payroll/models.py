@@ -107,4 +107,10 @@ class Payout(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+class OpeningBalance(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    year = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
 
+    class Meta:
+        unique_together = ('employee', 'year')

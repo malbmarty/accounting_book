@@ -14,7 +14,6 @@ router.register(r'payouts', views.PayoutViewSet)
 
 
 urlpatterns = [
-    path('api/summary-data/', views.YearlyPivotDataView.as_view(), name='yearly-pivot'),
     path('api/', include(router.urls)),
     # новый API для сводной таблицы
     path('directory/', views.PayrollDirPageView.as_view(), name='payroll_dir'),
@@ -24,5 +23,5 @@ urlpatterns = [
     path('edit-accrual/<int:pk>/', views.EditAccrualPageView.as_view(), name='edit_accrual'),
     path('all-payouts/', views.PayoutsPageView.as_view(), name='payouts'),
     path('edit-payout/<int:pk>/', views.EditPayoutPageView.as_view(), name='edit_payout'),
-     path('summary/', views.SummaryPageView.as_view(), name='summary'),
+    path('summary/', views.SummaryPageView.as_view(), name='summary'),
 ]

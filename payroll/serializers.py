@@ -7,6 +7,7 @@ from .models import (
 
 import locale
 
+# Сериализаторы для справочников
 
 class PositionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,6 +34,7 @@ class PaymentTypeSerializer(serializers.ModelSerializer):
         model = PaymentType
         fields = '__all__'
 
+# Сериализатор для таблицы Сотрудники
 class EmployeeSerializer(serializers.ModelSerializer):
     position_name = serializers.CharField(source='position.name', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
@@ -50,7 +52,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         ]
 
 
-
+# Сериализатор для таблицы Начисления
 class AccrualSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
@@ -123,6 +125,7 @@ class AccrualSerializer(serializers.ModelSerializer):
         
         return attrs
 
+# Сериализатор для таблицы Выплаты
 class PayoutSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     department_name = serializers.CharField(source='department.name', read_only=True)
@@ -147,41 +150,44 @@ class PayoutSerializer(serializers.ModelSerializer):
         ]
 
     def get_accrued_total_for_month(self, obj):
-        """Считает сумму начислений по сотруднику, отделу и месяцу выплаты"""
+        # Если поле уже аннотировано (при GET), берём его
+        if hasattr(obj, 'accrued_total_for_month'):
+            return obj.accrued_total_for_month or 0
+
+        # Если POST/PUT — считаем вручную
         if not obj.date or not obj.employee or not obj.department:
             return 0
-
-        # месяц и год выплаты
-        month = obj.date.month
-        year = obj.date.year
-
-        total = Accrual.objects.filter(
+        return Accrual.objects.filter(
             employee=obj.employee,
             department=obj.department,
-            date__year=year,
-            date__month=month
+            date__year=obj.date.year,
+            date__month=obj.date.month
         ).aggregate(
-            total=Sum(F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'), output_field=DecimalField(max_digits=20, decimal_places=2))
+            total=Sum(
+                F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'),
+                output_field=DecimalField(max_digits=20, decimal_places=2)
+            )
         )['total'] or 0
 
-        return total
     
     def get_net_amount_to_pay(self, obj):
-        """accrued_total_for_month минус все выплаты за месяц"""
-        month = obj.date.month
-        year = obj.date.year
+        accrued = getattr(obj, 'accrued_total_for_month', None)
+        if accrued is None:
+            accrued = self.get_accrued_total_for_month(obj)
 
-        total_paid = Payout.objects.filter(
-            employee=obj.employee,
-            department=obj.department,
-            date__year=year,
-            date__month=month
-        ).aggregate(
-            total=Sum('amount', output_field=DecimalField(max_digits=20, decimal_places=2))
-        )['total'] or 0
+        total_paid = getattr(obj, 'total_paid_for_month', None)
+        if total_paid is None and obj.date and obj.employee and obj.department:
+            total_paid = Payout.objects.filter(
+                employee=obj.employee,
+                department=obj.department,
+                date__year=obj.date.year,
+                date__month=obj.date.month
+            ).aggregate(
+                total=Sum('amount', output_field=DecimalField(max_digits=20, decimal_places=2))
+            )['total'] or 0
 
-        return (self.get_accrued_total_for_month(obj) or 0) - total_paid
-
+        return accrued - (total_paid or 0)
+    
     def get_monthly_period(self, obj):
         if not obj.date:
             return ""
@@ -190,34 +196,39 @@ class PayoutSerializer(serializers.ModelSerializer):
         return obj.date.strftime("%B %y")
     
     def get_accrued_total_for_all_time(self, obj):
-        if not obj.employee or not obj.department:
-            return 0
+        # Если поле уже аннотировано (при GET), берём его
+        if hasattr(obj, 'accrued_total_for_all_time'):
+            return obj.accrued_total_for_all_time or 0
 
-        total = Accrual.objects.filter(
-            employee=obj.employee,
-            department=obj.department
-        ).aggregate(
-            total=Sum(
-                F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'),
-                output_field=DecimalField(max_digits=20, decimal_places=2)
-            )
-        )['total'] or 0
-
-        return total
+        if obj.employee and obj.department:
+            return Accrual.objects.filter(
+                employee=obj.employee,
+                department=obj.department
+            ).aggregate(
+                total=Sum(
+                    F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'),
+                    output_field=DecimalField(max_digits=20, decimal_places=2)
+                )
+            )['total'] or 0
+        return 0
     
     def get_net_accrued_total_for_all_time(self, obj):
-        accrued_total = self.get_accrued_total_for_all_time(obj) or 0
-        if accrued_total == 0:
-            return None  # аналог пустой строки в Excel
+        accrued = getattr(obj, 'accrued_total_for_all_time', None)
+        if accrued is None:
+            accrued = self.get_accrued_total_for_all_time(obj)
 
-        total_paid = Payout.objects.filter(
-            employee=obj.employee,
-            department=obj.department
-        ).aggregate(
-            total=Sum('amount', output_field=DecimalField(max_digits=20, decimal_places=2))
-        )['total'] or 0
+        total_paid = getattr(obj, 'total_paid_for_all_time', None)
+        if total_paid is None and obj.employee and obj.department:
+            total_paid = Payout.objects.filter(
+                employee=obj.employee,
+                department=obj.department
+            ).aggregate(
+                total=Sum('amount', output_field=DecimalField(max_digits=20, decimal_places=2))
+            )['total'] or 0
 
-        return accrued_total - total_paid
+        if accrued == 0:
+            return None
+        return accrued - total_paid
 
         # Проверка выполнения бизнес-правил
     def validate(self, attrs):

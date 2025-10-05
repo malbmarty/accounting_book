@@ -299,7 +299,10 @@ class SummaryPageView(TemplateView):
         current_year = int(self.request.GET.get('year', 2025))
         context['years'] = list(range(2025, 2030))
         context['current_year'] = current_year
-        context['months'] = list(range(1, 13))
+        context['months'] = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ]
 
         # Все сотрудники с отделами
         employees = Employee.objects.select_related('department').all()

@@ -4,11 +4,11 @@
 
 {% block content %}
 {% load static %}
-<h1>Редактирование записи начисления</h1>
+
 
 <form id="editAccrualForm" data-success-url="{% url 'accruals' %}">
     {% csrf_token %}
-    
+    <h2>Редактирование записи начисления</h2>
     <div class="form-group">
         <label>Дата начисления:</label>
         <input type="date" name="date" value="{{ date }}" required>

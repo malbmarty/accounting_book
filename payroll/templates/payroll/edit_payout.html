@@ -4,11 +4,11 @@
 
 {% block content %}
 {% load static %}
-<h1>Редактирование записи выплаты</h1>
+
 
 <form id="editPayoutForm" data-success-url="{% url 'payouts' %}">
     {% csrf_token %}
-    
+    <h2>Редактирование записи выплаты</h2>
     <div class="form-group">
         <label>Дата ОДДС:</label>
         <input type="date" name="date" id = "currentDate" value="{{ date }}" required>

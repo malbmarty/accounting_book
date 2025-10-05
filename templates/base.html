@@ -18,9 +18,26 @@
             width: 100%;  /* растягиваем на всю ширину */
             box-sizing: border-box;
         }
-        .header { background: #f4f4f4; padding: 10px; margin-bottom: 20px; }
-        .header a { text-decoration: none; color: #333; padding: 5px 10px; }
-        .nav { display: flex; gap: 15px; }
+        
+       .header {
+            background: #f4f4f4;
+            padding: 10px;
+            margin-bottom: 20px;
+        
+            justify-content: center; /* центрируем контент */
+            gap: 10px; /* расстояние между секциями */
+        }
+
+        .header a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px 10px;
+        }
+
+        .nav {
+            position: relative;
+            display: inline-block;
+        }
         .nav a { text-decoration: none; color: #333; padding: 5px 10px; }
         .nav a:hover { background: #ddd; }
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
@@ -28,6 +45,12 @@
         th { background-color: #f2f2f2; }
         .filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
         .form-group { margin: 8px 0; }
+        #editAccrualForm,
+        #editEmployeeForm, 
+        #editPayoutForm {
+            max-width: 600px;   /* ограничиваем ширину */
+            margin: 0 auto;     /* центрируем по горизонтали */
+        }
         /* Форма */
         #createAccrualForm {
             display: grid;

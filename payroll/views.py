@@ -299,7 +299,8 @@ class SummaryPageView(TemplateView):
         current_year = int(self.request.GET.get('year', 2025))
         context['years'] = list(range(2025, 2030))
         context['current_year'] = current_year
-        context['months'] = [
+        context['months'] = list(range(1, 13))
+        context['months_name'] = [
             "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
             "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ]

@@ -20,7 +20,7 @@
             {% csrf_token %}
             <input type="hidden" name="id" id="projectId">
             <div class="form-group">
-                <input type="text" name="name" placeholder="Название проекта" required>
+                <input type="text" name="name" placeholder="Название" required>
             </div>
             <button type="submit">Сохранить</button>
             <button type="button" onclick="clearForm('projectForm')">Отмена</button>
@@ -59,6 +59,129 @@
         </ul>
     </div>
 
+        <!-- Платежные системы -->
+    <div>
+        <h3>Платежные системы</h3>
+        <form id="paymentSystemForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="paymentSystemId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('paymentSystemForm')">Отмена</button>
+        </form>
+        <ul id="paymentSystemList">
+            {% for payment_system in payment_systems %}
+            <li>
+                {{ payment_system.name }}
+                <button class="icon-btn" onclick="editItem('payment_system', '{{ payment_system.id }}', '{{ payment_system.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('payment-systems', '{{ project.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+        <!-- Контрагент -->
+    <div>
+        <h3>Контрагенты</h3>
+        <form id="counterpartyForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="counterpartyId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('counterpartyForm')">Отмена</button>
+        </form>
+        <ul id="counterpartyList">
+            {% for counterparty in counterparties %}
+            <li>
+                {{ counterparty.name }}
+                <button class="icon-btn" onclick="editItem('counterparty', '{{ counterparty.id }}', '{{ counterparty.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('counterparties', '{{ counterparty.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Группы -->
+    <div>
+        <h3>Группы</h3>
+        <form id="groupForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="groupId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('groupForm')">Отмена</button>
+        </form>
+        <ul id="groupList">
+            {% for group in groups %}
+            <li>
+                {{ group.name }}
+                <button class="icon-btn" onclick="editItem('group', '{{ group.id }}', '{{ group.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('groups', '{{ group.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Статьи (Item) -->
+    <div>
+        <h3>Статьи</h3>
+        <form id="itemForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="itemId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название" required>
+            </div>
+            <div class="form-group">
+                <select name="group" required>
+                    <option value="">Выберите группу</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <select name="flow_type" required>
+                    <option value="">Доход/расход</option>
+                    <option value="income">Доход</option>
+                    <option value="expense">Расход</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select name="variability" id="variabilitySelect">
+                    <option value="">Постоянные/переменные</option>
+                    <option value="fixed">Постоянные</option>
+                    <option value="variable">Переменные</option>
+                </select>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('itemForm')">Отмена</button>
+        </form>
+        <ul id="itemList">
+            {% for item in items %}
+            <li>
+                {{ item.name }}<br>
+                <small>
+                    Группа: {{ item.group }} | 
+                    Тип: {{ item.get_flow_type_display }}
+                    {% if item.get_variability_display %} | {{ item.get_variability_display }}{% endif %}
+                </small>
+                <button class="icon-btn" onclick="editItem('item', 
+                    '{{ item.id }}', 
+                    '{{ item.name }}', 
+                    '{{ item.group.id }}',
+                    '{{ item.flow_type }}',
+                    '{{ item.variability }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('items', '{{ item.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 
 </div>
 <script src="{% static 'js/analytics_dir.js' %}"></script>

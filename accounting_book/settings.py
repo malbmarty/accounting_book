@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'payroll',
-    'analytics_dir'
+    'analytics_dir',
+    'contribution'
 ]
 
 MIDDLEWARE = [

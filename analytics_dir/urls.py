@@ -5,6 +5,10 @@ from . import views
 router = DefaultRouter()
 router.register(r'projects', views.ProjectViewSet)
 router.register(r'participants', views.ParticipantViewSet)
+router.register(r'payment-systems', views.PaymentSystemViewSet)
+router.register(r'counterparties', views.CounterpartyViewSet)
+router.register(r'groups', views.GroupViewSet)
+router.register(r'items', views.ItemViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),

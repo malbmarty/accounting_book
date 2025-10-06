@@ -1,7 +1,15 @@
 // Общие функции для всех справочников
-function editItem(type, id, name) {
+function editItem(type, id, name, groupId = '', flowType = '', variability = '') {
     document.getElementById(`${type}Id`).value = id;
     document.querySelector(`#${type}Form input[name="name"]`).value = name;
+    if (type === 'item') {
+        document.querySelector(`#${type}Form select[name="group"]`).value = groupId;
+        document.querySelector(`#${type}Form select[name="flow_type"]`).value = flowType;
+        document.querySelector(`#${type}Form select[name="variability"]`).value = variability;
+        
+        // Показываем/скрываем поле variability в зависимости от flow_type
+        toggleVariabilityField(flowType);
+    }
     document.querySelector(`#${type}Form`).scrollIntoView();
 }
 
@@ -9,6 +17,10 @@ function editItem(type, id, name) {
 function clearForm(formId) {
     document.getElementById(formId).reset();
     document.getElementById(formId).querySelector('input[type="hidden"]').value = '';
+    // Для формы статей дополнительно скрываем поле variability
+    if (formId === 'itemForm') {
+        document.querySelector('#variabilitySelect').closest('.form-group').style.display = 'none';
+    }
 }
 
 // Удаление записи выбранной записи из справочника
@@ -34,6 +46,18 @@ function deleteItem(endpoint, id) {
     }
 }
 
+// Функция для показа/скрытия поля variability
+function toggleVariabilityField(flowType) {
+    const variabilityField = document.getElementById('variabilitySelect');
+    const variabilityGroup = variabilityField.closest('.form-group');
+    
+    if (flowType === 'expense') {
+        variabilityGroup.style.display = 'block';
+    } else {
+        variabilityGroup.style.display = 'none';
+        variabilityField.value = '';
+    }
+}
 
 // Обработчики форм
 document.addEventListener('DOMContentLoaded', function() {
@@ -49,7 +73,43 @@ document.addEventListener('DOMContentLoaded', function() {
         saveItem('participants', this);
     });
 
+    // Платежные системы
+    document.getElementById('paymentSystemForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveItem('payment-systems', this);
+    });
 
+    // Контрагенты
+    document.getElementById('counterpartyForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveItem('counterparties', this);
+    });
+
+    // Группы
+    document.getElementById('groupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveItem('groups', this);
+    });
+
+    // Статьи
+    document.getElementById('itemForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveItem('items', this);
+    });
+
+    // Обработчик изменения типа потока для статей
+    const flowTypeSelect = document.querySelector('#itemForm select[name="flow_type"]');
+    if (flowTypeSelect) {
+        flowTypeSelect.addEventListener('change', function(e) {
+            toggleVariabilityField(e.target.value);
+        });
+        
+        // Инициализация состояния при загрузке
+        const currentFlowType = flowTypeSelect.value;
+        if (currentFlowType) {
+            toggleVariabilityField(currentFlowType);
+        }
+    }
 
 });
 
@@ -60,6 +120,11 @@ function saveItem(endpoint, form) {
     const id = data.id;
     const url = id ? `/analytics-dir/api/${endpoint}/${id}/` : `/analytics-dir/api/${endpoint}/`;
     const method = id ? 'PUT' : 'POST';
+
+        // Для статей: если flow_type не 'expense', очищаем variability
+    if (endpoint === 'items' && data.flow_type !== 'expense') {
+        data.variability = '';
+    }
 
 
     fetch(url, {

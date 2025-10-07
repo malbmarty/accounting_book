@@ -19,7 +19,7 @@ class OperationalAccounting(models.Model):
         related_name='acc_as_recipient')
     item = models.ForeignKey('analytics_dir.Item', on_delete=models.PROTECT, verbose_name="Статья")
     payment_system = models.ForeignKey('analytics_dir.PaymentSystem', on_delete=models.PROTECT, verbose_name="Платежная система")
-    project = models.ForeignKey('analytics_dir.Project', on_delete=models.PROTECT, verbose_name="Проект")
+    project = models.ForeignKey('analytics_dir.Project', on_delete=models.PROTECT, verbose_name="Проект", null=True, blank=True,)
     payment_amount = models.DecimalField(
             decimal_places=2, 
             max_digits=20,
@@ -36,6 +36,19 @@ class OperationalAccounting(models.Model):
             validators=[MinValueValidator(0.01)],
             verbose_name="Сумма комиссии")
     comment = models.CharField(max_length=100, null=True, blank=True, verbose_name="Комментарий")
+
+        # Проверка выполнения бизнес-правил
+    def clean(self):
+        
+        if self.payer == self.recipient:
+            raise ValidationError({
+                'recipient': 'Плательщик и получатель не могут быть одинаковыми'
+                })
+        
+    def save(self, *args, **kwargs):
+        """Переопределение save для автоматической валидации"""
+        self.full_clean()
+        super().save(*args, **kwargs)
     
 
 class Planning(models.Model):

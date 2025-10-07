@@ -46,6 +46,8 @@
         .filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
         .form-group { margin: 8px 0; }
         #editAccrualForm,
+        #editOperAccForm,
+        #editPlanningForm,
         #editEmployeeForm, 
         #editPayoutForm {
             max-width: 600px;   /* ограничиваем ширину */
@@ -57,6 +59,7 @@
             grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
             gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
             margin-bottom: 20px;
+            align-items: start;
         }
 
         #createPayoutForm {
@@ -64,41 +67,79 @@
             grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
             gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
             margin-bottom: 20px;
+            align-items: start;
         }
 
+        #createOperAccForm {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr); /* 7 полей как 7 столбцов таблицы */
+            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+            margin-bottom: 20px;
+            align-items: start;
+        }
+
+        #createPlannigForm {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 6 полей как 7 столбцов таблицы */
+            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+            margin-bottom: 20px;
+            align-items: start;
+        }
 
         #createEmployeeForm {
             display: grid;
             grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
             gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
             margin-bottom: 20px;
+            align-items: start;
         }
 
+        #createPlannigForm .form-group,
+        #createOperAccForm .form-group,
         #createAccrualForm .form-group,
         #createPayoutForm .form-group,
         #createEmployeeForm .form-group {
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            grid-row: span 2; /* Занимает 2 строки в grid */
+            height: auto;
         }
 
+        #createPlannigForm label,
+        #createOperAccForm label,
         #createAccrualForm label,
         #createPayoutForm label,
         #createEmployeeForm label {
             display: block;
             font-weight: bold;
             margin-bottom: 4px;
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
+        #createPlannigForm input,
+        #createOperAccForm input,
         #createAccrualForm input,
         #createPayoutForm input,
         #createEmployeeForm input,
+        #createPlannigForm select,
+        #createOperAccForm select,
         #createAccrualForm select,
         #createPayoutForm select,
         #createEmployeeForm select,
+        #createPlannigForm textarea
+        #createOperAccForm textarea,
         #createAccrualForm textarea,
         #createPayoutForm textarea, 
         #createEmployeeForm textarea {
             width: 100%;
             box-sizing: border-box;
+            padding: 8px;
+            font-size: 16px;
+            min-height: 36px;
         }
 
         label { display: block; margin-bottom: 5px; font-size: 16px;}
@@ -146,6 +187,14 @@
       <a href="{% url 'accruals' %}">Начисления</a>
       <a href="{% url 'payouts' %}">Выплаты</a>
       <a href="{% url 'summary' %}">Сводная ведомость</a>
+    </div>
+  </div>
+
+    <div class="nav">
+    <a href="#">Внесение ▾</a>
+    <div class="dropdown-content">
+      <a href="{% url 'oper_acc' %}">Оперативный учет</a>
+      <a href="{% url 'planning' %}">Планирование</a>
     </div>
   </div>
 

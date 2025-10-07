@@ -18,12 +18,12 @@
     {% csrf_token %}
 
     <div class="form-group">
-        <label>ФИО</label>
+        <label>ФИО:</label>
         <input type="text" name="full_name" value="" required>
     </div>
 
     <div class="form-group">
-        <label>Должность</label>
+        <label>Должность:</label>
         <select name="position" required>
             <option value="">Выберите должность</option>
             {% for position in positions %}
@@ -33,7 +33,7 @@
     </div>
 
     <div class="form-group">
-        <label>Отдел</label>
+        <label>Отдел:</label>
         <select name="department" required>
             <option value="">Выберите отдел</option>
             {% for department in departments %}
@@ -43,7 +43,7 @@
     </div>
 
     <div class="form-group">
-        <label>Статус</label>
+        <label>Статус:</label>
         <select name="status" required>
             <option value="">Выберите статус</option>
             {% for status in statuses %}
@@ -53,7 +53,7 @@
     </div>
 
     <div class="form-group">
-        <label>Тип</label>
+        <label>Тип:</label>
         <select name="employee_type" required>
             <option value="">Выберите тип</option>
             {% for employee_type in employee_types %}
@@ -63,12 +63,12 @@
     </div>
 
     <div class="form-group">
-        <label>Банк</label>
+        <label>Банк:</label>
         <textarea name="bank_name" rows="1"></textarea>
     </div>
 
     <div class="form-group">
-        <label>Номер карты</label>
+        <label>Номер карты:</label>
         <textarea name="card_number" rows="1"></textarea>
     </div>
 

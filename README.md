@@ -42,7 +42,7 @@
     Выплаты: http://127.0.0.1:8000/payroll/api/payouts/
 
 ## 2. Справочник для аналитики (analytics_dir)
-- Справочники: проекты, стороны (плательщик/получатель), платежные системы, контрагенты, группы, статьи
+- Справочники: проекты, стороны (плательщик/получатель), платежные системы, контрагенты, группы, типы потока, типы изменчивости, статьи
 
 ### Основные модели:
 * Project - Проекты
@@ -50,6 +50,8 @@
 * PaymentSytem - Платежные системы
 * Counterparty - Контрагенты
 * Group - Группы
+* FlowType - Тип потока (доход/расход)
+* Variability - Тип изменчивости (постоянные/переменные)
 * Item - Статьи
 
 ### Страницы приложения analytics_dir:
@@ -61,6 +63,8 @@
     Платежные системы: http://127.0.0.1:8000/analytics-dir/api/payment-systems/
     Контрагенты: http://127.0.0.1:8000/analytics-dir/api/counterparties/
     Группы: http://127.0.0.1:8000/analytics-dir/api/groups/
+    Типы потока: http://127.0.0.1:8000/analytics-dir/api/flow-types/
+    Типы изменчивости: http://127.0.0.1:8000/analytics-dir/api/variabilities/
     Статьи: http://127.0.0.1:8000/analytics-dir/api/items/
 
 ## 3. Внесение (contribution)
@@ -71,7 +75,8 @@
 * Planning - Планирование
 
 ### Страницы приложения contribution:
-  
+    Таблица Оперативный учет: http://127.0.0.1:8000/contribution/oper-accounting/
+    Таблица Планирование: http://127.0.0.1:8000/contribution/planning/
 
 ### API для contribution:
     Оперативный учет: http://127.0.0.1:8000/contribution/api/oper-acc-records/

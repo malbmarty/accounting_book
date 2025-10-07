@@ -31,6 +31,14 @@ class OperationalAccountingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "non_field_errors": ["Необходимо указать хотя бы одну из дат: 'Дата платежа (ОДДС)' или 'Дата признания (ОПУ)'."]  
             })
+        
+        payer = data.get('payer') or getattr(self.instance, 'payer', None)
+        recipient = data.get('recipient') or getattr(self.instance, 'recipient', None)
+
+        if payer and recipient and payer == recipient:
+            raise serializers.ValidationError({
+                "non_field_errors": ["Плательщик и получатель не могут совпадать."]
+            })
         return data
     
 class PlanningSerializer(serializers.ModelSerializer):

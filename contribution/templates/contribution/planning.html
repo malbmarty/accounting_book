@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Планирование{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<h2>Планирование</h2>
+
+<h3>Создание новой записи</h3>
+
+<form id="createPlannigForm">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label>Дата ОДДС:</label>
+        <input type="date" name="date" id = "date">
+    </div>
+
+    <div class="form-group">
+        <label>Проект:</label>
+        <select name="project">
+            <option value="">Выберите проект</option>
+            {% for project in projects %}
+            <option value="{{ project.id }}" >{{ project.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Статья:</label>
+        <select name="item" required>
+            <option value="">Выберите статью</option>
+            {% for item in items %}
+            <option value="{{ item.id }}" >{{ item.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+    <div class="form-group">
+        <label>Сумма:</label>
+        <input type="number" name="payment_amount" step="0.01">
+    </div>
+
+    <div class="form-group">
+        <label>Частота платежа:</label>
+        <select name="frequency" id="frequency" required>
+            <option value="">Выберите частоту</option>
+            {% for value, label in frequency_choices %}
+                <option value="{{ value }}">
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Комментарий:</label>
+        <textarea name="comment" rows="3"></textarea>
+    </div>
+
+    <button type="submit">Внести</button>
+
+</form>
+
+
+
+
+<div id="planningTable">
+    <table>
+        <thead>
+            <tr>
+                <th>Дата ОДДС</th>
+                <th>Проект</th>
+                <th>Статья</th>
+                <th>Сумма</th>
+                <th>Частота платежа</th>
+                <th>Комментарий</th>
+            </tr>
+        </thead>
+        <tbody id="planningBody">
+            <!-- Данные будут загружены через JavaScript -->
+        </tbody>
+    </table>
+</div>
+<script src="{% static 'js/planning.js' %}"></script>
+{% endblock %}

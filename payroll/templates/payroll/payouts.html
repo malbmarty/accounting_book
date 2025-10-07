@@ -23,7 +23,7 @@
     </div>
 
     <div class="form-group">
-        <label>Проект</label>
+        <label>Проект:</label>
         <select name="project" required>
             <option value="">Выберите проект</option>
             {% for project in projects %}
@@ -33,7 +33,7 @@
     </div>
 
     <div class="form-group">
-        <label>Плательщик</label>
+        <label>Плательщик ОТКУДА:</label>
         <select name="payer" id="payer" required>
             <option value="">Выберите плательщика</option>
             {% for payer in participants %}
@@ -43,7 +43,7 @@
     </div>
 
     <div class="form-group">
-        <label>Получатель</label>
+        <label>Получатель КУДА:</label>
         <select name="recipient" id="recipient" required>
             <option value="">Выберите получателя</option>
             {% for recipient in participants %}
@@ -53,7 +53,7 @@
     </div>
 
     <div class="form-group">
-        <label>Отдел</label>
+        <label>Отдел:</label>
         <select name="department" id="department" onchange="loadEmployees()" required>
             <option value="">Выберите отдел</option>
             {% for department in departments %}
@@ -63,14 +63,14 @@
     </div>
 
     <div class="form-group">
-        <label>Сотрудник</label>
+        <label>Сотрудник:</label>
         <select name="employee" id="employee" required>
             <option value="">Сначала выберите отдел</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label>Тип выплаты</label>
+        <label>Тип выплаты:</label>
         <select name="payment_type" id="payment_type" required>
             <option value="">Выберите тип выплаты</option>
             {% for payment_type in payment_types %}

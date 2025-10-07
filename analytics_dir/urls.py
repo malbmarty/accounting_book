@@ -8,6 +8,8 @@ router.register(r'participants', views.ParticipantViewSet)
 router.register(r'payment-systems', views.PaymentSystemViewSet)
 router.register(r'counterparties', views.CounterpartyViewSet)
 router.register(r'groups', views.GroupViewSet)
+router.register(r'flow-types', views.FlowTypeViewSet)
+router.register(r'variabilities', views.VariabilityViewSet)
 router.register(r'items', views.ItemViewSet)
 
 urlpatterns = [

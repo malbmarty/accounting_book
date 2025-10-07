@@ -32,39 +32,31 @@ class Group(models.Model):
     def __str__(self):
         return self.name
     
-class Item(models.Model):
-    # Варианты для расхода/прихода
-    FLOW_TYPE_CHOICES = [
-        ("income", "Приход"),
-        ("expense", "Расход"),
-    ]
+class FlowType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
-    # Варианты для постоянных/переменных
-    VARIABILITY_CHOICES = [
-        ("variable", "Переменные"),
-        ("fixed", "Постоянные"),
-    ]
+    def __str__(self):
+        return self.name
+    
+class Variability(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    flow_type = models.ForeignKey(FlowType, on_delete=models.CASCADE, verbose_name="Тип потока")
+
+    def __str__(self):
+        return self.name
+    
+class Item(models.Model):
 
     name = models.CharField(max_length=100, unique=True, verbose_name="Название")
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name="Группа")
+    group = models.ForeignKey(Group, on_delete=models.PROTECT, verbose_name="Группа")
+    flow_type = models.ForeignKey(FlowType, on_delete=models.PROTECT, verbose_name="Тип потока")
+    variability = models.ForeignKey(Variability, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Изменчивость")
 
-    flow_type = models.CharField(
-        max_length=10,
-        choices=FLOW_TYPE_CHOICES,
-        verbose_name="Приход/расход",
-    )
 
-    variability = models.CharField(
-        max_length=10,
-        choices=VARIABILITY_CHOICES,
-        blank=True,
-        null=True,
-        verbose_name="Переменные/постоянные",
-    )
     def clean(self):
-        if self.flow_type == "income" and self.variability:
+        if self.variability and self.variability.flow_type != self.flow_type:
             raise ValidationError(
-                {"variability": "Поле «Постоянные/переменные» можно указывать только для расходов."}
+                {"variability": "Тип изменчивости не соответсвует выбранному типу потока"}
             )
     def __str__(self):
         return self.name

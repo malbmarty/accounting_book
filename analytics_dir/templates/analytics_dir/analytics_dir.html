@@ -128,15 +128,71 @@
         </ul>
     </div>
 
-    <!-- Статьи (Item) -->
+        <!-- Тип потока -->
+    <div>
+        <h3>Тип потока</h3>
+        <form id="flowTypeForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="flowTypeId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('flowTypeForm')">Отмена</button>
+        </form>
+        <ul id="flowTypeList">
+            {% for flow_type in flow_types %}
+            <li>
+                {{ flow_type.name }}
+                <button class="icon-btn" onclick="editItem('flowType', '{{ flow_type.id }}', '{{ flow_type.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('flow-types', '{{ flow_type.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Изменчивость -->
+    <div>
+        <h3>Изменчивость</h3>
+        <form id="variabilityForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="variabilityId">
+            <div class="form-group">
+                <select name="flow_type" id="flowType" required>
+                    <option value="">Выберите тип потока</option>
+                    {% for flow_type in flow_types %}
+                    <option value="{{ flow_type.id }}">{{ flow_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название типа изменчивости" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('variabilityForm')">Отмена</button>
+        </form>
+        <ul id="variabilityList">
+            {% for variability in variabilities %}
+            <li>
+                [{{ variability.flow_type.name }}] {{ variability.name }}
+                <button class="icon-btn" onclick="editItem('variability', '{{ variability.id }}', '{{ variability.name }}', '', '{{ variability.flow_type.id }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('variabilities', '{{ variability.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+   <!-- Статьи (Item) -->
     <div>
         <h3>Статьи</h3>
         <form id="itemForm">
             {% csrf_token %}
             <input type="hidden" name="id" id="itemId">
+            
             <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
+                <input type="text" name="name" placeholder="Название статьи" required>
             </div>
+            
             <div class="form-group">
                 <select name="group" required>
                     <option value="">Выберите группу</option>
@@ -145,38 +201,46 @@
                     {% endfor %}
                 </select>
             </div>
+            
             <div class="form-group">
-                <select name="flow_type" required>
-                    <option value="">Доход/расход</option>
-                    <option value="income">Доход</option>
-                    <option value="expense">Расход</option>
+                <select name="flow_type" id="itemFlowType" required>
+                    <option value="">Выберите тип потока</option>
+                    {% for flow_type in flow_types %}
+                    <option value="{{ flow_type.id }}">{{ flow_type.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
+            
             <div class="form-group">
-                <select name="variability" id="variabilitySelect">
-                    <option value="">Постоянные/переменные</option>
-                    <option value="fixed">Постоянные</option>
-                    <option value="variable">Переменные</option>
+                <select name="variability" id="itemVariability">
+                    <option value="">Выберите изменчивость</option>
+                    {% for variability in variabilities %}
+                    <option value="{{ variability.id }}" data-flow-type="{{ variability.flow_type.id }}">
+                        {{ variability.name }}
+                    </option>
+                    {% endfor %}
                 </select>
             </div>
+            
             <button type="submit">Сохранить</button>
             <button type="button" onclick="clearForm('itemForm')">Отмена</button>
         </form>
+        
         <ul id="itemList">
             {% for item in items %}
             <li>
-                {{ item.name }}<br>
+                <strong>{{ item.name }}</strong><br>
                 <small>
-                    Группа: {{ item.group }} | 
-                    Тип: {{ item.get_flow_type_display }}
-                    {% if item.get_variability_display %} | {{ item.get_variability_display }}{% endif %}
+                    Группа: {{ item.group.name }} | 
+                    Тип: {{ item.flow_type.name }} |
+                    {% if item.variability %}Изменчивость: {{ item.variability.name }}{% endif %}
                 </small>
                 <button class="icon-btn" onclick="editItem('item', 
                     '{{ item.id }}', 
                     '{{ item.name }}', 
                     '{{ item.group.id }}',
-                    '{{ item.flow_type }}',
-                    '{{ item.variability }}')">✏️</button>
+                    '{{ item.flow_type.id }}',
+                    '{{ item.variability.id }}')">✏️</button>
                 <button class="icon-btn" onclick="deleteItem('items', '{{ item.id }}')">❌</button>
             </li>
             {% endfor %}

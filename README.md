@@ -82,6 +82,8 @@
     Оперативный учет: http://127.0.0.1:8000/contribution/api/oper-acc-records/
     Планирование: http://127.0.0.1:8000/contribution/api/planning-records/
     
+## Схема БД
+![alt text](Схема_БД.png)
 ## Установка и запуск
 1. Клонировать репозиторий:
    ```
@@ -105,3 +107,4 @@
     ```
     python manage.py runserver
     ```
+

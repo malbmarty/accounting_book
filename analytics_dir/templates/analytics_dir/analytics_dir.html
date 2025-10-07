@@ -75,8 +75,8 @@
             {% for payment_system in payment_systems %}
             <li>
                 {{ payment_system.name }}
-                <button class="icon-btn" onclick="editItem('payment_system', '{{ payment_system.id }}', '{{ payment_system.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('payment-systems', '{{ project.id }}')">❌</button>
+                <button class="icon-btn" onclick="editItem('paymentSystem', '{{ payment_system.id }}', '{{ payment_system.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('payment-systems', '{{ payment_system.id }}')">❌</button>
             </li>
             {% endfor %}
         </ul>

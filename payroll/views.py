@@ -23,6 +23,7 @@ from .models import (
 )
 
 from analytics_dir.models import Project, Participant
+from .services.payroll_summary import PayrollSummaryService
 
 # HTML VIEWS
 # Справочник ЗП ведомости
@@ -277,18 +278,13 @@ class SummaryPageView(TemplateView):
     template_name = 'payroll/summary.html'
 
     def post(self, request, *args, **kwargs):
-
+        # Сохраняет или обновляет входящий баланс.
         try:
             data = json.loads(request.body)
-            employee_id = data.get("employee_id")
-            amount = Decimal(data.get("amount", 0))
-            year = int(data.get("year"))
-
-
             OpeningBalance.objects.update_or_create(
-                employee_id=employee_id,
-                year=year,
-                defaults={"amount": amount}
+                employee_id=data["employee_id"],
+                year=int(data["year"]),
+                defaults={"amount": Decimal(data.get("amount", 0))}
             )
             return JsonResponse({"status": "ok"})
         except Exception as e:
@@ -296,138 +292,8 @@ class SummaryPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        current_year = int(self.request.GET.get('year', 2025))
-        context['years'] = list(range(2025, 2030))
-        context['current_year'] = current_year
-        context['months'] = list(range(1, 13))
-        context['months_name'] = [
-            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-        ]
-
-        # Все сотрудники с отделами
-        employees = Employee.objects.select_related('department').all()
-        context['employees'] = employees
-
-        # Получаем все начисления и выплаты за год
-        accruals_qs = Accrual.objects.filter(date__year=current_year)
-        payouts_qs = Payout.objects.filter(date__year=current_year)
-
-        # Группировка начислений по (сотрудник, отдел, месяц)
-        accruals = accruals_qs.values('employee_id', 'department_id', 'date__month').annotate(
-            total=Sum(F('hourly_pay') + F('salary') + F('addition_pay') - F('deduction'))
-        )
-        accrual_dict = defaultdict(lambda: defaultdict(Decimal))
-        for a in accruals:
-            key = (a['employee_id'], a['department_id'])
-            accrual_dict[key][a['date__month']] = a['total'] or Decimal('0.00')
-
-        # Группировка выплат по (сотрудник, отдел, месяц)
-        payouts = payouts_qs.values('employee_id', 'department_id', 'date__month').annotate(
-            total=Sum('amount')
-        )
-        payout_dict = defaultdict(lambda: defaultdict(Decimal))
-        for p in payouts:
-            key = (p['employee_id'], p['department_id'])
-            payout_dict[key][p['date__month']] = p['total'] or Decimal('0.00')
-
-        # Входящие остатки всех сотрудников за выбранный год
-        balances = OpeningBalance.objects.filter(year=current_year)
-        balance_dict = {b.employee_id: b.amount for b in balances}
-
-        # Формируем сводку по отделам
-        department_data = defaultdict(list)
-        department_totals = defaultdict(lambda: {
-            'monthly': defaultdict(lambda: {'accrued': Decimal('0.00'),
-                                            'paid': Decimal('0.00'),
-                                            'balance': Decimal('0.00')}),
-            'year_total': {'accrued': Decimal('0.00'),
-                        'paid': Decimal('0.00'),
-                        'balance': Decimal('0.00')}
-        })
-
-        for emp in employees:
-            incoming_balance = balance_dict.get(emp.id, Decimal('0.00'))
-            running_balance = incoming_balance
-
-            emp_data = {
-                'employee': emp,
-                'monthly': {},
-                'incoming_balance': incoming_balance
-            }
-
-            key = (emp.id, emp.department_id)
-            total_accrued = Decimal('0.00')
-            total_paid = Decimal('0.00')
-
-            for month in range(1, 13):
-                month_accrued = accrual_dict[key][month]
-                month_paid = payout_dict[key][month]
-
-                running_balance += month_accrued - month_paid
-                total_accrued += month_accrued
-                total_paid += month_paid
-
-                emp_data['monthly'][month] = {
-                    'accrued': month_accrued,
-                    'paid': month_paid,
-                    'balance': running_balance
-                }
-
-                # Итоги по отделу
-                dept_name = emp.department.name if emp.department else 'Без отдела'
-                dept_tot = department_totals[dept_name]
-                dept_tot['monthly'][month]['accrued'] += month_accrued
-                dept_tot['monthly'][month]['paid'] += month_paid
-                dept_tot['monthly'][month]['balance'] += running_balance
-
-            # Итоги за год для сотрудника
-            year_balance = incoming_balance + total_accrued - total_paid
-            emp_data['year_total'] = {
-                'accrued': total_accrued,
-                'paid': total_paid,
-                'balance': year_balance
-            }
-
-            # Итоги по отделу за год
-            dept_tot['year_total']['accrued'] += total_accrued
-            dept_tot['year_total']['paid'] += total_paid
-            dept_tot['year_total']['balance'] += year_balance
-
-            dept_name = emp.department.name if emp.department else 'Без отдела'
-            department_data[dept_name].append(emp_data)
-
-        # Итоги по компании
-        company_totals = {
-            'monthly': defaultdict(lambda: {'accrued': Decimal('0.00'),
-                                            'paid': Decimal('0.00'),
-                                            'balance': Decimal('0.00')}),
-            'year_total': {'accrued': Decimal('0.00'),
-                        'paid': Decimal('0.00'),
-                        'balance': Decimal('0.00')}
-        }
-
-        for dept_name, dept_data in department_totals.items():
-            for month, month_data in dept_data['monthly'].items():
-                company_totals['monthly'][month]['accrued'] += month_data['accrued']
-                company_totals['monthly'][month]['paid'] += month_data['paid']
-                company_totals['monthly'][month]['balance'] += month_data['balance']
-
-            company_totals['year_total']['accrued'] += dept_data['year_total']['accrued']
-            company_totals['year_total']['paid'] += dept_data['year_total']['paid']
-            company_totals['year_total']['balance'] += dept_data['year_total']['balance']
-
-        # Добавляем всё в контекст
-        context['department_data'] = {k: v for k, v in department_data.items()}
-        context['department_totals'] = {k: {
-            'monthly': dict(v['monthly']),
-            'year_total': v['year_total']
-        } for k, v in department_totals.items()}
-        context['company_totals'] = {
-            'monthly': dict(company_totals['monthly']),
-            'year_total': company_totals['year_total']
-        }
-
+        year = int(self.request.GET.get('year', 2025))
+        context.update(PayrollSummaryService(year).build_context())
         return context
 
 

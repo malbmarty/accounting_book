@@ -1,5 +1,5 @@
 
-// Загрузка таблицы оперативный учет 
+// Загрузка таблицы планирование 
 function loadPlanning() {
 
     fetch(`/contribution/api/planning-records/`)
@@ -11,9 +11,19 @@ function loadPlanning() {
             
             data.forEach(record => {
                 // Форматирование даты
-                const [year, month, day] = record.date.split('-');
+                let [year, month, day] = record.date.split('-');
                 const formattedDate = `${day}.${month}.${year}`;
-              
+                [year, month, day] = record.last_payment_date.split('-');
+                const formattedlastDate = `${day}.${month}.${year}`;
+                
+                // Массив для колонок Платёж 2 ... Платёж 12
+                const payments = record.payment_dates || [];
+                const paymentCells = Array.from({ length: 11 }, (_, i) => {
+                    const d = payments[i];
+                    if (!d) return "<td></td>";
+                    const [y, m, da] = d.split('-');
+                    return `<td>${da}.${m}.${y}</td>`;
+                }).join('');
                 
                 const row = `
                     <tr>
@@ -23,6 +33,10 @@ function loadPlanning() {
                         <td>${record.payment_amount}</td>
                         <td>${record.frequency_name}</td>
                         <td>${record.comment || ''}</td>
+                        <td>${formattedlastDate}</td>
+                        <td>${record.flow_type_name || ''}</td>
+                        ${paymentCells}
+                        <td>${record.total_payment}</td>
                         <td>
                             <a href="/contribution/edit-planning/${record.id}/">Редактировать</a>
                             <button onclick="deletePlanning(${record.id})">Удалить</button>

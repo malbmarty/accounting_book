@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django_filters',
     'payroll',
     'analytics_dir',
-    'contribution'
+    'contribution',
+    'analytics'
 ]
 
 MIDDLEWARE = [

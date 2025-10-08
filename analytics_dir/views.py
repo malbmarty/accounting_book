@@ -5,12 +5,12 @@ from django.views.generic import TemplateView
 from .serializers import (
     ProjectSerializer, ParticipantSerializer, PaymentSystemSerializer,
     CounterpartySerializer, GroupSerializer, FlowTypeSerializer, 
-    VariabilitySerializer, ItemSerializer 
+    VariabilitySerializer, ItemSerializer, FrequencySerializer 
 )
 from .models import (
     Project, Participant, PaymentSystem, 
     Counterparty, Group, FlowType, 
-    Variability, Item
+    Variability, Item, Frequency
 )
 
 # HTML Views
@@ -26,6 +26,7 @@ class AnalyticsDirPageView(TemplateView):
         context['payment_systems'] = PaymentSystem.objects.all()
         context['counterparties'] = Counterparty.objects.all()
         context['groups'] = Group.objects.all()
+        context['frequencies'] = Frequency.objects.all()
         context['flow_types'] = FlowType.objects.all()
         context['variabilities'] = Variability.objects.all()
         context['items'] = Item.objects.all()
@@ -53,6 +54,10 @@ class CounterpartyViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
+
+class FrequencyViewSet(viewsets.ModelViewSet):
+    queryset = Frequency.objects.all()
+    serializer_class = FrequencySerializer
 
 class FlowTypeViewSet(viewsets.ModelViewSet):
     queryset = FlowType.objects.all()

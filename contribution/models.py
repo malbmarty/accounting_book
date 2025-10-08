@@ -52,9 +52,6 @@ class OperationalAccounting(models.Model):
     
 
 class Planning(models.Model):
-    FREQUENCY_CHOICES = [
-        ('once', 'Разово'),
-    ] + [(str(i), f'{i} мес.') for i in range(2, 13)]
     date = models.DateField(verbose_name="Дата ОДДС")
     project = models.ForeignKey('analytics_dir.Project', on_delete=models.PROTECT, verbose_name="Проект", null=True, blank=True)
     item = models.ForeignKey('analytics_dir.Item', on_delete=models.PROTECT, verbose_name="Статья")
@@ -65,10 +62,5 @@ class Planning(models.Model):
             blank = True, 
             validators=[MinValueValidator(0.01)],
             verbose_name="Сумма")
-    frequency = models.CharField(
-        max_length=5,
-        choices=FREQUENCY_CHOICES,
-        default='once',
-        verbose_name="Частота платежа"
-    )
+    frequency =  models.ForeignKey('analytics_dir.Frequency', on_delete=models.PROTECT, verbose_name="Частота платежа")
     comment = models.CharField(max_length=100, null=True, blank=True, verbose_name="Примечание")

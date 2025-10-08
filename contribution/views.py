@@ -13,7 +13,7 @@ from .models import (
     OperationalAccounting, Planning
 )
 from analytics_dir.models import (
-        Project, Participant, 
+        Project, Participant, Frequency,
         Item, PaymentSystem, Counterparty
 )
 
@@ -70,7 +70,7 @@ class PlanningPageView(TemplateView):
         
         context['items'] = Item.objects.all()
         context['projects'] = Project.objects.all()
-        context['frequency_choices'] = Planning.FREQUENCY_CHOICES
+        context['frequency_choices'] = Frequency.objects.all()
 
         return context
     
@@ -93,7 +93,7 @@ class EditPlanningPageView(TemplateView):
         context['date'] = record.date.strftime('%Y-%m-%d')
         context['items'] = Item.objects.all()
         context['projects'] = Project.objects.all()
-        context['frequency_choices'] = Planning.FREQUENCY_CHOICES
+        context['frequency_choices'] = Frequency.objects.all()
 
         return context
 

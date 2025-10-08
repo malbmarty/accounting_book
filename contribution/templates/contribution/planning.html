@@ -52,9 +52,9 @@
         <label>Частота платежа:</label>
         <select name="frequency" id="frequency" required>
             <option value="">Выберите частоту</option>
-            {% for value, label in frequency_choices %}
-                <option value="{{ value }}">
-                    {{ label }}
+            {% for frequency in frequency_choices %}
+                <option value="{{ frequency.id }}">
+                    {{ frequency.name }}
                 </option>
             {% endfor %}
         </select>

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     Project, Participant, PaymentSystem,
-    Counterparty, Group, Item, FlowType, Variability
+    Counterparty, Group, Item, FlowType, 
+    Variability, Frequency
 )
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -27,6 +28,11 @@ class CounterpartySerializer(serializers.ModelSerializer):
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
+        fields = '__all__'
+
+class FrequencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Frequency
         fields = '__all__'
 
 class FlowTypeSerializer(serializers.ModelSerializer):

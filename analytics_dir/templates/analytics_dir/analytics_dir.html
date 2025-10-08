@@ -247,6 +247,29 @@
         </ul>
     </div>
 
+    <!-- Частота -->
+    <div>
+        <h3>Частота платежа</h3>
+        <form id="frequencyForm">
+            {% csrf_token %}
+            <input type="hidden" name="id" id="frequencyId">
+            <div class="form-group">
+                <input type="text" name="name" placeholder="Название" required>
+            </div>
+            <button type="submit">Сохранить</button>
+            <button type="button" onclick="clearForm('frequencyForm')">Отмена</button>
+        </form>
+        <ul id="frequencyList">
+            {% for frequency in frequencies %}
+            <li>
+                {{ frequency.name }}
+                <button class="icon-btn" onclick="editItem('frequency', '{{ frequency.id }}', '{{ frequency.name }}')">✏️</button>
+                <button class="icon-btn" onclick="deleteItem('frequencies', '{{ frequency.id }}')">❌</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
 </div>
 <script src="{% static 'js/analytics_dir.js' %}"></script>
 {% endblock %}

@@ -150,6 +150,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Частоты
+    const frequencyForm = document.getElementById('frequencyForm');
+    if (frequencyForm) {
+        frequencyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveItem('frequencies', this);
+        });
+    }
+
+
     // Тип потока
     const flowTypeForm = document.getElementById('flowTypeForm');
     if (flowTypeForm) {

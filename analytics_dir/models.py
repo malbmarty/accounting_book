@@ -31,6 +31,12 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
+
+class Frequency(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
     
 class FlowType(models.Model):
     name = models.CharField(max_length=100, unique=True)

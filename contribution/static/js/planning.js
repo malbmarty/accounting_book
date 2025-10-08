@@ -21,7 +21,7 @@ function loadPlanning() {
                         <td>${record.project_name}</td>
                         <td>${record.item_name}</td> 
                         <td>${record.payment_amount}</td>
-                        <td>${record.frequency}</td>
+                        <td>${record.frequency_name}</td>
                         <td>${record.comment || ''}</td>
                         <td>
                             <a href="/contribution/edit-planning/${record.id}/">Редактировать</a>

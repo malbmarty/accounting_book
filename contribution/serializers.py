@@ -42,7 +42,7 @@ class OperationalAccountingSerializer(serializers.ModelSerializer):
         return data
     
 class PlanningSerializer(serializers.ModelSerializer):
-    frequency_display = serializers.CharField(source='get_frequency_display', read_only=True)
+    frequency_name = serializers.CharField(source='frequency.name', read_only=True)
     project_name = serializers.CharField(source='project.name', read_only=True)
     item_name = serializers.CharField(source='item.name', read_only=True)
 
@@ -51,5 +51,5 @@ class PlanningSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'date', 'project',
             'project_name', 'item', 'item_name',
-            'payment_amount', 'frequency', 'frequency_display', 'comment',
+            'payment_amount', 'frequency', 'frequency_name', 'comment',
         ]

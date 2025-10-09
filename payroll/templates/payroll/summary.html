@@ -27,11 +27,11 @@
             </tr>
             <tr>
                 {% for month in months %}
-                    <th>Начислено</th>
+                    <th class="border-strong">Начислено</th>
                     <th>Выплачено</th>
                     <th>Остаток</th>
                 {% endfor %}
-                <th>Начислено</th>
+                <th class="border-strong">Начислено</th>
                 <th>Выплачено</th>
                 <th>Остаток</th>
             </tr>
@@ -62,7 +62,7 @@
                     {% for month in months %}
                         {% with month_data=emp_data.monthly|dict_get:month %}
                             {% if month_data %}
-                                <td>{{ month_data.accrued|stringformat:".2f" }}</td>
+                                <td class="border-strong">{{ month_data.accrued|stringformat:".2f" }}</td>
                                 <td>{{ month_data.paid|stringformat:".2f" }}</td>
                                 <td class="{% if month_data.balance < 0 %}negative{% endif %}">{{ month_data.balance|stringformat:".2f" }}</td>
                                 {% with total_accrued=total_accrued|add:month_data.accrued %}
@@ -74,7 +74,7 @@
                             {% endif %}
                         {% endwith %}
                     {% endfor %}
-                    <td>{{ emp_data.year_total.accrued|stringformat:".2f" }}</td>
+                    <td class="border-strong">{{ emp_data.year_total.accrued|stringformat:".2f" }}</td>
                     <td>{{ emp_data.year_total.paid|stringformat:".2f" }}</td>
                     <td class="{% if total_balance < 0 %}negative{% endif %}">{{ emp_data.year_total.balance|stringformat:".2f" }}</td>
                 {% endwith %}
@@ -88,7 +88,7 @@
                 {% with dept_tot=department_totals|dict_get:dept_name %}
                     {% for month in months %}
                         {% with month_tot=dept_tot.monthly|dict_get:month %}
-                            <td>{{ month_tot.accrued|stringformat:".2f" }}</td>
+                            <td class="border-strong">{{ month_tot.accrued|stringformat:".2f" }}</td>
                             <td>{{ month_tot.paid|stringformat:".2f" }}</td>
                             <td class="{% if month_tot.balance < 0 %}negative{% endif %}">{{ month_tot.balance|stringformat:".2f" }}</td>
                         {% endwith %}
@@ -106,12 +106,12 @@
                 <td>-</td>
                 {% for month in months %}
                     {% with month_tot=company_totals.monthly|dict_get:month %}
-                        <td>{{ month_tot.accrued|stringformat:".2f" }}</td>
+                        <td class="border-strong">{{ month_tot.accrued|stringformat:".2f" }}</td>
                         <td>{{ month_tot.paid|stringformat:".2f" }}</td>
                         <td class="{% if month_tot.balance < 0 %}negative{% endif %}">{{ month_tot.balance|stringformat:".2f" }}</td>
                     {% endwith %}
                 {% endfor %}
-                <td>{{ company_totals.year_total.accrued|stringformat:".2f" }}</td>
+                <td class="border-strong">{{ company_totals.year_total.accrued|stringformat:".2f" }}</td>
                 <td>{{ company_totals.year_total.paid|stringformat:".2f" }}</td>
                 <td class="{% if company_totals.year_total.balance < 0 %}negative{% endif %}">{{ company_totals.year_total.balance|stringformat:".2f" }}</td>
             </tr>
@@ -166,6 +166,12 @@ thead th.left {
     color: red;
     font-weight: bold;
 }
+
+.border-strong {
+    border-left: 3px solid #333 !important;
+}
+
+
 </style>
 
 <script src="{% static 'js/summary.js' %}"></script>

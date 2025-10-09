@@ -87,7 +87,7 @@ class PayrollSummaryService:
         for month in range(1, 13):
             accrued = accruals[key][month]
             paid = payouts[key][month]
-            running_balance += accrued - paid
+            running_balance += paid - accrued
             total_accrued += accrued
             total_paid += paid
 
@@ -97,7 +97,7 @@ class PayrollSummaryService:
         emp_data['year_total'] = {
             'accrued': total_accrued,
             'paid': total_paid,
-            'balance': incoming_balance + total_accrued - total_paid
+            'balance': total_paid - total_accrued # Вопрос с остатками
         }
 
         self._update_dept_totals(dept_totals[dept_name]['year_total'], total_accrued, total_paid,

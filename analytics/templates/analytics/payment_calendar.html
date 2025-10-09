@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load analytics_custom_tags %}
+{% block content %}
+{% load static %}
+
+<h2>Платежный календарь</h2>
+
+<form id="paymentCalendarForm" method="get">
+    {% csrf_token %}
+    <div class="form-group">
+        <label>Начало периода:</label>
+        <input type="date" name="start_date" required value="{{ form_values.start_date }}">
+    </div>
+
+    <div class="form-group">
+        <label>Окончание периода:</label>
+        <input type="date" name="end_date" required value="{{ form_values.end_date }}">
+    </div>
+
+    <div class="form-group">
+        <label>Проект:</label>
+        <select name="project" required>
+            <option value="">Выберите проект</option>
+            <option value="all" {% if form_values.project == 'all' %}selected{% endif %}>Все проекты</option>
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id == form_values.project %}selected{% endif %}>{{ project.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Интервал:</label>
+        <select name="period_type" required>
+            <option value="day" {% if form_values.period_type == 'day' %}selected{% endif %}>День</option>
+            <option value="month" {% if form_values.period_type == 'month' %}selected{% endif %}>Месяц</option>
+            <option value="quarter" {% if form_values.period_type == 'quarter' %}selected{% endif %}>Квартал</option>
+            <option value="year" {% if form_values.period_type == 'year' %}selected{% endif %}>Год</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Построить календарь</button>
+</form>
+
+{% if headers and calendar_data %}
+<div class="table-container mt-4">
+    <table class="summary-table table table-bordered table-sm text-center align-middle">
+        <thead>
+            <tr>
+                <th class="left" rowspan="2">Статья</th>
+                {% for h in headers %}
+                    <th style="border-left: 3px solid #333;">{{ h.start }}</th> 
+                    <th>{{ h.end }}</th> 
+                    <th>{{ h.label }}</th>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for h in headers %}
+                    <th style="border-left: 3px solid #333;">ПЛАН</th>
+                    <th>ФАКТ</th>
+                    <th>ОТКЛ</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for flow_type, items in calendar_data.items %}
+                <!-- ===== Тип потока ===== -->
+                <tr class="flow-type-row">
+                    <td class="left" colspan="{{ headers|length|add:1 }}"><b>{{ flow_type|upper }}</b></td>
+                </tr>
+
+                <!-- ===== Статьи ===== -->
+                {% for item_name, values in items.items %}
+                    <tr>
+                        <td class="left">{{ item_name }}</td>
+                        {% for h in headers %}
+                            {% with cell=values|get_item:h.key %}
+                                <td style="border-left: 3px solid #333;">{{ cell.plan|default:"0" }}</td>
+                                <td>{{ cell.fact|default:"0" }}</td>
+                                <td class="{% if cell.var < 0 %}negative{% elif cell.var > 0 %}text-success{% endif %}">
+                                    {{ cell.var|default:"0" }}
+                                </td>
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+
+                <!-- ===== ИТОГО по типу потока ===== -->
+                <tr class="flow-total-row">
+                    <td class="left">ИТОГО {{ flow_type|upper }}</td>
+                    {% for h in headers %}
+                        {% with cell=flow_totals|get_item:flow_type|get_item:h.key %}
+                            <td style="border-left: 3px solid #333;">{{ cell.plan }}</td>
+                            <td>{{ cell.fact }}</td>
+                            <td class="{% if cell.var < 0 %}negative{% elif cell.var > 0 %}text-success{% endif %}">{{ cell.var }}</td>
+                        {% endwith %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            <!-- ===== Разделитель между блоками ===== -->
+            <tr class="block-separator">
+                <td colspan="{{ headers|length|add:1 }}"></td>
+            </tr>
+            <!-- ===== Кассовые потоки ===== -->
+            {% if cash_flow_calendar %}
+                {% for indicator in cash_flow_indicators %}
+                    <tr class="cash-flow-row">
+                        <td class="left" ><b>{{ indicator }}</b></td>
+                        {% for h in headers %}
+                            {% with cell=cash_flow_calendar|get_item:h.key|get_item:indicator %}
+                                <td>{{ cell.plan|default:"0" }}</td>
+                                <td>{{ cell.fact|default:"0" }}</td>
+                                <td class="{% if cell.var < 0 %}negative{% elif cell.var > 0 %}text-success{% endif %}">{{ cell.var|default:"0" }}</td>
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+            
+        </tbody>
+    </table>
+</div>
+{% else %}
+    <p class="text-muted mt-4">Выберите период и нажмите “Построить календарь”.</p>
+{% endif %}
+
+<style>
+.table-container {
+    overflow: auto;
+    width: 100%;
+    max-height: 80vh; /* Вертикальный скролл */
+}
+
+.summary-table {
+    border-collapse: collapse;
+    min-width: 1400px; /* Горизонтальный скролл */
+}
+
+.summary-table th,
+.summary-table td {
+    border: 1px solid #999;
+    padding: 6px;
+    white-space: nowrap;
+}
+
+.summary-table th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+td.left, th.left {
+    text-align: left;
+    padding-left: 8px;
+    position: sticky;
+    left: 0;
+    background-color: #f9f9f9;
+    z-index: 2;
+}
+
+/* Пересечение шапки и левой колонки */
+thead th.left {
+    z-index: 6;
+}
+
+/* Цвет строки типа потока */
+.flow-type-row {
+    background-color: #e29977;
+    font-weight: bold;
+}
+
+/* Цвет строки ИТОГО по типу потока */
+.flow-total-row {
+    background-color: #d6e9c6;
+    font-weight: bold;
+}
+
+.cash-flow-row {
+    background-color: #d45b5b91; /* светло-жёлтый, можно изменить */
+    font-weight: bold;
+}
+
+.block-separator td {
+  
+    height: 40px; /* высота разделителя */
+    padding: 0;
+    border: none;
+}
+
+/* Отрицательная вариация */
+.negative {
+    color: red;
+    font-weight: bold;
+}
+
+</style>
+
+<script src="{% static 'js/payment_calendar.js' %}"></script>
+{% endblock %}

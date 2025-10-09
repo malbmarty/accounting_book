@@ -8,6 +8,7 @@ urlpatterns = [
     path('payroll/', include('payroll.urls')),
     path('analytics-dir/', include('analytics_dir.urls')),
     path('contribution/', include('contribution.urls')),
+    path('analytics/', include('analytics.urls')),
 ]
 
 

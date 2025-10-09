@@ -54,6 +54,15 @@
             margin: 0 auto;     /* центрируем по горизонтали */
         }
         /* Форма */
+
+        #paymentCalendarForm {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 7 полей как 7 столбцов таблицы */
+            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+            margin-bottom: 20px;
+            align-items: start;
+        }
+   
         #createAccrualForm {
             display: grid;
             grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
@@ -94,6 +103,7 @@
             align-items: start;
         }
 
+        #paymentCalendarForm .form-group,
         #createPlannigForm .form-group,
         #createOperAccForm .form-group,
         #createAccrualForm .form-group,
@@ -106,6 +116,7 @@
             height: auto;
         }
 
+        #paymentCalendarForm label,
         #createPlannigForm label,
         #createOperAccForm label,
         #createAccrualForm label,
@@ -120,16 +131,19 @@
             text-overflow: ellipsis;
         }
 
+        #paymentCalendarForm input,
         #createPlannigForm input,
         #createOperAccForm input,
         #createAccrualForm input,
         #createPayoutForm input,
         #createEmployeeForm input,
+        #paymentCalendarForm select,
         #createPlannigForm select,
         #createOperAccForm select,
         #createAccrualForm select,
         #createPayoutForm select,
         #createEmployeeForm select,
+        #paymentCalendarForm textarea,
         #createPlannigForm textarea
         #createOperAccForm textarea,
         #createAccrualForm textarea,
@@ -195,6 +209,14 @@
     <div class="dropdown-content">
       <a href="{% url 'oper_acc' %}">Оперативный учет</a>
       <a href="{% url 'planning' %}">Планирование</a>
+    </div>
+  </div>
+
+  <div class="nav">
+    <a href="#">Аналитика ▾</a>
+    <div class="dropdown-content">
+      <a href="{% url 'payment_calendar' %}">Платежный календарь</a>
+      <a href="{% url 'dept' %}">Задолженность</a>
     </div>
   </div>
 

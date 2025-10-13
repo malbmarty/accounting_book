@@ -3,100 +3,301 @@
 
 {% block title %}Штат{% endblock %}
 
-{% block extra_head %}
-{% load static %}
-
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/employees.css' %}">
 {% endblock %}
 
 {% block content %}
 {% load static %}
-<h2>Штат сотрудников</h2>
 
-<h3>Создание новой записи</h3>
-
-<form id="createEmployeeForm">
-    {% csrf_token %}
-
-    <div class="form-group">
-        <label>ФИО:</label>
-        <input type="text" name="full_name" value="" required>
-    </div>
-
-    <div class="form-group">
-        <label>Должность:</label>
-        <select name="position" required>
-            <option value="">Выберите должность</option>
-            {% for position in positions %}
-            <option value="{{ position.id }}" >{{ position.name }}</option>
-            {% endfor %}
+<div class="table-top">
+    <h2 class="table-title">Штат сотрудников</h2>
+    <div class="table-active">
+        <select class="sort" name="sort" required>
+                <option value="">Сортировать:</option>
         </select>
-    </div>
-
-    <div class="form-group">
-        <label>Отдел:</label>
-        <select name="department" required>
-            <option value="">Выберите отдел</option>
-            {% for department in departments %}
-            <option value="{{ department.id }}" >{{ department.name }}</option>
-            {% endfor %}
+        <select class="filter" name="filter" required>
+                <option value="">Все категории:</option>
         </select>
+        <button class="new-record-button" type="submit">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <span class="button-text">Новая запись</span>
+        </button>
     </div>
-
-    <div class="form-group">
-        <label>Статус:</label>
-        <select name="status" required>
-            <option value="">Выберите статус</option>
-            {% for status in statuses %}
-            <option value="{{ status.id }}" >{{ status.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Тип:</label>
-        <select name="employee_type" required>
-            <option value="">Выберите тип</option>
-            {% for employee_type in employee_types %}
-            <option value="{{ employee_type.id }}" >{{ employee_type.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Банк:</label>
-        <textarea name="bank_name" rows="1"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Номер карты:</label>
-        <textarea name="card_number" rows="1"></textarea>
-    </div>
-
-    <button type="submit">Внести</button>
-
-</form>
-
-
-
-
-
-<div id="employeesTable">
-    <table>
-        <thead>
-            <tr>
-                <th>ФИО</th>
-                <th>Должность</th>
-                <th>Отдел</th>
-                <th>Статус</th>
-                <th>Тип сотрудника</th>
-                <th>Банк</th>
-                <th>Номер карты</th>
-            </tr>
-        </thead>
-        <tbody id="employeesBody">
-            <!-- Данные будут загружены через JavaScript -->
-        </tbody>
-    </table>
 </div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="createEmployeeModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление сотрудника</h2>
+            <h3 class="create-instruction">Внесите информацию о сотруднике</h3>
+        </div>
+
+        <form id="createEmployeeForm">
+            {% csrf_token %}
+
+            <div class="form-group form-group--fio">
+                <label class="create-label">ФИО:</label>
+                <input class="create-input" type="text" name="full_name" value="" required placeholder="ФИО сотрудника">
+            </div>
+
+            <div class="form-group">
+                <label class="create-label">Должность:</label>
+                <select class="create-input" name="position" required>
+                    <option class="option-text" value="">Выберите должность</option>
+                    {% for position in positions %}
+                    <option class="option-text" value="{{ position.id }}" >{{ position.name }}</option>
+                    {% endfor %}
+                </select>
+                <label class="create-label">Отдел:</label>
+                <select class="create-input" name="department" required>
+                    <option class="option-text" value="">Выберите отдел</option>
+                    {% for department in departments %}
+                    <option class="option-text" value="{{ department.id }}" >{{ department.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="create-label">Статус:</label>
+                <select class="create-input" name="status" required>
+                    <option class="option-text" value="">Выберите статус</option>
+                    {% for status in statuses %}
+                    <option class="option-text" value="{{ status.id }}" >{{ status.name }}</option>
+                    {% endfor %}
+                </select>
+                <label class="create-label">Тип:</label>
+                <select class="create-input" name="employee_type" required>
+                    <option class="option-text" value="">Выберите тип</option>
+                    {% for employee_type in employee_types %}
+                    <option class="option-text" value="{{ employee_type.id }}" >{{ employee_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="create-label">Банк:</label>
+                <textarea class="create-input" name="bank_name" rows="1" placeholder="Название банка сотрудника"></textarea>
+                <label class="create-label">Номер карты:</label>
+                <textarea class="create-input" name="card_number" rows="1" placeholder="Номер карты сотрудника"></textarea>
+            </div>
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить сотрудника</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="editEmployeeModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Редактировать сотрудника</h2>
+            <h3 class="create-instruction">Внесите изменения в информацию о сотруднике</h3>
+        </div>
+
+        <form id="editEmployeeForm">
+            {% csrf_token %}
+
+            <div class="form-group form-group--fio">
+                <label class="create-label">ФИО:</label>
+                <input class="create-input" type="text" name="full_name" value="{{ employee.full_name }}" required placeholder="ФИО сотрудника">
+            </div>
+
+            <div class="form-group">
+                <label class="create-label">Должность:</label>
+                <select class="create-input" name="position" required>
+                    <option class="option-text" value="">Выберите должность</option>
+                    {% for position in positions %}
+                    <option class="option-text" value="{{ position.id }}" {% if position.id == employee.position %}selected{% endif %}>{{ position.name }}</option>
+                    {% endfor %}
+                </select>
+                <label class="create-label">Отдел:</label>
+                <select class="create-input" name="department" required>
+                    <option class="option-text" value="">Выберите отдел</option>
+                    {% for department in departments %}
+                    <option class="option-text" value="{{ department.id }}" {% if department.id == employee.department %}selected{% endif %}>{{ department.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="create-label">Статус:</label>
+                <select class="create-input" name="status" required>
+                    <option class="option-text" value="">Выберите статус</option>
+                    {% for status in statuses %}
+                    <option class="option-text" value="{{ status.id }}" {% if status.id == employee.status %}selected{% endif %}>{{ status.name }}</option>
+                    {% endfor %}
+                </select>
+                <label class="create-label">Тип:</label>
+                <select class="create-input" name="employee_type" required>
+                    <option class="option-text" value="">Выберите тип</option>
+                    {% for employee_type in employee_types %}
+                    <option class="option-text" value="{{ employee_type.id }}" {% if employee_type.id == employee.employee_type %}selected{% endif %}>{{ employee_type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="create-label">Банк:</label>
+                <textarea class="create-input" name="bank_name" rows="1" placeholder="Название банка сотрудника">{{ employee.bank }}</textarea>
+                <label class="create-label">Номер карты:</label>
+                <textarea class="create-input" name="card_number" rows="1" placeholder="Номер карты сотрудника">{{ employee.card }}</textarea>
+            </div>
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Сохранить изменения</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal-delete">
+    <div class="modal-delete-content">
+        <h2 class="delete-title">Удалить сотрудника?</h2>
+        <p class="delete-instruction">Это действие полностью удалит запись вашего сотруднгика из системы.</p>
+    </div>
+    <div class="delete-active">
+        <button class="btn-cancel" id="cancelDelete">
+             <span class="btn-cancel-text">Нет, оставить</span>
+        </button>
+        <button class="button-delete" id="confirmDelete">
+            <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 4.98366C15.225 4.70866 12.4333 4.56699 9.65 4.56699C8 4.56699 6.35 4.65033 4.7 4.81699L3 4.98366M7.58333 4.14199L7.76667 3.05033C7.9 2.25866 8 1.66699 9.40833 1.66699H11.5917C13 1.66699 13.1083 2.29199 13.2333 3.05866L13.4167 4.14199M16.2083 7.61699L15.6667 16.0087C15.575 17.317 15.5 18.3337 13.175 18.3337H7.825C5.5 18.3337 5.425 17.317 5.33333 16.0087L4.79167 7.61699M9.10833 13.7503H11.8833M8.41667 10.417H12.5833" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="button-delete-text">Да, удалить</span>
+        </button>
+    </div>
+</div>
+
+<div id="employeesTable" class="table-container">
+    
+    <!-- Столбец ФИО -->
+    <div class="table-column table-column--fio" id="fioColumn">
+        <div class="table-head table-head--fio">
+            <span class="head-title">ФИО</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Должность -->
+    <div class="table-column table-column--position" id="positionColumn">
+        <div class="table-head table-head--position">
+            <span class="head-title">Должность</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Отдел -->
+    <div class="table-column table-column--depart" id="departColumn">
+        <div class="table-head table-head--depart">
+            <span class="head-title">Отдел</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Статус -->
+    <div class="table-column table-column--status" id="statusColumn">
+        <div class="table-head table-head--status">
+            <span class="head-title">Статус</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Тип сотрудника -->
+    <div class="table-column table-column--type" id="typeColumn">
+        <div class="table-head table-head--type">
+            <span class="head-title">Тип сотрудника</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Банк -->
+    <div class="table-column table-column--bank" id="bankColumn">
+        <div class="table-head table-head--bank">
+            <span class="head-title">Банк</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Номер карты -->
+    <div class="table-column table-column--card" id="cardColumn">
+        <div class="table-head table-head--card">
+            <span class="head-title">Номер карты</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец кнопки редактировать -->
+    <div class="table-column table-column--edit" id="editColumn">
+            <div class="table-head table-head--edit">
+                <span class="head-title"></span>
+            </div>
+    </div>
+
+    <!-- Столбец кнопки удалить -->
+    <div class="table-column table-column--delete" id="deleteColumn">
+            <div class="table-head table-head--delete">
+                <span class="head-title"></span>
+            </div>
+    </div>
+
+
+</div>
+
 <script src="{% static 'js/employees.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,787 @@
+
+.table-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 20px 0;
+}
+
+
+.table-title {
+    margin: 0;
+    height: 35px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 110%;
+    /* or 35px */
+    color: #282533;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.table-active {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+    margin: 0;
+    width: 604px;
+    height: 40px;
+}
+
+
+
+.sort {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px 10px 14px;
+    gap: 6px;
+    width: 220px;
+    height: 40px;
+    background: #F6F5FA;
+    border-radius: 10px;
+}
+
+
+.filter {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px 10px 14px;
+    gap: 6px;
+    width: 220px;
+    height: 40px;
+    background: #F6F5FA;
+    border-radius: 10px;
+
+}
+
+
+.new-record-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 10px 10px 10px;
+    gap: 2px;
+
+    width: 144px;
+    height: 40px;
+
+    background: #FF3C3F;
+    border-radius: 10px;
+
+    border: none;       /* убираем стандартную рамку */
+    outline: none;      /* убираем обводку при фокусе, если нужно */
+    cursor: pointer;    /* курсор при наведении */
+
+}
+
+.new-record-button:hover {
+    outline: 2px solid #FFB3B5; /* кастомный фокус */
+}
+
+.new-record-button:focus {
+    outline: 2px solid #FFB3B5; /* кастомный фокус */
+}
+
+.button-text {
+    width: 96px;
+    height: 20px;
+    white-space: nowrap;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #F6F5FA;
+
+}
+
+.table-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0px;
+    isolation: isolate;
+    width: 100%;
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+
+
+.table-column {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* чтобы .table-cell растягивалась по ширине колонки */
+    flex-shrink: 0;       /* колонка не сжимается */
+    flex-grow: 0;         /* колонка не растёт сверх своей ширины */
+    padding: 0px;
+    isolation: isolate;
+    height: 400px;
+}
+
+.table-column--fio { width: 18%; flex: 0 0 18%; }
+.table-column--position { width: 12%; flex: 0 0 12%; }
+.table-column--depart { width: 12%; flex: 0 0 12%; }
+.table-column--status { width: 9%; flex: 0 0 9%; }
+.table-column--type { width: 14%; flex: 0 0 14%; }
+.table-column--bank { width: 12%; flex: 0 0 12%; }
+.table-column--card { width: 17%; flex: 0 0 17%;}
+.table-column--edit { width: 3%; flex: 0 0 3%; }
+.table-column--delete { width: 3%; flex: 0 0 3%; }
+
+
+.table-head {
+    display: flex;
+    /* flex-direction: row; */
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 14px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 0px;
+    border-style: solid;
+    border-color: #DFDEE5;
+    
+}
+
+.table-head--check {
+    padding: 0px 4px;
+} 
+.table-head--edit {
+    padding: 0px 4px;
+} 
+.table-head--delete {
+    padding: 0px 4px;
+} 
+
+
+/* .table-head--fio { width: 20%; }
+.table-head--position { width: 16%; }
+.table-head--depart { width: 14%; }
+.table-head--status { width: 12%; }
+.table-head--type { width: 16%; }
+.table-head--bank { width: 14%; }
+.table-head--card { width: 20%; } */
+
+.head-title {
+    margin: 0;
+    /* width: 35px;
+    height: 16px; */
+    white-space: nowrap;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+
+}
+
+
+.table-icon {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.table-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    box-sizing: border-box;
+    gap: 6px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    width: 100%;
+    height: 40px;
+
+    background: rgba(246, 245, 250, 0.4);
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.table-cell--edit {
+  justify-content: center;
+}
+
+.table-cell--delete {
+  justify-content: center;
+}
+
+
+.women_portrait {
+    width: 24px;
+    height: 24px;
+    background: url("/static/images/woman_portrait.png") center/cover no-repeat;
+    border-radius: 4px;
+}
+
+.cell-title {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;             /* скрывать лишнее */
+    text-overflow: ellipsis;      /* троеточие */
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+    color: #282533;
+    display: block;               /* важно для text-overflow */
+    max-width: 100%;              /* чтобы ограничивалось шириной родителя */
+}
+
+/* Скругляем только последние ячейки в колонке */
+.table-column--fio .table-cell--fio:last-child {
+    border-bottom-left-radius: 12px;
+}
+
+.table-column--delete .table-cell--delete:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+.cell-depart {
+    box-sizing: border-box;
+
+    /* Auto layout */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 6px;
+    gap: 4px;
+
+    height: 25px;
+
+    background: rgba(87, 210, 30, 0.12);
+    border: 1px solid rgba(87, 210, 30, 0.16);
+    border-radius: 6px;
+
+}
+
+.modal-backdrop {
+    display: none; /* скрыт по умолчанию */
+    position: fixed;
+    z-index: 999; /* ниже окна */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Фон модального окна */
+.modal {
+    display: none; /* скрыто по умолчанию */
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px;
+    box-sizing: border-box;
+    gap: 32px;
+    isolation: isolate;
+
+    position: fixed;
+    width: 440px;
+    height: 648px;
+    left: calc(50% - 440px/2);
+    top: calc(50% - 648px/2);
+    z-index: 1000;
+
+    background: #F6F5FA;
+    border-radius: 24px;
+    align-items: center;
+}
+
+
+
+/* Контент окна */
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 20px;
+
+    width: 400px;
+    height: 536px;
+}
+
+
+/* Кнопка закрытия */
+.modal-close {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 416px;
+    top: 16px;
+}
+
+/* эффект при наведении */
+.modal-close:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+.modal-content-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 6px;
+
+    width: 400px;
+    height: 45px;
+    align-self: flex-start;
+}
+
+
+
+.create-title {
+    margin: 0;
+    white-space: nowrap;
+    height: 22px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 110%;
+    /* identical to box height, or 22px */
+
+    color: #282533;
+}
+
+.create-instruction {
+    margin: 0;
+    white-space: nowrap;
+    height: 17px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 124%;
+    /* or 17px */
+
+    color: #282533;
+
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 6px;
+
+    width: 400px;
+    height: 122px;
+    align-self: flex-start;
+    margin-bottom: 16px;
+}
+
+.form-group.form-group--fio {
+    height: 57px;
+}
+
+.create-label {
+    margin: 0;
+    white-space: nowrap;
+    height: 15px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 124%;
+    /* identical to box height, or 15px */
+
+    color: #282533;
+}
+
+.create-input {
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 6px;
+
+    width: 400px;
+    height: 40px;
+
+    background: #F6F5FA;
+    border: 1px solid rgba(40, 37, 51, 0.08);
+    border-radius: 10px;
+
+    /* Title Text */
+    white-space: nowrap;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+
+}
+
+.option-text {
+    white-space: nowrap;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.create-active {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 8px;
+    margin-top: 30px;
+
+    width: 400px;
+    height: 40px;
+}
+
+.button-cancel {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 6px;
+
+    width: 85px;
+    height: 40px;
+
+    border: 1px solid rgba(40, 37, 51, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.button-add {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    gap: 6px;
+
+    width: 284px;
+    height: 40px;
+
+    background: #FF3C3F;
+    border-radius: 12px;
+    border: none;       /* убираем стандартную рамку */
+    outline: none;      /* убираем обводку при фокусе, если нужно */
+    cursor: pointer;    /* курсор при наведении */
+
+
+}
+
+.button-add-text {
+ 
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #F6F5FA;
+
+
+}
+
+.button-cancel-text {
+
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #282533;
+
+}
+
+/* Hover для кнопки "Отмена" */
+.button-cancel:hover {
+    outline: 2px solid rgba(40, 37, 51, 0.2);
+}
+
+/* Hover для кнопки "Добавить" */
+.button-add:hover {
+    outline: 2px solid #FFB3B5;
+}
+
+.button-cancel:focus {
+    outline: rgba(40, 37, 51, 0.2);
+}
+
+/* Hover для кнопки "Добавить" */
+.button-add:focus {
+    outline: 2px solid #FFB3B5;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.edit-button:hover svg path {
+  stroke: #1E34FF; /* немного темнее при наведении */
+}
+
+.edit-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.delete-button:hover svg path {
+  stroke: #a2092f; /* немного темнее при наведении */
+}
+
+.delete-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.modal-delete {
+    display: none; /* скрыто по умолчанию */
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    box-sizing: border-box;
+    position: fixed;
+    width: 448px;
+    height: 170px;
+    left: calc(50% - 448px/2);
+    top: calc(50% - 170px/2);
+    z-index: 1000;
+}
+
+.modal-delete-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 20px 12px;
+    box-sizing: border-box;
+    gap: 10px;
+
+    width: 448px;
+    height: 98px;
+
+    background: #F6F5FA;
+    border-radius: 24px 24px 0px 0px;
+}
+
+
+.delete-title {
+    margin: 0;
+    height: 22px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 110%;
+    /* identical to box height, or 22px */
+
+    color: #282533;
+}
+
+.delete-instruction {
+    margin: 0;
+    height: 34px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 124%;
+    /* or 17px */
+
+    color: rgba(40, 37, 51, 0.8);
+}
+
+.delete-active {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 12px 20px 20px;
+    box-sizing: border-box;
+    gap: 8px;
+
+    width: 448px;
+    height: 72px;
+
+    background: #F6F5FA;
+    border-radius: 0px 0px 24px 24px;
+}
+
+.button-delete {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 14px;
+    gap: 6px;
+
+    width: 267px;
+    height: 40px;
+
+    background: #BD0A37;
+    border-radius: 12px;
+}
+
+.button-delete-text {
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #F6F5FA;
+}
+
+
+.button-delete:hover {
+    outline: 2px solid #FFB3B5;
+}
+
+.button-delete:focus {
+    outline: 2px solid #FFB3B5;
+}
+
+.btn-cancel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    gap: 6px;
+
+    width: 133px;
+    height: 40px;
+
+    border: 1px solid rgba(40, 37, 51, 0.08);
+    border-radius: 12px;
+}
+
+.btn-cancel-text {
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #282533;
+}
+
+.btn-cancel:hover {
+    outline: 2px solid rgba(40, 37, 51, 0.2);
+}
+
+
+.btn-cancel:focus {
+    outline: rgba(40, 37, 51, 0.2);
+}
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,295 @@
+body {
+    position: relative;
+    width: 100%;
+    background: #EAE9F0;
+    padding-top: 120px !important;
+    margin: 0;
+    overflow-x: hidden;  
+}
+
+.content {
+    width: 100%;
+    padding: 0 100px;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    padding: 0px;
+    position: fixed;
+    width: 100%;
+    height: 120px;
+    left: 0px;
+    top: 0px;
+    z-index: 998;
+}
+
+.header__top,
+.header__bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 100px;
+    width: 100%;
+    height: 60px;
+    box-sizing: border-box; 
+    margin: 0;
+}
+
+.header__top {
+    background: #F6F5FA
+}
+
+/* .header__bar {
+    background: #fff;
+} */
+
+.page-title {
+    margin: 0;
+    width: auto;
+    height: 26px;
+
+    font-family: 'Bebas Neue';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 100%;
+    /* or 32px */
+
+    color: #282533;
+    
+
+}
+
+.account-icon {
+    width: 84px;
+    height: 36px;
+    gap: 12px;
+}
+
+.nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    height: 36px;
+}
+
+
+
+.nav__item-home {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 12px 8px 10px;
+    gap: 6px;
+    width: 107px;
+    height: 36px;
+    background: #F6F5FA;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.nav__item-salary {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 224px;
+    height: 36px;
+    gap: 6px;
+    padding: 8px 12px 8px 10px;
+    border-radius: 10px;
+    background: #F6F5FA;
+    box-sizing: border-box;
+
+}
+
+.nav__item-contribution {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 119px;
+    height: 36px;
+    gap: 6px;
+    padding: 8px 12px 8px 10px;
+    border-radius: 10px;
+    background: #F6F5FA;
+    box-sizing: border-box;
+
+}
+
+.nav__item-analytics {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 107px;
+    height: 36px;
+    gap: 6px;
+    padding: 8px 12px 8px 10px;
+    border-radius: 10px;
+    background: #F6F5FA;
+    box-sizing: border-box;
+
+}
+
+.nav__item-dict {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 265px;
+    height: 36px;
+    gap: 6px;
+    padding: 8px 12px 8px 10px;
+    border-radius: 10px;
+    background: #F6F5FA;
+    box-sizing: border-box;
+
+}
+
+.nav__title-home {
+    width: 63px;
+    height: 20px;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 124%;
+    color: #282533;
+    text-decoration: none;
+}
+
+.nav__title-salary {
+    width: 180px;
+    height: 20px;
+    font-family: Mulish;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 124%;
+    letter-spacing: 0px;
+    color: #282533;
+    text-decoration: none;
+}
+
+.nav__title-contribution {
+    width: 75px;
+    height: 20px;
+    font-family: Mulish;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 124%;
+    letter-spacing: 0px;
+    color: #282533;
+    text-decoration: none;
+}
+
+.nav__title-analytics {
+    width: 75px;
+    height: 20px;
+    font-family: Mulish;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 124%;
+    letter-spacing: 0px;
+    color: #282533;
+    text-decoration: none;
+}
+
+.nav__title-dict {
+    width: 221px;
+    height: 20px;
+    font-family: Mulish;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 124%;
+    letter-spacing: 0px;
+    color: #282533;
+    text-decoration: none;
+}
+
+.nav__icon{
+    width: 16px;
+    height: 16px;
+    opacity: 1;
+
+}
+
+
+
+.dropdown-content {
+    position: absolute;
+    width: max-content; /* ширина зависит от контента */
+    min-width: 100px;   /* при желании минимальная ширина */
+    height: auto;
+    top: 100%;
+    left: 0;
+    gap: 4px;
+    border-radius: 20px;
+    padding: 8px;
+    border-width: 1px;
+    background: #F6F5FA;
+    border: 1px solid #28253314;
+    box-shadow: 0px 8px 16px 0px #211C610F;
+    display: none; /* скрыт по умолчанию */
+    z-index: 1010; 
+    box-sizing: border-box;
+    
+}
+
+
+/* Показываем дропдаун при наведении */
+.nav__item-salary:hover .dropdown-content {
+    display: block;
+}
+
+.nav__item-contribution:hover .dropdown-content {
+    display: block;
+}
+
+.nav__item-analytics:hover .dropdown-content {
+    display: block;
+}
+
+/* Frame 2087328276 */
+
+
+
+.nav__item-dict:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    width: auto;
+    height: 40px;
+    gap: 6px;
+    border-radius: 12px;
+    padding-top: 10px;
+    padding-right: 14px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    background: #EEEEF6;
+    box-sizing: border-box;
+}
+
+.dropdown-item a {
+    width: auto; /* не фиксировать ширину */
+    white-space: nowrap; /* текст в одну строку */
+    height: 20px;
+    font-family: Mulish;
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 16px;
+    line-height: 124%;
+    letter-spacing: 0px;
+    color: #282533B2;
+    text-decoration: none;
+}
+

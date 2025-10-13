@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Редактирование записи - Выплаты{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_payout.css' %}">
+{% endblock %}
 
 {% block content %}
 {% load static %}

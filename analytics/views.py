@@ -8,12 +8,12 @@ from decimal import Decimal
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum, F, DecimalField
 
-from .services import analytics_dept, payment_calendar
+from .services import analytics_dept, payment_calendar, balances
 
 from analytics_dir.models import (
     Project
 )
-from .models import CounterpartyOpeningBalance
+from .models import CounterpartyOpeningBalance, ParticipantsOpeningBalance
 from contribution.models import (
     OperationalAccounting, Planning
 )
@@ -68,25 +68,25 @@ class DeptPageView(TemplateView):
         print(context)
         return context
     
-# class BalancesPageView(TemplateView):
-#     template_name = 'analytics/balances.html'
+class BalancesPageView(TemplateView):
+    template_name = 'analytics/balances.html'
 
-#     def post(self, request, *args, **kwargs):
-#         # Сохраняет или обновляет входящий баланс.
-#         try:
-#             data = json.loads(request.body)
-#             CounterpartyOpeningBalance.objects.update_or_create(
-#                 counterparty_id=data["counterparty_id"],
-#                 year=int(data["year"]),
-#                 defaults={"amount": Decimal(data.get("amount", 0))}
-#             )
-#             return JsonResponse({"status": "ok"})
-#         except Exception as e:
-#             return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    def post(self, request, *args, **kwargs):
+        # Сохраняет или обновляет входящий баланс.
+        try:
+            data = json.loads(request.body)
+            ParticipantsOpeningBalance.objects.update_or_create(
+                participant_id=data["participant_id"],
+                year=int(data["year"]),
+                defaults={"amount": Decimal(data.get("amount", 0))}
+            )
+            return JsonResponse({"status": "ok"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         year = int(self.request.GET.get('year', 2025))
-#         context.update(analytics_dept.AnalyticsDeptService(year).build_context())
-#         print(context)
-#         return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year = int(self.request.GET.get('year', 2025))
+        context.update(balances.BalancesService(year).build_context())
+        print(context)
+        return context

@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Редактирование записи - Начисление{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_accrual.css' %}">
+{% endblock %}
+
 
 {% block content %}
 {% load static %}

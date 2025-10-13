@@ -1,0 +1,141 @@
+body { font-family: Arial, sans-serif; 
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 100vh;
+}
+.content {
+    width: 100%;  /* растягиваем на всю ширину */
+    box-sizing: border-box;
+}
+table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; }
+.filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
+.form-group { margin: 8px 0; }
+#editAccrualForm,
+#editOperAccForm,
+#editPlanningForm,
+#editEmployeeForm, 
+#editPayoutForm {
+    max-width: 600px;   /* ограничиваем ширину */
+    margin: 0 auto;     /* центрируем по горизонтали */
+}
+/* Форма */
+
+#paymentCalendarForm {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 7 полей как 7 столбцов таблицы */
+    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+#createAccrualForm {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
+    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+#createPayoutForm {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
+    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+#createOperAccForm {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr); /* 7 полей как 7 столбцов таблицы */
+    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+#createPlannigForm {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 полей как 7 столбцов таблицы */
+    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+#createEmployeeForm {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
+    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
+    margin-bottom: 20px;
+    align-items: start;
+}
+
+#paymentCalendarForm .form-group,
+#createPlannigForm .form-group,
+#createOperAccForm .form-group,
+#createAccrualForm .form-group,
+#createPayoutForm .form-group,
+#createEmployeeForm .form-group {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    grid-row: span 2; /* Занимает 2 строки в grid */
+    height: auto;
+}
+
+#paymentCalendarForm label,
+#createPlannigForm label,
+#createOperAccForm label,
+#createAccrualForm label,
+#createPayoutForm label,
+#createEmployeeForm label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#paymentCalendarForm input,
+#createPlannigForm input,
+#createOperAccForm input,
+#createAccrualForm input,
+#createPayoutForm input,
+#createEmployeeForm input,
+#paymentCalendarForm select,
+#createPlannigForm select,
+#createOperAccForm select,
+#createAccrualForm select,
+#createPayoutForm select,
+#createEmployeeForm select,
+#paymentCalendarForm textarea,
+#createPlannigForm textarea
+#createOperAccForm textarea,
+#createAccrualForm textarea,
+#createPayoutForm textarea, 
+#createEmployeeForm textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    font-size: 16px;
+    min-height: 36px;
+}
+
+label { display: block; margin-bottom: 5px; font-size: 16px;}
+input, select, textarea { width: 80%; padding: 10px; font-size: 16px;}
+button { padding: 10px 15px; background: #3386d8; color: white; border: none; cursor: pointer; font-size: 16px;}
+button:hover { background: #0056b3; }
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}

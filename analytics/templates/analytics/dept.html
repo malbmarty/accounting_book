@@ -1,5 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% load analytics_custom_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dept.css' %}">
+{% endblock %}
+
 {% block content %}
 {% load static %}
 <h1>Задолженность за {{ current_year }} год</h1>

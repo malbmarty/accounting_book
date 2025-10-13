@@ -16,10 +16,10 @@ class AnalyticsDeptService:
                 OperationalAccounting.objects.filter(recognition_date__year=self.year).values('counterparty_id')
             )
         )
-        oper_accounting_income, oper_accounting_expence = self.get_financial_data()
+        oper_accounting_income, oper_accounting_expense = self.get_financial_data()
         balances = self.get_balances()
 
-        data = self.build_summary(counterparties, oper_accounting_income, oper_accounting_expence, balances)
+        data = self.build_summary(counterparties, oper_accounting_income, oper_accounting_expense, balances)
         data.update({
             'years': range(2025, 2030),
             'current_year': self.year,
@@ -37,12 +37,12 @@ class AnalyticsDeptService:
 
     def get_financial_data(self):
         records_income = OperationalAccounting.objects.filter(recognition_date__year=self.year, item__flow_type__name="Приход").values(
-            'counterparty_id', 'recognition_date__month', 'payment_amount'
-        )
+            'counterparty_id', 'recognition_date__month'
+        ).annotate(total=Sum('payment_amount'))
 
         records_expense = OperationalAccounting.objects.filter(recognition_date__year=self.year, item__flow_type__name ="Расход").values(
-            'counterparty_id', 'recognition_date__month', 'payment_amount'
-        )
+            'counterparty_id', 'recognition_date__month'
+        ).annotate(total=Sum('payment_amount'))
 
 
         return self.to_dict(records_income), self.to_dict(records_expense)
@@ -52,17 +52,17 @@ class AnalyticsDeptService:
         data = defaultdict(lambda: defaultdict(Decimal))
         for item in qs:
             key = item['counterparty_id']
-            data[key][item['recognition_date__month']] = item['payment_amount'] or Decimal('0.00')
+            data[key][item['recognition_date__month']] = item['total'] or Decimal('0.00')
         return data
 
     def get_balances(self):
         return {b.counterparty_id: b.amount for b in CounterpartyOpeningBalance.objects.filter(year=self.year)}
 
-    def build_summary(self, counterparties, oper_accounting_income, oper_accounting_expence, balances):
+    def build_summary(self, counterparties, oper_accounting_income, oper_accounting_expense, balances):
 
         counterparties_data = defaultdict(list)
         for counterparty in counterparties:
-            counterparty_data = self.build_counterparty_summary(counterparty, oper_accounting_income, oper_accounting_expence, balances)
+            counterparty_data = self.build_counterparty_summary(counterparty, oper_accounting_income, oper_accounting_expense, balances)
             counterparties_data[counterparty.name] = counterparty_data
 
 
@@ -70,7 +70,7 @@ class AnalyticsDeptService:
             'counterparties_data': dict(counterparties_data),
         }
 
-    def build_counterparty_summary(self, counterparty, oper_accounting_income, oper_accounting_expence, balances):
+    def build_counterparty_summary(self, counterparty, oper_accounting_income, oper_accounting_expense, balances):
         incoming_balance = balances.get(counterparty.id, Decimal('0.00'))
         running_balance = incoming_balance
         key = (counterparty.id)
@@ -79,8 +79,8 @@ class AnalyticsDeptService:
         counterparty_data = {'counterparty': counterparty, 'monthly': {}, 'incoming_balance': incoming_balance}
 
         for month in range(1, 13):
-            accrued = oper_accounting_expence[key][month] - oper_accounting_income[key][month] 
-            paid = oper_accounting_income[key][month] - oper_accounting_expence[key][month]
+            accrued = oper_accounting_expense[key][month] - oper_accounting_income[key][month] 
+            paid = oper_accounting_income[key][month] - oper_accounting_expense[key][month]
             running_balance += accrued + paid
             total_accrued += accrued
             total_paid += paid

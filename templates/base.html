@@ -1,239 +1,117 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Бухгалтерский учет{% endblock %}</title>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <style>
-        body { font-family: Arial, sans-serif; 
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            min-height: 100vh;
-        }
-        .content {
-            width: 100%;  /* растягиваем на всю ширину */
-            box-sizing: border-box;
-        }
-        
-       .header {
-            background: #f4f4f4;
-            padding: 10px;
-            margin-bottom: 20px;
-        
-            justify-content: center; /* центрируем контент */
-            gap: 10px; /* расстояние между секциями */
-        }
-
-        .header a {
-            text-decoration: none;
-            color: #333;
-            padding: 5px 10px;
-        }
-
-        .nav {
-            position: relative;
-            display: inline-block;
-        }
-        .nav a { text-decoration: none; color: #333; padding: 5px 10px; }
-        .nav a:hover { background: #ddd; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
-        .form-group { margin: 8px 0; }
-        #editAccrualForm,
-        #editOperAccForm,
-        #editPlanningForm,
-        #editEmployeeForm, 
-        #editPayoutForm {
-            max-width: 600px;   /* ограничиваем ширину */
-            margin: 0 auto;     /* центрируем по горизонтали */
-        }
-        /* Форма */
-
-        #paymentCalendarForm {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 7 полей как 7 столбцов таблицы */
-            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-            margin-bottom: 20px;
-            align-items: start;
-        }
-   
-        #createAccrualForm {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-            margin-bottom: 20px;
-            align-items: start;
-        }
-
-        #createPayoutForm {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-            margin-bottom: 20px;
-            align-items: start;
-        }
-
-        #createOperAccForm {
-            display: grid;
-            grid-template-columns: repeat(11, 1fr); /* 7 полей как 7 столбцов таблицы */
-            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-            margin-bottom: 20px;
-            align-items: start;
-        }
-
-        #createPlannigForm {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); /* 6 полей как 7 столбцов таблицы */
-            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-            margin-bottom: 20px;
-            align-items: start;
-        }
-
-        #createEmployeeForm {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
-            gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-            margin-bottom: 20px;
-            align-items: start;
-        }
-
-        #paymentCalendarForm .form-group,
-        #createPlannigForm .form-group,
-        #createOperAccForm .form-group,
-        #createAccrualForm .form-group,
-        #createPayoutForm .form-group,
-        #createEmployeeForm .form-group {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            grid-row: span 2; /* Занимает 2 строки в grid */
-            height: auto;
-        }
-
-        #paymentCalendarForm label,
-        #createPlannigForm label,
-        #createOperAccForm label,
-        #createAccrualForm label,
-        #createPayoutForm label,
-        #createEmployeeForm label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 4px;
-            font-size: 16px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        #paymentCalendarForm input,
-        #createPlannigForm input,
-        #createOperAccForm input,
-        #createAccrualForm input,
-        #createPayoutForm input,
-        #createEmployeeForm input,
-        #paymentCalendarForm select,
-        #createPlannigForm select,
-        #createOperAccForm select,
-        #createAccrualForm select,
-        #createPayoutForm select,
-        #createEmployeeForm select,
-        #paymentCalendarForm textarea,
-        #createPlannigForm textarea
-        #createOperAccForm textarea,
-        #createAccrualForm textarea,
-        #createPayoutForm textarea, 
-        #createEmployeeForm textarea {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 8px;
-            font-size: 16px;
-            min-height: 36px;
-        }
-
-        label { display: block; margin-bottom: 5px; font-size: 16px;}
-        input, select, textarea { width: 80%; padding: 10px; font-size: 16px;}
-        button { padding: 10px 15px; background: #3386d8; color: white; border: none; cursor: pointer; font-size: 16px;}
-        button:hover { background: #0056b3; }
-        .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px 8px;
-            font-size: 16px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-    .nav { position: relative; display: inline-block; }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background: #f9f9f9;
-        min-width: 200px;
-        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-    .dropdown-content a {
-        color: black;
-        padding: 10px 16px;
-        text-decoration: none;
-        display: block;
-    }
-    .dropdown-content a:hover { background: #eee; }
-    .nav:hover .dropdown-content { display: block; }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
 
-<div class="header">
-    <a href="{% url 'home' %}">Главная</a>
+<body style="background: #EAE9F0;">
 
-    <div class="nav">
-    <a href="#">Зарплатная ведомость ▾</a>
-    <div class="dropdown-content">
-      <a href="{% url 'employees' %}">Сотрудники</a>
-      <a href="{% url 'accruals' %}">Начисления</a>
-      <a href="{% url 'payouts' %}">Выплаты</a>
-      <a href="{% url 'summary' %}">Сводная ведомость</a>
-    </div>
-  </div>
+    <header class="header">
+        <div class="header__top">
+            <h1 class="page-title">БУХГАЛТЕРСКАЯ КНИГА</h1>
+            <svg width="70" height="36" viewBox="0 0 70 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="70" height="36" rx="18" fill="#EAE9F0"/>
+            <rect x="4" y="4" width="28" height="28" rx="14" fill="white"/>
+            <path d="M18 22.3337C20.3932 22.3337 22.3333 20.3936 22.3333 18.0003C22.3333 15.6071 20.3932 13.667 18 13.667C15.6067 13.667 13.6666 15.6071 13.6666 18.0003C13.6666 20.3936 15.6067 22.3337 18 22.3337Z" stroke="#282533" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22.76 22.7597L22.6734 22.673M22.6734 13.3263L22.76 13.2397L22.6734 13.3263ZM13.24 22.7597L13.3267 22.673L13.24 22.7597ZM18 11.3863V11.333V11.3863ZM18 24.6663V24.613V24.6663ZM11.3867 17.9997H11.3334H11.3867ZM24.6667 17.9997H24.6134H24.6667ZM13.3267 13.3263L13.24 13.2397L13.3267 13.3263Z" stroke="#282533" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M45.3533 18.28C45.5933 21.7133 48.5066 24.5066 51.9933 24.66C54.4533 24.7666 56.6533 23.62 57.9733 21.8133C58.52 21.0733 58.2266 20.58 57.3133 20.7466C56.8666 20.8266 56.4066 20.86 55.9266 20.84C52.6666 20.7066 50 17.98 49.9866 14.76C49.98 13.8933 50.16 13.0733 50.4866 12.3266C50.8466 11.5 50.4133 11.1066 49.58 11.46C46.94 12.5733 45.1333 15.2333 45.3533 18.28Z" stroke="#282533" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
 
-    <div class="nav">
-    <a href="#">Внесение ▾</a>
-    <div class="dropdown-content">
-      <a href="{% url 'oper_acc' %}">Оперативный учет</a>
-      <a href="{% url 'planning' %}">Планирование</a>
-    </div>
-  </div>
+        <div class="header__bar">
 
-  <div class="nav">
-    <a href="#">Аналитика ▾</a>
-    <div class="dropdown-content">
-      <a href="{% url 'payment_calendar' %}">Платежный календарь</a>
-      <a href="{% url 'dept' %}">Задолженность</a>
-    </div>
-  </div>
+            <div class="nav">
+                <div class="nav__item-home">
+                    <svg class="nav__icon" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 12V10" stroke="#FF3C3F" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6.71334 1.88023L2.09334 5.58023C1.57334 5.99356 1.24 6.86689 1.35334 7.52023L2.24 12.8269C2.4 13.7736 3.30667 14.5402 4.26667 14.5402H11.7333C12.6867 14.5402 13.6 13.7669 13.76 12.8269L14.6467 7.52023C14.7533 6.86689 14.42 5.99356 13.9067 5.58023L9.28667 1.88689C8.57334 1.31356 7.42 1.31356 6.71334 1.88023Z" stroke="#FF3C3F" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <a class="nav__title-home" href="{% url 'home' %}">Главная</a>
+                </div>
 
-  <div class="nav">
-    <a href="#">Управление справочниками ▾</a>
-    <div class="dropdown-content">
-      <a href="{% url 'payroll_dir' %}">Для зарплатной ведомости</a>
-      <a href="{% url 'analytics_dir' %}">Для аналитики</a>
-    </div>
-  </div>
-</div>
+                <div class="nav__item-salary">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.16772 11.2399V12.5933C7.16772 13.7399 6.10105 14.6666 4.78771 14.6666C3.47438 14.6666 2.40104 13.7399 2.40104 12.5933V11.2399M7.16772 11.2399C7.16772 12.3799 6.10105 13.1999 4.78771 13.1999M7.16772 11.2399V9.40633C7.16772 8.833 6.90107 8.31299 6.4744 7.93966C6.04107 7.56632 5.44771 7.33301 4.78771 7.33301C3.46771 7.33301 2.40104 8.25966 2.40104 9.40633V11.2399M7.16772 11.2399C7.16772 12.3866 6.10105 13.1999 4.78771 13.1999M2.40104 11.2399C2.40104 12.3866 3.46771 13.1999 4.78771 13.1999M2.40104 11.2399C2.40104 12.3799 3.47438 13.1999 4.78771 13.1999M14 9.36633C14.3733 9.353 14.6667 9.05303 14.6667 8.68636V7.31299C14.6667 6.94632 14.3733 6.64635 14 6.63302M14 9.36633H12.6933C11.9733 9.36633 11.3134 8.83967 11.2534 8.11967C11.2134 7.69967 11.3733 7.30633 11.6533 7.033C11.9 6.77967 12.24 6.63302 12.6133 6.63302H14M14 9.36633L14 10.333C14 12.333 12.6667 13.6663 10.6667 13.6663H9M14 6.63302L14 5.66634C14 3.83967 12.8867 2.56633 11.1667 2.36633C11.0067 2.33967 10.84 2.33301 10.6667 2.33301H4.66666C4.48 2.33301 4.3 2.34634 4.12666 2.37301C2.42666 2.58634 1.33333 3.85301 1.33333 5.66634V6.99967M7.16666 9.40633C7.16666 9.73966 7.07333 10.0463 6.91333 10.313C6.51999 10.9597 5.71332 11.3663 4.77998 11.3663C3.84665 11.3663 3.03998 10.953 2.64664 10.313C2.48664 10.0463 2.39335 9.73966 2.39335 9.40633C2.39335 8.833 2.66 8.31966 3.08666 7.94633C3.52 7.56633 4.11331 7.33968 4.77331 7.33968C5.43331 7.33968 6.02666 7.573 6.46 7.94633C6.9 8.313 7.16666 8.833 7.16666 9.40633Z" stroke="#282533" stroke-opacity="0.8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
 
-    {% load static %}
+                    <a class="nav__title-salary" href="#">Зарплатная ведомость</a>
+                    <div class="dropdown-content">
+                        <div class="dropdown-item">
+                            <a class="" href="{% url 'employees' %}">Сотрудники</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'accruals' %}">Начисления</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'payouts' %}">Выплаты</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'summary' %}">Сводная ведомость</a>
+                        </div>
+                    </div>
+                </div>
 
-    
-    <div class="content">
+                <div class="nav__item-contribution">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.16668 6.66634H7.83334M6.00001 8.49967V4.83301M14.6667 3.99967V5.61301C14.6667 6.66634 14 7.33301 12.9467 7.33301H10.6667V2.67301C10.6667 1.93301 11.2733 1.33301 12.0133 1.33301C12.74 1.33967 13.4067 1.63301 13.8867 2.11301C14.3667 2.59967 14.6667 3.26634 14.6667 3.99967ZM1.33334 13.9997C1.33334 14.553 1.96001 14.8663 2.40001 14.533L3.54001 13.6797C3.80668 13.4797 4.18001 13.5063 4.42001 13.7463L5.52667 14.8597C5.78667 15.1197 6.21335 15.1197 6.47335 14.8597L7.59334 13.7397C7.82668 13.5063 8.20001 13.4797 8.46001 13.6797L9.60001 14.533C10.04 14.8597 10.6667 14.5463 10.6667 13.9997V2.66634C10.6667 1.93301 11.2667 1.33301 12 1.33301H4.00001C2.00001 1.33301 1.33334 2.52634 1.33334 3.99967V13.9997Z" stroke="#282533" stroke-opacity="0.7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+
+                    <a class="nav__title-contribution" href="#">Внесение</a>
+                    <div class="dropdown-content">
+                        <div class="dropdown-item">
+                            <a href="{% url 'oper_acc' %}">Оперативный учет</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'planning' %}">Планирование</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav__item-analytics">
+                    <a class="nav__title-analytics" href="#">Аналитика</a>
+                    <div class="dropdown-content">
+                        <div class="dropdown-item">
+                            <a href="{% url 'payment_calendar' %}">Платежный календарь</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'dept' %}">Задолженность</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'balances' %}">Остатки</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav__item-dict">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.54665 3.32634C2.27331 3.70634 1.33331 5.10634 1.33331 7.93301V9.95301C1.33331 13.3197 2.66665 14.6663 5.99998 14.6663H9.99998C13.3333 14.6663 14.6666 13.3197 14.6666 9.95301V7.93301C14.6666 5.05967 13.6933 3.65301 11.3333 3.30634M9.33331 1.33301C10.6666 1.33301 11.3333 2.00634 11.3333 3.35301V8.05301C11.3333 9.37967 10.3933 9.89301 9.23998 9.19967L8.35998 8.66634C8.15998 8.54634 7.83998 8.54634 7.63998 8.66634L6.75998 9.19967C5.60665 9.89301 4.66665 9.37967 4.66665 8.05301V3.35301C4.66665 2.00634 5.33331 1.33301 6.66665 1.33301H9.33331Z" stroke="#282533" stroke-opacity="0.7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <a class="nav__title-dict" href="#">Управление справочниками</a>
+                    <div class="dropdown-content">
+                        <div class="dropdown-item">
+                            <a href="{% url 'payroll_dir' %}">Для зарплатной ведомости</a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'analytics_dir' %}">Для аналитики</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="account-icon"></div>
+        </div>
+    </header>
+    <main class="content">
         {% block content %}{% endblock %}
-    </div>
+    </main>
 </body>
 </html>

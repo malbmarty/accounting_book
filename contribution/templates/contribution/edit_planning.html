@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Редактирование записи - Планирование{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_planning.css' %}">
+{% endblock %}
 
 {% block content %}
 {% load static %}

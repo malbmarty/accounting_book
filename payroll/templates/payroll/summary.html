@@ -1,5 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 {% load custom_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/summary.css' %}">
+{% endblock %}
+
 {% block content %}
 {% load static %}
 <h1>Сводка по зарплатам за {{ current_year }} год</h1>

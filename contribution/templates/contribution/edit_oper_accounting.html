@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Редактирование записи - Оперативный учет{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_oper_accounting.css' %}">
+{% endblock %}
 
 {% block content %}
 {% load static %}

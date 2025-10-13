@@ -8,3 +8,11 @@ class CounterpartyOpeningBalance(models.Model):
 
     class Meta:
         unique_together = ('counterparty', 'year')
+
+class ParticipantsOpeningBalance(models.Model):
+    participant = models.ForeignKey("analytics_dir.Participant", on_delete=models.CASCADE)
+    year = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        unique_together = ('participant', 'year')

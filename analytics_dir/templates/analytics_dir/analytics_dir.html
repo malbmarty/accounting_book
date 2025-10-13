@@ -3,9 +3,8 @@
 
 {% block title %}Управление справочником для аналитики{% endblock %}
 
-{% block extra_head %}
-{% load static %}
-<script src="{% static 'js/analytics_dir.js' %}"></script>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/analytics_dir.css' %}">
 {% endblock %}
 
 {% block content %}

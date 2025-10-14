@@ -41,15 +41,19 @@ body {
     background: #F6F5FA
 }
 
-/* .header__bar {
-    background: #fff;
-} */
+/* Подключаем шрифт */
+@font-face {
+    font-family: 'Bebas Neue';
+    src: url('../fonts/Bebas_Neue.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Рекомендуется для производительности */
+}
 
 .page-title {
     margin: 0;
-    width: auto;
+    width: 91;
     height: 26px;
-
     font-family: 'Bebas Neue';
     font-style: normal;
     font-weight: 700;
@@ -59,7 +63,6 @@ body {
 
     color: #282533;
     
-
 }
 
 .account-icon {

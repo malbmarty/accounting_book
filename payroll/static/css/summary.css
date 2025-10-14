@@ -1,142 +1,216 @@
-body { font-family: Arial, sans-serif; 
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    min-height: 100vh;
-}
-.content {
-    width: 100%;  /* растягиваем на всю ширину */
-    box-sizing: border-box;
-}
 
-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-th { background-color: #f2f2f2; }
-.filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
-.form-group { margin: 8px 0; }
-#editAccrualForm,
-#editOperAccForm,
-#editPlanningForm,
-#editEmployeeForm, 
-#editPayoutForm {
-    max-width: 600px;   /* ограничиваем ширину */
-    margin: 0 auto;     /* центрируем по горизонтали */
-}
-/* Форма */
-
-#paymentCalendarForm {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
-}
-
-#createAccrualForm {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
-}
-
-#createPayoutForm {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
-}
-
-#createOperAccForm {
-    display: grid;
-    grid-template-columns: repeat(11, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
-}
-
-#createPlannigForm {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 6 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
-}
-
-#createEmployeeForm {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
-}
-
-#paymentCalendarForm .form-group,
-#createPlannigForm .form-group,
-#createOperAccForm .form-group,
-#createAccrualForm .form-group,
-#createPayoutForm .form-group,
-#createEmployeeForm .form-group {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    grid-row: span 2; /* Занимает 2 строки в grid */
-    height: auto;
-}
-
-#paymentCalendarForm label,
-#createPlannigForm label,
-#createOperAccForm label,
-#createAccrualForm label,
-#createPayoutForm label,
-#createEmployeeForm label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 4px;
-    font-size: 16px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#paymentCalendarForm input,
-#createPlannigForm input,
-#createOperAccForm input,
-#createAccrualForm input,
-#createPayoutForm input,
-#createEmployeeForm input,
-#paymentCalendarForm select,
-#createPlannigForm select,
-#createOperAccForm select,
-#createAccrualForm select,
-#createPayoutForm select,
-#createEmployeeForm select,
-#paymentCalendarForm textarea,
-#createPlannigForm textarea
-#createOperAccForm textarea,
-#createAccrualForm textarea,
-#createPayoutForm textarea, 
-#createEmployeeForm textarea {
+.table-container {
     width: 100%;
-    box-sizing: border-box;
-    padding: 8px;
-    font-size: 16px;
-    min-height: 36px;
+    overflow-x: auto; /* Горизонтальный скролл для всей таблицы */
+    padding-bottom: 8px; /* Место для скроллбара */
 }
 
-label { display: block; margin-bottom: 5px; font-size: 16px;}
-input, select, textarea { width: 80%; padding: 10px; font-size: 16px;}
-button { padding: 10px 15px; background: #3386d8; color: white; border: none; cursor: pointer; font-size: 16px;}
-button:hover { background: #0056b3; }
-.icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 8px;
-    font-size: 16px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+/* Стилизация скроллбара для ВСЕЙ таблицы */
+.table-container::-webkit-scrollbar {
+    height: 2px;
 }
+
+.table-container::-webkit-scrollbar-track {
+    background: #DFDEE5;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(40, 37, 51, 0.14);
+    border-radius: 3px;
+}
+
+/* Для Firefox */
+/* .table-container {
+    scrollbar-height: 2px;
+    scrollbar-color: rgba(40, 37, 51, 0.14) #DFDEE5;
+} */
+
+
+.summary-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0px;
+
+    width: 100%;
+}
+
+.summary-head {
+    margin: 0;
+    white-space: nowrap;
+    height: 35px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 110%;
+    /* or 35px */
+
+    color: #282533;
+}
+
+.summary-year {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px 10px 14px;
+    box-sizing: border-box;
+    width: 220px;
+    height: 40px;
+    background: #F6F5FA;
+    border-radius: 10px;
+    border: none;
+    
+    /* Стили текста */
+    font-family: 'Mulish', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 140%;
+    color: rgba(40, 37, 51, 0.9);
+    
+    /* Кастомная стрелка */
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M3.13263 5.02888C3.04707 4.92961 3 4.80291 3 4.67185C3 4.36983 3.24483 4.125 3.54685 4.125H8.45315C8.75517 4.125 9 4.36983 9 4.67185C9 4.80291 8.95293 4.92961 8.86737 5.02888L6.5994 7.66017C6.45692 7.82546 6.24952 7.92051 6.0313 7.92051H5.9687C5.75048 7.92051 5.54308 7.82546 5.4006 7.66017L3.13263 5.02888Z' fill='%23282533' fill-opacity='0.7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    cursor: pointer;
+}
+
+/* Убрать стандартную обводку при фокусе */
+.summary-year:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(40, 37, 51, 0.1);
+}
+
+.table-head {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 56px;
+    gap: 10px;
+}
+
+.head-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+}
+
+.head-period {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    isolation: isolate;
+}
+
+.head-column {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+
+    background: #F6F5FA;
+    border: 1px solid #DFDEE5;
+}
+
+.head-column--emp { 
+    width: 362px; 
+    height: 56px; 
+    border-radius: 12px 0px 0px 12px; 
+    padding: 20px 14px;
+    box-sizing: border-box;
+}
+.head-column--incoming-balance { 
+    width: 200px; 
+    height: 56px; 
+    border-radius: 0px 12px 12px 0px; 
+    padding: 20px 14px;
+    box-sizing: border-box;
+}
+.head-column--month { 
+    width: 330px; 
+    height: 28px; 
+    border-radius: 12px 12px 0px 0px; 
+    padding: 6px 14px;
+    box-sizing: border-box;
+}
+.head-column--finance { 
+    width: 330px;  
+    height: 28px; 
+    border-radius: 0px 0px 12px 12px; 
+    /* padding: 6px 14px;
+    box-sizing: border-box; */
+    border: 0px solid #DFDEE5;
+}
+
+.finance-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 14px;
+    box-sizing: border-box;
+    gap: 10px;
+
+    width: 110px;
+    height: 28px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+
+
+}
+
+.finance-head--accrued {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 0px 12px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.finance-head--paid {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 0px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.finance-head--balance {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 12px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.head-title {
+    margin: 0;
+    white-space: nowrap;
+    height: 16px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+
+

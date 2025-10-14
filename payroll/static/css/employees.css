@@ -25,6 +25,7 @@
     margin: 0;
 }
 
+
 .table-active {
     display: flex;
     flex-direction: row;
@@ -35,7 +36,6 @@
     width: 604px;
     height: 40px;
 }
-
 
 
 .sort {
@@ -49,6 +49,18 @@
     height: 40px;
     background: #F6F5FA;
     border-radius: 10px;
+
+    /* Title Text */
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+
+    color: rgba(40, 37, 51, 0.9);
+
 }
 
 
@@ -63,6 +75,15 @@
     height: 40px;
     background: #F6F5FA;
     border-radius: 10px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+
+    color: rgba(40, 37, 51, 0.9);
 
 }
 

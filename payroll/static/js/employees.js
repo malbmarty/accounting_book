@@ -217,13 +217,26 @@ function editEmployee(id) {
     .then(employee => {
         // Заполняем форму данными сотрудника
         document.querySelector('#editEmployeeForm input[name="full_name"]').value = employee.full_name || '';
-        document.querySelector('#editEmployeeForm select[name="position"]').value = employee.position || '';
-        document.querySelector('#editEmployeeForm select[name="department"]').value = employee.department || '';
-        document.querySelector('#editEmployeeForm select[name="status"]').value = employee.status || '';
-        document.querySelector('#editEmployeeForm select[name="employee_type"]').value = employee.employee_type || '';
         document.querySelector('#editEmployeeForm textarea[name="bank_name"]').value = employee.bank_name || '';
         document.querySelector('#editEmployeeForm textarea[name="card_number"]').value = employee.card_number || '';
         
+
+        // Обновляем кастомные dropdown'ы в форме редактирования
+        const updateDropdown = (name, value, text) => {
+          const dropdown = document.querySelector(`#editEmployeeForm .dropdown[data-name="${name}"]`);
+          if (dropdown) {
+            dropdown.querySelector('input[type="hidden"]').value = value;
+            dropdown.querySelector('.dropdown-toggle').textContent = text;
+          }
+        };
+
+        // Заполняем dropdown'ы
+        updateDropdown('position', employee.position, employee.position_name);
+        updateDropdown('department', employee.department, employee.department_name);
+        updateDropdown('status', employee.status, employee.status_name);
+        updateDropdown('employee_type', employee.employee_type, employee.employee_type_name);
+
+
         // Показываем модальное окно
         const modal = document.getElementById('editEmployeeModal');
         modal.style.display = 'flex';
@@ -235,6 +248,7 @@ function editEmployee(id) {
         alert('Не удалось загрузить данные сотрудника');
     });
 }
+
 
 // Обработчик формы редактирования
 document.getElementById('editEmployeeForm').addEventListener('submit', function(e) {
@@ -340,10 +354,51 @@ function setupModalHandlers() {
     });
 }
 
+// Универсальная логика кастомных dropdown'ов
+function setupDropdowns() {
+  document.querySelectorAll('.dropdown').forEach(dropdown => {
+    const toggle = dropdown.querySelector('.dropdown-toggle');
+    const menu = dropdown.querySelector('.dropdown-menu');
+    const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+    const items = dropdown.querySelectorAll('.dropdown-item');
+
+    // Открытие/закрытие меню
+    toggle.addEventListener('click', () => {
+      menu.classList.toggle('open');
+      toggle.classList.toggle('active');
+    });
+
+    // Выбор элемента
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        const value = item.dataset.value;
+        const text = item.textContent.trim();
+
+        hiddenInput.value = value;
+        toggle.textContent = text;
+
+        // Закрываем меню
+        menu.classList.remove('open');
+        toggle.classList.remove('active');
+      });
+    });
+
+    // Закрытие при клике вне
+    document.addEventListener('click', e => {
+      if (!dropdown.contains(e.target)) {
+        menu.classList.remove('open');
+        toggle.classList.remove('active');
+      }
+    });
+  });
+}
+
+
 // Загружаем данные при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     loadEmployees();
     setupModalHandlers();
+    setupDropdowns(); // <-- вот это добавляем
     
     // Открытие модального окна создания
     document.querySelector('.new-record-button').addEventListener('click', function() {

@@ -16,6 +16,7 @@
         <select class="sort" name="sort" required>
                 <option value="">Сортировать:</option>
         </select>
+        
         <select class="filter" name="filter" required>
                 <option value="">Все категории:</option>
         </select>
@@ -49,49 +50,62 @@
             {% csrf_token %}
 
             <div class="form-group form-group--fio">
-                <label class="create-label">ФИО:</label>
-                <input class="create-input" type="text" name="full_name" value="" required placeholder="ФИО сотрудника">
+                <label class="form-label">ФИО:</label>
+                <input class="form-input" type="text" name="full_name" value="" required placeholder="ФИО сотрудника">
             </div>
 
             <div class="form-group">
-                <label class="create-label">Должность:</label>
-                <select class="create-input" name="position" required>
-                    <option class="option-text" value="">Выберите должность</option>
-                    {% for position in positions %}
-                    <option class="option-text" value="{{ position.id }}" >{{ position.name }}</option>
-                    {% endfor %}
-                </select>
-                <label class="create-label">Отдел:</label>
-                <select class="create-input" name="department" required>
-                    <option class="option-text" value="">Выберите отдел</option>
-                    {% for department in departments %}
-                    <option class="option-text" value="{{ department.id }}" >{{ department.name }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label">Должность:</label>
+                <div class="dropdown" data-name="position">
+                <div class="dropdown-toggle form-input">Выберите должность</div>
+                    <div class="dropdown-menu">
+                        {% for position in positions %}
+                            <div class="dropdown-item" data-value="{{ position.id }}">{{ position.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="position" value="">
+                </div>
+                
+                <label class="form-label">Отдел:</label>
+                <div class="dropdown" data-name="department">
+                <div class="dropdown-toggle form-input">Выберите отдел</div>
+                    <div class="dropdown-menu">
+                        {% for department in departments %}
+                            <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="department" value="">
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="create-label">Статус:</label>
-                <select class="create-input" name="status" required>
-                    <option class="option-text" value="">Выберите статус</option>
-                    {% for status in statuses %}
-                    <option class="option-text" value="{{ status.id }}" >{{ status.name }}</option>
-                    {% endfor %}
-                </select>
-                <label class="create-label">Тип:</label>
-                <select class="create-input" name="employee_type" required>
-                    <option class="option-text" value="">Выберите тип</option>
-                    {% for employee_type in employee_types %}
-                    <option class="option-text" value="{{ employee_type.id }}" >{{ employee_type.name }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label">Статус:</label>
+                <div class="dropdown" data-name="status">
+                <div class="dropdown-toggle form-input">Выберите статус</div>
+                    <div class="dropdown-menu">
+                        {% for status in statuses %}
+                            <div class="dropdown-item" data-value="{{ status.id }}">{{ status.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="status" value="">
+                </div>
+                <label class="form-label">Тип:</label>
+                <div class="dropdown" data-name="employee_type">
+                <div class="dropdown-toggle form-input">Выберите тип сотрудника</div>
+                    <div class="dropdown-menu">
+                        {% for employee_type in employee_types %}
+                            <div class="dropdown-item" data-value="{{ employee_type.id }}">{{ employee_type.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="employee_type" value="">
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="create-label">Банк:</label>
-                <textarea class="create-input" name="bank_name" rows="1" placeholder="Название банка сотрудника"></textarea>
-                <label class="create-label">Номер карты:</label>
-                <textarea class="create-input" name="card_number" rows="1" placeholder="Номер карты сотрудника"></textarea>
+                <label class="form-label">Банк:</label>
+                <textarea class="form-input" name="bank_name" rows="1" placeholder="Название банка сотрудника"></textarea>
+                <label class="form-label">Номер карты:</label>
+                <textarea class="form-input" name="card_number" rows="1" placeholder="Номер карты сотрудника"></textarea>
             </div>
 
             <div class="create-active">
@@ -129,49 +143,62 @@
             {% csrf_token %}
 
             <div class="form-group form-group--fio">
-                <label class="create-label">ФИО:</label>
-                <input class="create-input" type="text" name="full_name" value="{{ employee.full_name }}" required placeholder="ФИО сотрудника">
+                <label class="form-label">ФИО:</label>
+                <input class="form-input" type="text" name="full_name" value="{{ employee.full_name }}" required placeholder="ФИО сотрудника">
             </div>
 
             <div class="form-group">
-                <label class="create-label">Должность:</label>
-                <select class="create-input" name="position" required>
-                    <option class="option-text" value="">Выберите должность</option>
-                    {% for position in positions %}
-                    <option class="option-text" value="{{ position.id }}" {% if position.id == employee.position %}selected{% endif %}>{{ position.name }}</option>
-                    {% endfor %}
-                </select>
-                <label class="create-label">Отдел:</label>
-                <select class="create-input" name="department" required>
-                    <option class="option-text" value="">Выберите отдел</option>
-                    {% for department in departments %}
-                    <option class="option-text" value="{{ department.id }}" {% if department.id == employee.department %}selected{% endif %}>{{ department.name }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label">Должность:</label>
+                <div class="dropdown" data-name="position">
+                <div class="dropdown-toggle form-input">Выберите должность</div>
+                    <div class="dropdown-menu">
+                        {% for position in positions %}
+                            <div class="dropdown-item" data-value="{{ position.id }}">{{ position.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="position" value="">
+                </div>
+                
+                <label class="form-label">Отдел:</label>
+                <div class="dropdown" data-name="department">
+                <div class="dropdown-toggle form-input">Выберите отдел</div>
+                    <div class="dropdown-menu">
+                        {% for department in departments %}
+                            <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="department" value="">
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="create-label">Статус:</label>
-                <select class="create-input" name="status" required>
-                    <option class="option-text" value="">Выберите статус</option>
-                    {% for status in statuses %}
-                    <option class="option-text" value="{{ status.id }}" {% if status.id == employee.status %}selected{% endif %}>{{ status.name }}</option>
-                    {% endfor %}
-                </select>
-                <label class="create-label">Тип:</label>
-                <select class="create-input" name="employee_type" required>
-                    <option class="option-text" value="">Выберите тип</option>
-                    {% for employee_type in employee_types %}
-                    <option class="option-text" value="{{ employee_type.id }}" {% if employee_type.id == employee.employee_type %}selected{% endif %}>{{ employee_type.name }}</option>
-                    {% endfor %}
-                </select>
+                <label class="form-label">Статус:</label>
+                <div class="dropdown" data-name="status">
+                <div class="dropdown-toggle form-input">Выберите статус</div>
+                    <div class="dropdown-menu">
+                        {% for status in statuses %}
+                            <div class="dropdown-item" data-value="{{ status.id }}">{{ status.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="status" value="">
+                </div>
+                <label class="form-label">Тип:</label>
+                <div class="dropdown" data-name="employee_type">
+                <div class="dropdown-toggle form-input">Выберите тип сотрудника</div>
+                    <div class="dropdown-menu">
+                        {% for employee_type in employee_types %}
+                            <div class="dropdown-item" data-value="{{ employee_type.id }}">{{ employee_type.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="employee_type" value="">
+                </div>
             </div>
 
             <div class="form-group">
-                <label class="create-label">Банк:</label>
-                <textarea class="create-input" name="bank_name" rows="1" placeholder="Название банка сотрудника">{{ employee.bank }}</textarea>
-                <label class="create-label">Номер карты:</label>
-                <textarea class="create-input" name="card_number" rows="1" placeholder="Номер карты сотрудника">{{ employee.card }}</textarea>
+                <label class="form-label">Банк:</label>
+                <textarea class="form-input" name="bank_name" rows="1" placeholder="Название банка сотрудника">{{ employee.bank }}</textarea>
+                <label class="form-label">Номер карты:</label>
+                <textarea class="form-input" name="card_number" rows="1" placeholder="Номер карты сотрудника">{{ employee.card }}</textarea>
             </div>
 
             <div class="create-active">

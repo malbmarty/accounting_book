@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.incoming-balance').forEach(input => {
+    // === 1. Обработчики для input-баланса ===
+    document.querySelectorAll('.input-balance').forEach(input => {
         input.addEventListener('change', function() {
             const employeeId = this.dataset.employee;
             const amount = this.value;
-            const year = parseInt(this.dataset.year);  // добавим data-year в input
+            const year = parseInt(this.dataset.year); // data-year в input
 
             fetch("/payroll/summary/", {
                 method: "POST",
@@ -11,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie('csrftoken')
                 },
-
                 body: JSON.stringify({
                     employee_id: employeeId,
                     amount: amount,
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
             })
             .then(resp => resp.json())
             .then(data => {
-                if(data.status === "ok"){
+                if (data.status === "ok") {
                     window.location.reload(); // обновляем страницу после сохранения
                 } else {
                     alert("Ошибка: " + (data.message || "неизвестная ошибка"));
@@ -29,6 +29,40 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(err => console.error("Ошибка:", err));
         });
     });
+
+
+    // === 2. Dropdown для выбора года ===
+    const dropdown = document.querySelector('.dropdown');
+    if (dropdown) {  // на случай, если блок отсутствует на странице
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        const items = dropdown.querySelectorAll('.dropdown-item');
+        const hiddenInput = document.getElementById('year-input');
+        const form = dropdown.closest('form');
+
+        // показать/скрыть меню
+        toggle.addEventListener('click', () => {
+            menu.classList.toggle('open');
+        });
+
+        // выбор года
+        items.forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.getAttribute('data-value');
+                hiddenInput.value = value;
+                toggle.textContent = `Год: ${value}`;
+                menu.classList.remove('open');
+                form.submit(); // отправка формы
+            });
+        });
+
+        // закрытие по клику вне
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    }
 });
 
 /**

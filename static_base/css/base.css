@@ -11,6 +11,8 @@ body {
     width: 100%;
     padding: 0 100px;
     box-sizing: border-box;
+    position: static; /* или relative, или удалить position вообще */
+    /* Убираем position: fixed */
 }
 
 .header {

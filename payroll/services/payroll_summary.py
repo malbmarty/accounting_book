@@ -58,19 +58,28 @@ class PayrollSummaryService:
                                             'balance': Decimal('0.00')}),
             'year_total': {'accrued': Decimal('0.00'),
                            'paid': Decimal('0.00'),
-                           'balance': Decimal('0.00')}
+                           'balance': Decimal('0.00')},
+            'incoming_balance': Decimal('0.00') 
         })
+
+        # Добавляем расчет суммы входящих остатков
+        total_incoming_balance = Decimal('0.00')
 
         for emp in employees:
             emp_data = self.build_employee_summary(emp, accruals, payouts, balances, dept_totals)
             dept_name = emp.department.name if emp.department else 'Без отдела'
             dept_data[dept_name].append(emp_data)
 
+            # Суммируем входящие остатки по отделу и общей сумме
+            dept_totals[dept_name]['incoming_balance'] += emp_data['incoming_balance']
+            total_incoming_balance += emp_data['incoming_balance']
+        
         company_totals = self.aggregate_company_totals(dept_totals)
+        company_totals['total_incoming_balance'] = total_incoming_balance
 
         return {
             'department_data': dict(dept_data),
-            'department_totals': {k: {'monthly': dict(v['monthly']), 'year_total': v['year_total']}
+            'department_totals': {k: {'monthly': dict(v['monthly']), 'year_total': v['year_total'], 'incoming_balance': v['incoming_balance']}
                                   for k, v in dept_totals.items()},
             'company_totals': company_totals
         }

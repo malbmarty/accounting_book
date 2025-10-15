@@ -87,6 +87,76 @@
 
 }
 
+.dropdown {
+    position: relative;
+    width: 400px;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.dropdown-toggle {
+    background: #F6F5FA;
+    border-radius: 10px;
+    padding: 10px 12px 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 140%;
+    color: rgba(40, 37, 51, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.dropdown-toggle::after {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M3.13263 5.02888C3.04707 4.92961 3 4.80291 3 4.67185C3 4.36983 3.24483 4.125 3.54685 4.125H8.45315C8.75517 4.125 9 4.36983 9 4.67185C9 4.80291 8.95293 4.92961 8.86737 5.02888L6.5994 7.66017C6.45692 7.82546 6.24952 7.92051 6.0313 7.92051H5.9687C5.75048 7.92051 5.54308 7.82546 5.4006 7.66017L3.13263 5.02888Z' fill='%23282533' fill-opacity='0.7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: #F6F5FA;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(40, 37, 51, 0.1);
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.dropdown-menu.open {
+    display: flex;
+}
+
+.dropdown-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: rgba(40, 37, 51, 0.05);
+}
+
+.dropdown-item.active {
+    background: rgba(40, 37, 51, 0.08);
+    font-weight: 400;
+}
 
 .new-record-button {
     display: flex;
@@ -440,7 +510,7 @@
     height: 57px;
 }
 
-.create-label {
+.form-label {
     margin: 0;
     white-space: nowrap;
     height: 15px;
@@ -455,7 +525,7 @@
     color: #282533;
 }
 
-.create-input {
+.form-input {
 
     box-sizing: border-box;
     display: flex;

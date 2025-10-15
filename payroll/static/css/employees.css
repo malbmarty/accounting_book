@@ -1,3 +1,32 @@
+.table-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    isolation: isolate;
+    width: 100%;
+    max-height: 500px;
+    border-radius: 12px;
+    overflow-x: auto; 
+    overflow-y: auto; 
+}
+
+/* Стилизация скроллбара для контейнера */
+.table-container::-webkit-scrollbar {
+    width: 2px; /* Для вертикального скролла */
+    height: 2px; /* Для горизонтального скролла */
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #DFDEE5;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(40, 37, 51, 0.14);
+    border-radius: 3px;
+    
+}
 
 .table-top {
     display: flex;
@@ -204,19 +233,6 @@
 
 }
 
-.table-container {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    padding: 0px;
-    isolation: isolate;
-    width: 100%;
-    height: 400px;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-
 
 .table-column {
     display: flex;
@@ -226,7 +242,6 @@
     flex-grow: 0;         /* колонка не растёт сверх своей ширины */
     padding: 0px;
     isolation: isolate;
-    height: 400px;
 }
 
 .table-column--fio { width: 18%; flex: 0 0 18%; }

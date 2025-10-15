@@ -65,7 +65,6 @@ class EmployeesPageView(TemplateView):
             {'field': 'bank_name', 'display': 'По банку'},
         ]
         context['department_colors'] = get_all_departments_colors(departments)
-        print(context['department_colors'])
 
         return context
 
@@ -78,38 +77,27 @@ class AccrualsPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        departments = Department.objects.all()
         context['employees'] = Employee.objects.all()
-        context['departments'] = Department.objects.all()
+        context['departments'] = departments
         context['projects'] = Project.objects.all()
         context['statuses'] = Status.objects.all()
         context['employee_types'] = EmployeeType.objects.all()
+        context['column_names'] = [
+            {'field': 'date', 'display': 'По дате'},
+            {'field': 'project__name', 'display': 'По проекту'},
+            {'field': 'department__name', 'display': 'По отделу'},
+            {'field': 'employee__name', 'display': 'По сотруднику'},
+            {'field': 'hourly_pay', 'display': 'По почасовой'},
+            {'field': 'salary', 'display': 'По окладу'},
+            {'field': 'addition_pay', 'display': 'По доплатам'},
+            {'field': 'deduction', 'display': 'По возвратам'},
+        ]
+        context['department_colors'] = get_all_departments_colors(departments)
 
         return context
     
-# Страница с формой изменения записи в таблице Начисления
-class EditAccrualPageView(TemplateView):
-    template_name = 'payroll/edit_accrual.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        accrual_id = self.kwargs.get('pk')
-        
-        # Получаем транзакцию или возвращаем 404
-        accrual = get_object_or_404(Accrual, id=accrual_id)
-        
-        # Сериализуем данные транзакции
-        serializer = AccrualSerializer(accrual)
-        
-        # Добавляем данные в контекст
-        context['accrual'] = serializer.data
-        context['date'] = accrual.date.strftime('%Y-%m-%d')
-        context['employees'] = Employee.objects.all()
-        context['departments'] = Department.objects.all()
-        context['projects'] = Project.objects.all()
-        context['statuses'] = Status.objects.all()
-        context['employee_types'] = EmployeeType.objects.all()
-
-        return context
     
 # Страница с таблицей Выплаты
 class PayoutsPageView(TemplateView):
@@ -119,39 +107,27 @@ class PayoutsPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        departments = Department.objects.all()
         # Добавляем данные в контекст
         context['employees'] = Employee.objects.all()
-        context['departments'] = Department.objects.all()
+        context['departments'] = departments
         context['projects'] = Project.objects.all()
         context['participants'] = Participant.objects.all()
         context['payment_types'] = PaymentType.objects.all()
+        context['column_names'] = [
+            {'field': 'date', 'display': 'По дате'},
+            {'field': 'project__name', 'display': 'По проекту'},
+            {'field': 'payer__name', 'display': 'По плательщику'},
+            {'field': 'recipient__name', 'display': 'По получателю'},
+            {'field': 'department__name', 'display': 'По отделу'},
+            {'field': 'employee__name', 'display': 'По сотруднику'},
+            {'field': 'payment_type__name', 'display': 'По типу выплаты'},
+            {'field': 'amount', 'display': 'По сумме выплаты'},
+        ]
+        context['department_colors'] = get_all_departments_colors(departments)
 
         return context
     
-# Страница с формой изменения записи в таблице ВЫПЛАТЫ
-class EditPayoutPageView(TemplateView):
-    template_name = 'payroll/edit_payout.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        payout_id = self.kwargs.get('pk')
-        
-        # Получаем транзакцию или возвращаем 404
-        payout = get_object_or_404(Payout, id=payout_id)
-        
-        # Сериализуем данные транзакции
-        serializer = PayoutSerializer(payout)
-        
-        # Добавляем данные в контекст
-        context['payout'] = serializer.data
-        context['date'] = payout.date.strftime('%Y-%m-%d')
-        context['employees'] = Employee.objects.all()
-        context['departments'] = Department.objects.all()
-        context['projects'] = Project.objects.all()
-        context['participants'] = Participant.objects.all()
-        context['payment_types'] = PaymentType.objects.all()
-
-        return context
     
 class SummaryPageView(TemplateView):
     template_name = 'payroll/summary.html'
@@ -232,6 +208,16 @@ class AccrualViewSet(viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering = ['-date']
+    ordering_fields = [
+        'date', 
+        'project__name', 
+        'department__name', 
+        'employee__name',
+        'hourly_pay',
+        'salary',
+        'addition_pay',
+        'deduction'
+    ]
 
     def get_queryset(self):
         # подзапрос для суммы по комбинации date+department+employee
@@ -251,6 +237,16 @@ class PayoutViewSet(viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     ordering = ['-date']
+    ordering_fields = [
+        'date', 
+        'project__name',
+        'payer__name',
+        'recipient__name', 
+        'department__name', 
+        'employee__name',
+        'payment_type__name'
+        'amount',
+    ]
 
     def get_queryset(self):
         # подзапрос для суммы начислений за месяц

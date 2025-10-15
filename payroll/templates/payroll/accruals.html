@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_tags %}
 
 {% block title %}Начисления{% endblock %}
 
@@ -9,101 +10,421 @@
 
 {% block content %}
 {% load static %}
-<h2>Начислено</h2>
-
-<h3>Создание новой записи</h3>
-
-<form id="createAccrualForm">
-    {% csrf_token %}
-
-    <div class="form-group">
-        <label>Дата начисления:</label>
-        <input type="date" name="date" id = "currentDate" required>
-    </div>
-
-    <div class="form-group">
-        <label>Проект:</label>
-        <select name="project" required>
-            <option value="">Выберите проект</option>
-            {% for project in projects %}
-            <option value="{{ project.id }}" >{{ project.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-
-    <div class="form-group">
-        <label>Отдел:</label>
-        <select name="department" id="department" onchange="loadEmployees()" required>
-            <option value="">Выберите отдел</option>
-            {% for department in departments %}
-            <option value="{{ department.id }}" >{{ department.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Сотрудник:</label>
-        <select name="employee" id="employee" required>
-            <option value="">Сначала выберите отдел</option>
-        </select>
-    </div>
-
-
-    <div class="form-group">
-        <label>Почасовая:</label>
-        <input type="number" name="hourly_pay" step="0.01">
-    </div>
-
-    <div class="form-group">
-        <label>Оклад:</label>
-        <input type="number" name="salary" step="0.01">
-    </div>
-
-    <div class="form-group">
-        <label>Премия/доплаты:</label>
-        <input type="number" name="addition_pay" step="0.01">
-    </div>
-
-    <div class="form-group">
-        <label>Возвраты/вычеты:</label>
-        <input type="number" name="deduction" step="0.01">
-    </div>
-
-    <div class="form-group">
-        <label>Комментарий:</label>
-        <textarea name="comment" rows="3"></textarea>
-    </div>
-
-    <button type="submit">Внести</button>
-
-</form>
-
-
-
-
-<div id="accrualsTable">
-    <table>
-        <thead>
-            <tr>
-                <th>Дата начисления</th>
-                <th>Проект</th>
-                <th>Отдел</th>
-                <th>Сотрудник</th>
-                <th>Почасовая</th>
-                <th>Оклад</th>
-                <th>Премия/доплаты</th>
-                <th>Возвраты/вычеты</th>
-                <th>Комментарий</th>
-                <th>Почасовая за месяц</th>
-                <th>Итого к выдаче</th>
-                <th>Месяц</th>
-            </tr>
-        </thead>
-        <tbody id="accrualsBody">
-            <!-- Данные будут загружены через JavaScript -->
-        </tbody>
-    </table>
+<div id="departmentColorsData" 
+     data-colors='{{ department_colors|json_serialize }}'
+     style="display: none;">
 </div>
+<div class="table-top">
+    <h2 class="table-title">Начислено</h2>
+    <div class="table-active">
+        <!-- <select class="sort" name="sort" required>
+                <option value="">Сортировать:</option>
+        </select> -->
+        <div class="dropdown" data-name="sort">
+        <div class="dropdown-toggle select-sort">Сортировать:</div>
+            <div class="dropdown-menu">
+                {% for column_name in column_names %}
+                <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="asc">
+                    {{ column_name.display }} ↑
+                </div>
+                <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="desc">
+                    {{ column_name.display }} ↓
+                </div>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="column_name" value="">
+             <input type="hidden" name="sort_direction" value="">
+        </div>
+        
+        <!-- <select class="filter" name="filter" required>
+                <option value="">Все категории:</option>
+        </select> -->
+        <div class="dropdown" data-name="filter">
+        <div class="dropdown-toggle select-filter">Все категории: </div>
+            <div class="dropdown-menu">
+                <!-- {% for column_name in column_names %}
+                    <div class="dropdown-item" data-value="{{ column_name }}">{{ column_name }}</div>
+                {% endfor %} -->
+            </div>
+            <input type="hidden" name="filter" value="">
+        </div>
+
+        <button class="new-record-button" type="submit">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <span class="button-text">Новая запись</span>
+        </button>
+    </div>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="createAccrualModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление записи</h2>
+            <h3 class="create-instruction">Внесите информацию о начислении</h3>
+        </div>
+
+        <form id="createAccrualForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Дата начисления:</label>
+                <input class="form-input" type="date" name="date" id = "currentDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Проект:</label>
+                <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle form-input">Выберите проект</div>
+                    <div class="dropdown-menu">
+                        {% for project in projects %}
+                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="project" value="">
+                </div>
+                
+                <label class="form-label">Отдел:</label>
+                <div class="dropdown" data-name="department">
+                <div class="dropdown-toggle form-input">Выберите отдел</div>
+                    <div class="dropdown-menu">
+                        {% for department in departments %}
+                            <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="department" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Сотрудник:</label>
+                <div class="dropdown" data-name="employee">
+                <div class="dropdown-toggle form-input">Выберите сотрудника</div>
+                    <div class="dropdown-menu">
+                        {% for employee in employees %}
+                            <div class="dropdown-item" data-value="{{ employee.id }}">{{ employee.full_name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="employee" value="">
+                </div>
+            </div>   
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Почасовая:</label>
+                    <input class="form-input" type="number" name="hourly_pay" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Оклад:</label>
+                    <input class="form-input" type="number" name="salary" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Премия/доплаты:</label>
+                    <input class="form-input" type="number" name="addition_pay" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Возвраты/вычеты:</label>
+                    <input class="form-input" type="number" name="deduction" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий:</label>
+                <textarea class="form-input" name="comment" rows="3"></textarea>
+            </div>
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Изменить запись</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="editAccrualModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Редактирование записи</h2>
+            <h3 class="create-instruction">Внесите изменения в информацию о начислении</h3>
+        </div>
+
+        <form id="editAccrualForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Дата начисления:</label>
+                <input class="form-input" type="date" name="date" id = "currentDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Проект:</label>
+                <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle form-input">Выберите проект</div>
+                    <div class="dropdown-menu">
+                        {% for project in projects %}
+                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="project" value="">
+                </div>
+                
+                <label class="form-label">Отдел:</label>
+                <div class="dropdown" data-name="department">
+                <div class="dropdown-toggle form-input">Выберите отдел</div>
+                    <div class="dropdown-menu">
+                        {% for department in departments %}
+                            <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="department" value="">
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label class="form-label">Сотрудник:</label>
+                <div class="dropdown" data-name="employee">
+                <div class="dropdown-toggle form-input">Выберите сотрудника</div>
+                    <div class="dropdown-menu">
+                        {% for employee in employees %}
+                            <div class="dropdown-item" data-value="{{ employee.id }}">{{ employee.full_name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="employee" value="">
+                </div>
+            </div>   
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Почасовая:</label>
+                    <input class="form-input" type="number" name="hourly_pay" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Оклад:</label>
+                    <input class="form-input" type="number" name="salary" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Премия/доплаты:</label>
+                    <input class="form-input" type="number" name="addition_pay" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Возвраты/вычеты:</label>
+                    <input class="form-input" type="number" name="deduction" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий:</label>
+                <textarea class="form-input" name="comment" rows="3"></textarea>
+            </div>
+
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить запись</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal-delete">
+    <div class="modal-delete-content">
+        <h2 class="delete-title">Удалить запись?</h2>
+        <p class="delete-instruction">Это действие полностью удалит запись выбранного начисления из системы.</p>
+    </div>
+    <div class="delete-active">
+        <button class="btn-cancel" id="cancelDelete">
+             <span class="btn-cancel-text">Нет, оставить</span>
+        </button>
+        <button class="button-delete" id="confirmDelete">
+            <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 4.98366C15.225 4.70866 12.4333 4.56699 9.65 4.56699C8 4.56699 6.35 4.65033 4.7 4.81699L3 4.98366M7.58333 4.14199L7.76667 3.05033C7.9 2.25866 8 1.66699 9.40833 1.66699H11.5917C13 1.66699 13.1083 2.29199 13.2333 3.05866L13.4167 4.14199M16.2083 7.61699L15.6667 16.0087C15.575 17.317 15.5 18.3337 13.175 18.3337H7.825C5.5 18.3337 5.425 17.317 5.33333 16.0087L4.79167 7.61699M9.10833 13.7503H11.8833M8.41667 10.417H12.5833" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="button-delete-text">Да, удалить</span>
+        </button>
+    </div>
+</div>
+
+<div id="accrualsTable" class="table-container">
+    
+    <!-- Столбец Дата -->
+    <div class="table-column table-column--date" id="dateColumn">
+        <div class="table-head table-head--date">
+            <span class="head-title">Дата начисления</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Проект -->
+    <div class="table-column table-column--project" id="projectColumn">
+        <div class="table-head table-head--project">
+            <span class="head-title">Проект</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Отдел -->
+    <div class="table-column table-column--depart" id="departColumn">
+        <div class="table-head table-head--depart">
+            <span class="head-title">Отдел</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец сотрудник -->
+    <div class="table-column table-column--employee" id="fioColumn">
+        <div class="table-head table-head--employee">
+            <span class="head-title">Сотрудник</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Почасовая -->
+    <div class="table-column table-column--hourly" id="hourlyColumn">
+        <div class="table-head table-head--hourly">
+            <span class="head-title">Почасовая</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Оклад -->
+    <div class="table-column table-column--salary" id="salaryColumn">
+        <div class="table-head table-head--salary">
+            <span class="head-title">Оклад</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Премия/доплаты -->
+    <div class="table-column table-column--addition" id="additionColumn">
+        <div class="table-head table-head--addition">
+            <span class="head-title">Премия/доплаты</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Возвраты/вычеты -->
+    <div class="table-column table-column--deduction" id="deductionColumn">
+        <div class="table-head table-head--deduction">
+            <span class="head-title">Возвраты/вычеты</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Комментарий -->
+    <div class="table-column table-column--comment" id="commentColumn">
+        <div class="table-head table-head--comment">
+            <span class="head-title">Комментарий</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец почасовая за месяц -->
+    <div class="table-column table-column--hourly-sum" id="hourlySumColumn">
+        <div class="table-head table-head--hourly-sum">
+            <span class="head-title">Почасовая за месяц</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Итого к выдаче -->
+    <div class="table-column table-column--total" id="totalColumn">
+        <div class="table-head table-head--total">
+            <span class="head-title">Итого к выдаче</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Месяц -->
+    <div class="table-column table-column--month" id="monthColumn">
+        <div class="table-head table-head--month">
+            <span class="head-title">Месяц</span>
+            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец кнопки редактировать -->
+    <div class="table-column table-column--edit" id="editColumn">
+            <div class="table-head table-head--edit">
+                <span class="head-title"></span>
+            </div>
+    </div>
+
+    <!-- Столбец кнопки удалить -->
+    <div class="table-column table-column--delete" id="deleteColumn">
+            <div class="table-head table-head--delete">
+                <span class="head-title"></span>
+            </div>
+    </div>
+
+
+</div>
+
 <script src="{% static 'js/accruals.js' %}"></script>
 {% endblock %}

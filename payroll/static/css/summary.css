@@ -4,6 +4,8 @@
     overflow: auto;
     padding-bottom: 8px;
     padding-right: 8px;
+    overflow-x: auto; /* горизонтальная прокрутка */
+    overflow-y: auto; /* вертикальная прокрутка */
 }
 
 
@@ -138,7 +140,7 @@
     box-shadow: 0 4px 10px rgba(40, 37, 51, 0.1);
     display: none;
     flex-direction: column;
-    z-index: 10;
+    z-index: 60;
     overflow: hidden;
 }
 
@@ -185,6 +187,7 @@
 }
 
 .head-column {
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -231,7 +234,6 @@
     border-radius: 0px 0px 12px 12px; 
     /* padding: 6px 14px;
     box-sizing: border-box; */
-    border: 0px solid #DFDEE5;
 }
 
 .finance-head {
@@ -406,8 +408,8 @@
 
     height: 44px;
 
-    background: rgba(246, 245, 250, 0.6);
-    border: 1px solid #DFDEE5;
+    /* background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5; */
 
     /* Title Text */
 
@@ -419,24 +421,20 @@
     /* or 16px */
 
     color: #282533;
-
-
-    /* Inside auto layout */
-    flex: none;
-    order: 0;
-    flex-grow: 0;
-
 }
 
 .data-cell--fio {
     width: 362px;
+    background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5;
     /* border-radius: 12px 0px 0px 0px; */
 }
 
 .data-cell--incoming-balance {
     width: 200px;
     /* border-radius: 12px 0px 0px 0px; */
-
+    background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5;
 }
 
 .data-cell--accrued,
@@ -444,10 +442,44 @@
 .data-cell--balance
 {
     width: 110px;
+    padding: 14px 16px;
+    gap: 10px;
+    background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5;
 }
 
+.data-cell--total-accrued,
+.data-cell--total-paid,
+.data-cell--total-balance
+{
+    width: 110px;
+    padding: 14px 16px;
+    gap: 10px;
+    background: #F6F5FA;
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+}
 
+.data-cell--balance-total {
+    padding: 14px 16px;
+    gap: 10px;
+    width: 200px;
 
+    background: #F6F5FA;
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.data-cell--total {
+    width: 362px;
+    background: #F6F5FA;
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+    /* border-radius: 12px 0px 0px 0px; */
+}
 
 
 .women_portrait {
@@ -474,7 +506,7 @@
 
 .input-balance {
 
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
 
     /* Auto layout */
     display: flex;
@@ -536,6 +568,31 @@
 
 .data-row--total { margin-top: 10px; }
 
+/* === Фиксация верхней шапки === */
+.table-head {
+  position: sticky;
+  top: 0;
+  /* background: #DFDEE5; */
+  z-index: 50; /* выше, чем фиксированные колонки */
+}
+
+/* === Фиксация первых двух колонок === */
+.emp-data {
+  position: sticky; 
+  left: 0;
+  z-index: 40;
+  background: rgba(246, 245, 250, 0.6);
+}
+
+
+
+
+
+/* Чтобы нижние ряды не перекрывали шапку */
+/* .emp-data-row .data-cell--fio,
+.emp-data-row .data-cell--incoming-balance {
+  z-index: 10;
+} */
 
 
 

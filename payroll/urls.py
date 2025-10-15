@@ -18,7 +18,6 @@ urlpatterns = [
     # новый API для сводной таблицы
     path('directory/', views.PayrollDirPageView.as_view(), name='payroll_dir'),
     path('all-employees/', views.EmployeesPageView.as_view(), name='employees'),
-    path('edit-employee/<int:pk>/', views.EditEmployeePageView.as_view(), name='edit_employee'),
     path('all-accruals/', views.AccrualsPageView.as_view(), name='accruals'),
     path('edit-accrual/<int:pk>/', views.EditAccrualPageView.as_view(), name='edit_accrual'),
     path('all-payouts/', views.PayoutsPageView.as_view(), name='payouts'),

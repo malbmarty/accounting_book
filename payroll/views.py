@@ -24,6 +24,7 @@ from .models import (
 
 from analytics_dir.models import Project, Participant
 from .services.payroll_summary import PayrollSummaryService
+from .services.department_color import get_all_departments_colors 
 
 # HTML VIEWS
 # Справочник ЗП ведомости
@@ -50,35 +51,24 @@ class EmployeesPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        departments = Department.objects.all()
         context['positions'] = Position.objects.all()
-        context['departments'] = Department.objects.all()
+        context['departments'] = departments
         context['statuses'] = Status.objects.all()
         context['employee_types'] = EmployeeType.objects.all()
+        context['column_names'] = [
+            {'field': 'full_name', 'display': 'По ФИО'},
+            {'field': 'position__name', 'display': 'По должности'},
+            {'field': 'department__name', 'display': 'По отделу'},
+            {'field': 'status__name', 'display': 'По статусу'},
+            {'field': 'employee_type__name', 'display': 'По типу'},
+            {'field': 'bank_name', 'display': 'По банку'},
+        ]
+        context['department_colors'] = get_all_departments_colors(departments)
+        print(context['department_colors'])
 
         return context
 
-# Страница с формой изменения записи в таблице Сотрудники
-class EditEmployeePageView(TemplateView):
-    template_name = 'payroll/edit_employee.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        employee_id = self.kwargs.get('pk')
-        
-        # Получаем объект или возвращаем 404
-        employee = get_object_or_404(Employee, id=employee_id)
-        
-        # Сериализуем данные 
-        serializer = EmployeeSerializer(employee)
-        
-        # Добавляем данные в контекст
-        context['employee'] = serializer.data
-        context['positions'] = Position.objects.all()
-        context['departments'] = Department.objects.all()
-        context['statuses'] = Status.objects.all()
-        context['employee_types'] = EmployeeType.objects.all()
-
-        return context
     
 # Страница с таблицей Начисления
 class AccrualsPageView(TemplateView):
@@ -162,6 +152,31 @@ class EditPayoutPageView(TemplateView):
         context['payment_types'] = PaymentType.objects.all()
 
         return context
+    
+class SummaryPageView(TemplateView):
+    template_name = 'payroll/summary.html'
+
+    def post(self, request, *args, **kwargs):
+        # Сохраняет или обновляет входящий баланс.
+        try:
+            data = json.loads(request.body)
+            OpeningBalance.objects.update_or_create(
+                employee_id=data["employee_id"],
+                year=int(data["year"]),
+                defaults={"amount": Decimal(data.get("amount", 0))}
+            )
+            return JsonResponse({"status": "ok"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year = int(self.request.GET.get('year', 2025))
+        context.update(PayrollSummaryService(year).build_context())
+        departments = Department.objects.all()
+        context['department_colors'] = get_all_departments_colors(departments)
+        
+        return context
 
 
 # Фильтр для сотрудников
@@ -198,8 +213,18 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = EmployeesFilter
+    ordering_fields = [
+        'full_name', 
+        'position__name', 
+        'department__name', 
+        'status__name',
+        'employee_type__name',
+        'bank_name',
+        'card_number'
+    ]
+    ordering = ['full_name']  # сортировка по умолчанию
 
 class AccrualViewSet(viewsets.ModelViewSet):
     serializer_class = AccrualSerializer
@@ -274,27 +299,7 @@ class PayoutViewSet(viewsets.ModelViewSet):
             total_paid_for_all_time=Subquery(payouts_all_time, output_field=DecimalField(max_digits=20, decimal_places=2))
         )
 
-class SummaryPageView(TemplateView):
-    template_name = 'payroll/summary.html'
 
-    def post(self, request, *args, **kwargs):
-        # Сохраняет или обновляет входящий баланс.
-        try:
-            data = json.loads(request.body)
-            OpeningBalance.objects.update_or_create(
-                employee_id=data["employee_id"],
-                year=int(data["year"]),
-                defaults={"amount": Decimal(data.get("amount", 0))}
-            )
-            return JsonResponse({"status": "ok"})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        year = int(self.request.GET.get('year', 2025))
-        context.update(PayrollSummaryService(year).build_context())
-        return context
 
 
 

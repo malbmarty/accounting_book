@@ -1,7 +1,20 @@
 
 // Загрузка таблицы сотрудников 
-function loadEmployees() {
-    fetch(`/payroll/api/employees/`)
+function loadEmployees(sortField = '', sortDirection = '') {
+    // Формируем URL с параметрами сортировки
+    let url = `/payroll/api/employees/`;
+    const params = new URLSearchParams();
+    
+    if (sortField) {
+        params.append('ordering', sortDirection === 'desc' ? `-${sortField}` : sortField);
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+        url += `?${queryString}`;
+    }
+    
+    fetch(url)
     .then(response => response.json())
     .then(data => {
         // Список всех колонок (новые id без table-body)
@@ -17,22 +30,20 @@ function loadEmployees() {
         delete: document.getElementById('deleteColumn'),
     };
 
-     // Map для хранения цветов отделов
-    const departmentColorMap = new Map();
-
-    function getDepartmentColors(departmentName) {
-        if (departmentColorMap.has(departmentName)) {
-            return departmentColorMap.get(departmentName);
+    // Получаем цвета из data-attribute
+    const departmentColorsElement = document.getElementById('departmentColorsData');
+    let departmentColors = {};
+    
+    if (departmentColorsElement) {
+        try {
+            // Для варианта с data-attribute
+            const colorsJson = departmentColorsElement.getAttribute('data-colors');
+            if (colorsJson) {
+                departmentColors = JSON.parse(colorsJson);
+            }
+        } catch (e) {
+            console.warn('Не удалось распарсить цвета отделов:', e);
         }
-
-        // Генерируем уникальный цвет через HSL
-        const hue = Math.floor(Math.random() * 360);
-        const bg = `hsla(${hue}, 70%, 80%, 0.5)`;
-        const text = `hsl(${hue}, 70%, 30%)`;
-
-        const colors = { bg, text };
-        departmentColorMap.set(departmentName, colors);
-        return colors;
     }
 
     // Очищаем содержимое колонок (кроме заголовков)
@@ -58,17 +69,20 @@ function loadEmployees() {
           </div>
         `;
 
-       // Получаем цвета для отдела
-        const colors = getDepartmentColors(employee.department_name);
+        // Используем стабильные цвета из data-attribute
+        let colors = departmentColors[employee.department_name] || { 
+            bg: 'rgba(128, 128, 128, 0.2)', 
+            text: '#808080' 
+        };
 
         columns.depart.innerHTML += `
             <div class="table-cell table-cell--depart">
-            <div class="cell-depart" style="background: ${colors.bg}; color: ${colors.text}">
-                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="3" cy="3" r="3" fill="${colors.text}"/>
-                </svg>
-                <span class="cell-title" title="${employee.department_name}">${employee.department_name}</span>
-            </div>
+                <div class="cell-depart" style="background: ${colors.bg}; color: ${colors.text}">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="3" cy="3" r="3" fill="${colors.text}"/>
+                    </svg>
+                    <span class="cell-title" title="${employee.department_name}">${employee.department_name}</span>
+                </div>
             </div>
         `;
 
@@ -184,6 +198,9 @@ document.getElementById('createEmployeeForm').addEventListener('submit', functio
     })
     .then(data => {
         this.reset(); // Очищаем форму
+        // Закрываем модальное окно
+        document.getElementById('createEmployeeModal').style.display = 'none';
+        document.getElementById('modalBackdrop').style.display = 'none';
         loadEmployees()
     })
     .catch(error => {
@@ -248,7 +265,6 @@ function editEmployee(id) {
         alert('Не удалось загрузить данные сотрудника');
     });
 }
-
 
 // Обработчик формы редактирования
 document.getElementById('editEmployeeForm').addEventListener('submit', function(e) {
@@ -354,21 +370,20 @@ function setupModalHandlers() {
     });
 }
 
-// Универсальная логика кастомных dropdown'ов
+// Универсальная логика кастомных dropdown'ов с поддержкой сортировки
 function setupDropdowns() {
   document.querySelectorAll('.dropdown').forEach(dropdown => {
     const toggle = dropdown.querySelector('.dropdown-toggle');
     const menu = dropdown.querySelector('.dropdown-menu');
     const hiddenInput = dropdown.querySelector('input[type="hidden"]');
     const items = dropdown.querySelectorAll('.dropdown-item');
+    const dropdownName = dropdown.dataset.name;
 
-    // Открытие/закрытие меню
     toggle.addEventListener('click', () => {
       menu.classList.toggle('open');
       toggle.classList.toggle('active');
     });
 
-    // Выбор элемента
     items.forEach(item => {
       item.addEventListener('click', () => {
         const value = item.dataset.value;
@@ -377,13 +392,25 @@ function setupDropdowns() {
         hiddenInput.value = value;
         toggle.textContent = text;
 
-        // Закрываем меню
         menu.classList.remove('open');
         toggle.classList.remove('active');
+
+        if (dropdownName === 'sort') {
+          const direction = item.dataset.direction || 'asc';
+          document.querySelector('input[name="sort_direction"]').value = direction;
+          loadEmployees(value, direction, document.querySelector('input[name="filter"]').value);
+        }
+
+        if (dropdownName === 'filter') {
+          loadEmployees(
+            document.querySelector('input[name="column_name"]').value,
+            document.querySelector('input[name="sort_direction"]').value,
+            value
+          );
+        }
       });
     });
 
-    // Закрытие при клике вне
     document.addEventListener('click', e => {
       if (!dropdown.contains(e.target)) {
         menu.classList.remove('open');
@@ -394,11 +421,12 @@ function setupDropdowns() {
 }
 
 
+
 // Загружаем данные при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     loadEmployees();
     setupModalHandlers();
-    setupDropdowns(); // <-- вот это добавляем
+    setupDropdowns();
     
     // Открытие модального окна создания
     document.querySelector('.new-record-button').addEventListener('click', function() {

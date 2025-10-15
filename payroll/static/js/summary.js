@@ -83,4 +83,44 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// === 3. Применение цветов отделов ===
+document.addEventListener("DOMContentLoaded", function() {
+    const colorsEl = document.getElementById("departmentColorsData");
+    if (!colorsEl) return;
+
+    let colors = {};
+    try {
+        const raw = colorsEl.getAttribute("data-colors");
+        colors = JSON.parse(raw);
+        console.log("✅ Цвета отделов:", colors);
+    } catch (err) {
+        console.error("❌ Ошибка парсинга цветов:", err);
+        return;
+    }
+
+    // Проходим по каждому отделу и задаем стили
+    document.querySelectorAll(".dept-data").forEach(deptBlock => {
+        const deptNameEl = deptBlock.querySelector(".dept-name span");
+        if (!deptNameEl) return;
+
+        const deptName = deptNameEl.textContent.trim();
+        const color = colors[deptName];
+
+        if (color) {
+            const infoEl = deptBlock.querySelector(".dept-info");
+            if (infoEl) {
+                infoEl.style.background = color.bg;
+                infoEl.style.borderColor = color.text;
+            }
+
+            // Цвет текста
+            deptNameEl.style.color = color.text;
+
+            // Цвет кружка в svg
+            const circle = deptBlock.querySelector(".dept-name svg circle");
+            if (circle) circle.setAttribute("fill", color.text);
+        }
+    });
+});
+
 

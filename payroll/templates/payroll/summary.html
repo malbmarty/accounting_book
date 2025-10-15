@@ -8,6 +8,10 @@
 
 {% block content %}
 {% load static %}
+<div id="departmentColorsData" 
+     data-colors='{{ department_colors|json_serialize }}'
+     style="display: none;">
+</div>
 <div class="summary-top">
     <h2 class="summary-head">Сводная ведомость за {{ current_year }} год</h2>
 
@@ -107,13 +111,13 @@
                 </div>
                 {% endfor %}
                 <div class="emp-data-row">
-                    <div class="data-cell data-cell--fio">
+                    <div class="data-cell data-cell--total">
                         <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="3" cy="3" r="3" fill="#282533"/>
                         </svg>
                         <span class="title-text">Итого по отделу</span>
                     </div>
-                    <div class="data-cell data-cell--incoming-balance">
+                    <div class="data-cell data-cell--balance-total">
                         <span>{{ dept_tot.incoming_balance }}</span>
                     </div>
                 </div>
@@ -139,13 +143,13 @@
                 {% endfor %}
                 <div class="period-data-row">
                 {% with month_tot=dept_tot.monthly|dict_get:month %}
-                    <div class="data-cell data-cell--accrued">
+                    <div class="data-cell data-cell--total-accrued">
                         {{ month_tot.accrued|stringformat:".2f" }}
                     </div>
-                    <div class="data-cell data-cell--paid">
+                    <div class="data-cell data-cell--total-paid">
                         {{ month_tot.paid|stringformat:".2f" }}
                     </div>
-                    <div class="data-cell data-cell--balance">
+                    <div class="data-cell data-cell--total-balance">
                         {{ month_tot.balance|stringformat:".2f" }}
                     </div>
                 {% endwith %}
@@ -169,15 +173,15 @@
                 </div>
                 {% endfor %}
 
-                <!-- Итого по отделу за год -->
+                <!-- Итого по отделу -->
                 <div class="period-data-row dept-total">
-                    <div class="data-cell data-cell--accrued">
+                    <div class="data-cell data-cell--total-accrued">
                         {{ dept_tot.year_total.accrued|stringformat:".2f" }}
                     </div>
-                    <div class="data-cell data-cell--paid">
+                    <div class="data-cell data-cell--total-paid">
                         {{ dept_tot.year_total.paid|stringformat:".2f" }}
                     </div>
-                    <div class="data-cell data-cell--balance">
+                    <div class="data-cell data-cell--total-balance">
                         {{ dept_tot.year_total.balance|stringformat:".2f" }}
                     </div>
                 </div>
@@ -192,13 +196,13 @@
     <div class="data-row data-row--total">
         <div class="emp-data">
             <div class="emp-data-row">
-                    <div class="data-cell data-cell--fio">
+                    <div class="data-cell data-cell--total">
                         <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="3" cy="3" r="3" fill="#57D21E"/>
                         </svg>
                         <span class="title-text">Итого по компании</span>
                     </div>
-                    <div class="data-cell data-cell--balance">
+                    <div class="data-cell data-cell--balance-total">
                         <span>{{ company_totals.total_incoming_balance|stringformat:".2f" }}</span>
                     </div>
             </div>
@@ -208,13 +212,13 @@
         <div class="period-data">
             <div class="period-data-row">
                 {% with month_tot=company_totals.monthly|dict_get:month %}
-                <div class="data-cell data-cell--accrued">
+                <div class="data-cell data-cell--total-accrued">
                     {{ month_tot.accrued|stringformat:".2f" }}
                 </div>
-                <div class="data-cell data-cell--paid">
+                <div class="data-cell data-cell--total-paid">
                     {{ month_tot.paid|stringformat:".2f" }}
                 </div>
-                <div class="data-cell data-cell--balance">
+                <div class="data-cell data-cell--total-balance">
                     {{ month_tot.balance|stringformat:".2f" }}
                 </div>
                 {% endwith %}

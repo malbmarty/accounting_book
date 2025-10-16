@@ -9,3 +9,9 @@ def get_item(dictionary, key):
         return dictionary.get(key)
     return None
 
+@register.filter
+def dict_get(d, key):
+    """Возвращает значение словаря по ключу или None, если ключа нет"""
+    return d.get(key)
+
+

@@ -1,143 +1,138 @@
 {% extends "base.html" %}
 {% load static %}
 {% load analytics_custom_tags %}
+{% block title %}Задолженность{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dept.css' %}">
 {% endblock %}
-
 {% block content %}
 {% load static %}
-<h1>Задолженность за {{ current_year }} год</h1>
 
-<!-- Форма выбора года -->
-<form method="get" action="" style="margin-bottom:20px;">
-    <label for="year">Выберите год:</label>
-    <select name="year" id="year" onchange="this.form.submit()">
-        {% for year in years %}
-            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
-        {% endfor %}
-    </select>
-</form>
+<div class="summary-top">
+    <h2 class="summary-head">Задолженность за {{ current_year }} год</h2>
 
-<div class="table-container">
-    <table class="summary-table">
-        <thead>
-            <tr>
-                <th rowspan="2" class="left">Агент</th>
-                <th rowspan="2">Входящий остаток</th>
-                {% for month in months_name %}
-                    <th colspan="3">{{ month }}</th>
+    <!-- Кастомный dropdown -->
+    <form method="get" action="">
+        <div class="dropdown">
+            <div class="dropdown-toggle" id="selected-year">
+                Год: {{ current_year }}
+            </div>
+            <div class="dropdown-menu">
+                {% for year in years %}
+                    <div class="dropdown-item {% if year == current_year %}active{% endif %}" data-value="{{ year }}">
+                        Год: {{ year }}
+                    </div>
                 {% endfor %}
-                <th colspan="3">Итого</th>
-            </tr>
-            <tr>
-                {% for month in months %}
-                    <th class="border-strong">Начислено</th>
-                    <th>Выплачено</th>
-                    <th>Остаток</th>
-                {% endfor %}
-                <th>Начислено</th>
-                <th>Выплачено</th>
-                <th>Остаток</th>
-            </tr>
-        </thead>
-
-        {% for counterparty_name, counterparty_data in counterparties_data.items %}
-        <tbody>
-            <tr>
-                <td class="left">{{ counterparty_name }}</td>
-                <td>
-                    <input type="number" step="0.01" 
-                        value="{{ counterparty_data.incoming_balance }}" 
-                        class="incoming-balance" 
-                        data-counterparty="{{ counterparty_data.counterparty.id }}"
-                        data-year="{{ current_year }}" 
-                        style="width:80px; text-align:right;">
-                        
-                </td>
-                {% with total_accrued=0 total_paid=0 total_balance=counterparty_data.counterparty.incoming_balance %}
-                    {% for month in months %}
-                        {% with month_data=counterparty_data.monthly|get_item:month %}
-                            {% if month_data %}
-                                <td class="border-strong {% if month_data.accrued < 0 %}negative{% endif %}">{{ month_data.accrued|stringformat:".2f" }}</td>
-                                <td class="{% if month_data.paid < 0 %}negative{% endif %}">{{ month_data.paid|stringformat:".2f" }}</td>
-                                <td class="{% if month_data.balance < 0 %}negative{% endif %}">{{ month_data.balance|stringformat:".2f" }}</td>
-                                {% with total_accrued=total_accrued|add:month_data.accrued %}
-                                {% with total_paid=total_paid|add:month_data.paid %}
-                                {% with total_balance=month_data.balance %}
-                                {% endwith %}{% endwith %}{% endwith %}
-                            {% else %}
-                                <td>0</td><td>0</td><td>0</td>
-                            {% endif %}
-                        {% endwith %}
-                    {% endfor %}
-                    <td class="border-strong {% if counterparty_data.year_total.accrued < 0 %}negative{% endif %}">{{ counterparty_data.year_total.accrued|stringformat:".2f" }}</td>
-                    <td class="{% if counterparty_data.year_total.paid < 0 %}negative{% endif %}">{{ counterparty_data.year_total.paid|stringformat:".2f" }}</td>
-                    <td class="{% if counterparty_data.year_total.balance < 0 %}negative{% endif %}">{{ counterparty_data.year_total.balance|stringformat:".2f" }}</td>
-                {% endwith %}
-            </tr>
-
-        </tbody>
-        {% endfor %}
-
-    </table>
+            </div>
+            <input type="hidden" name="year" id="year-input" value="{{ current_year }}">
+        </div>
+    </form>
 </div>
 
-<style>
-.table-container {
-    overflow: auto;
-    width: 100%;
-    max-height: 80vh;
-}
+<div class="table-container">
+    <div class="table-head">
+        <div class="head-info">
+            <div class="head-column head-column--counterparty">
+            <span class="head-title">Агент</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            </div>
+            <div class="head-column head-column--incoming-balance">
+                <span class="head-title">Входящий остаток</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+        {% for month in months_name %}
+        <div class="head-period">
+            <div class="head-column head-column--month">
+                <span class="head-title">{{ month }}</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="head-column head-column--finance">
+                <div class="finance-head finance-head--accrued">Начислено</div>
+                <div class="finance-head finance-head--paid">Выплачено</div>
+                <div class="finance-head finance-head--balance">Остаток</div>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="head-period">
+            <div class="head-column head-column--total">
+                    <span class="head-title">Итого</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="head-column head-column--finance">
+                    <div class="finance-head finance-head--accrued">Начислено</div>
+                    <div class="finance-head finance-head--paid">Выплачено</div>
+                    <div class="finance-head finance-head--balance">Остаток</div>
+            </div>
+        </div>
+    </div>
+    <div class="dept-data"> 
+    <div class="data-row">
+        
+        <div class="counterparty-data">
+            {% for counterparty_name, counterparty_data in counterparties_data.items %}
+            <div class="counterparty-data-row">
+                <div class="data-cell data-cell--counterparty">
+                    <div class="women_portrait"></div>
+                    <span class="title-text">{{ counterparty_name }}</span>
+                </div>
+                <div class="data-cell data-cell--incoming-balance">
+                    <input type="number" step="0.01" 
+                        value="{{ counterparty_data.incoming_balance }}" 
+                        class="input-balance" 
+                        data-counterparty="{{ counterparty_data.counterparty.id }}"
+                        data-year="{{ current_year }}">    
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% for month in months %}
+        <div class="period-data">
+            {% for counterparty_name, counterparty_data in counterparties_data.items %}
+            <div class="period-data-row">
+                {% with month_data=counterparty_data.monthly|get_item:month %}
+                <div class="data-cell data-cell--accrued">
+                    {{ month_data.accrued|default:0|stringformat:".2f" }}
+                </div>
+                <div class="data-cell data-cell--paid">
+                    {{ month_data.paid|default:0|stringformat:".2f" }}
+                </div>
+                <div class="data-cell data-cell--balance">
+                    {{ month_data.balance|default:0|stringformat:".2f" }}
+                </div>
+                {% endwith %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <div class="period-data">
+            {% for counterparty_name, counterparty_data in counterparties_data.items %}
+            <div class="period-data-row">
+                <div class="data-cell data-cell--accrued">
+                    {{ counterparty_data.year_total.accrued|stringformat:".2f" }}
+                </div>
+                <div class="data-cell data-cell--paid">
+                    {{ counterparty_data.year_total.paid|stringformat:".2f" }}
+                </div>
+                <div class="data-cell data-cell--balance">
+                    {{ counterparty_data.year_total.balance|stringformat:".2f" }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    </div> 
+</div>
 
-table.summary-table {
-    border-collapse: collapse;
-    min-width: 1400px;
-}
-
-table.summary-table th,
-table.summary-table td {
-    border: 1px solid #999;
-    padding: 6px;
-    white-space: nowrap;
-    text-align: right;
-}
-
-table.summary-table th {
-    background-color: #f2f2f2;
-    position: sticky;
-    top: 0;
-    z-index: 3;
-}
-
-
-
-td.left, th.left {
-    text-align: left !important; /* текст слева */
-    padding-left: 8px; /* отступ от левого края для красоты */
-    position: sticky;
-    left: 0;
-    background-color: #f9f9f9;
-    z-index: 2;
-}
-
-/* Пересечение шапки и левой колонки */
-thead th.left {
-    z-index: 6; /* самое высокое значение, чтобы оставалась сверху и при вертикальном, и при горизонтальном скролле */
-}
-
-.negative {
-    color: red;
-    font-weight: bold;
-}
-
-/* Отрицательная вариация */
-.border-strong {
-    border-left: 3px solid #333 !important;
-}
-
-</style>
 
 <script src="{% static 'js/dept.js' %}"></script>
 {% endblock %}

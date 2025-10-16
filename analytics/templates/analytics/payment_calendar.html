@@ -113,7 +113,7 @@
                         <td class="left" ><b>{{ indicator }}</b></td>
                         {% for h in headers %}
                             {% with cell=cash_flow_calendar|get_item:h.key|get_item:indicator %}
-                                <td>{{ cell.plan|default:"0" }}</td>
+                                <td style="border-left: 3px solid #333;">{{ cell.plan|default:"0" }}</td>
                                 <td>{{ cell.fact|default:"0" }}</td>
                                 <td class="{% if cell.var < 0 %}negative{% elif cell.var > 0 %}text-success{% endif %}">{{ cell.var|default:"0" }}</td>
                             {% endwith %}

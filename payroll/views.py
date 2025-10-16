@@ -87,7 +87,7 @@ class AccrualsPageView(TemplateView):
             {'field': 'date', 'display': 'По дате'},
             {'field': 'project__name', 'display': 'По проекту'},
             {'field': 'department__name', 'display': 'По отделу'},
-            {'field': 'employee__name', 'display': 'По сотруднику'},
+            {'field': 'employee__full_name', 'display': 'По сотруднику'},
             {'field': 'hourly_pay', 'display': 'По почасовой'},
             {'field': 'salary', 'display': 'По окладу'},
             {'field': 'addition_pay', 'display': 'По доплатам'},
@@ -120,7 +120,7 @@ class PayoutsPageView(TemplateView):
             {'field': 'payer__name', 'display': 'По плательщику'},
             {'field': 'recipient__name', 'display': 'По получателю'},
             {'field': 'department__name', 'display': 'По отделу'},
-            {'field': 'employee__name', 'display': 'По сотруднику'},
+            {'field': 'employee__full_name', 'display': 'По сотруднику'},
             {'field': 'payment_type__name', 'display': 'По типу выплаты'},
             {'field': 'amount', 'display': 'По сумме выплаты'},
         ]
@@ -212,7 +212,7 @@ class AccrualViewSet(viewsets.ModelViewSet):
         'date', 
         'project__name', 
         'department__name', 
-        'employee__name',
+        'employee__full_name',
         'hourly_pay',
         'salary',
         'addition_pay',
@@ -243,7 +243,7 @@ class PayoutViewSet(viewsets.ModelViewSet):
         'payer__name',
         'recipient__name', 
         'department__name', 
-        'employee__name',
+        'employee__full_name',
         'payment_type__name'
         'amount',
     ]

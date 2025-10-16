@@ -2,7 +2,7 @@ body {
     background: #EAE9F0;
     /* padding-top: 120px !important; */
     margin: 0;
-    overflow-x: hidden;  
+    overflow: hidden;  
 }
 
 .content {

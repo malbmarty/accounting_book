@@ -140,7 +140,7 @@
                 <div class="dropdown-toggle form-input">Выберите сотрудника</div>
                     <div class="dropdown-menu">
                         {% for employee in employees %}
-                            <div class="dropdown-item" data-value="{{ employee.id }}">{{ employee.full_name }}</div>
+                            <!-- Сюда будем подгружать сотрудников динамически -->
                         {% endfor %}
                     </div>
                     <input type="hidden" name="employee" value="">
@@ -275,7 +275,7 @@
                 </div>
 
                 <label class="form-label">Тип выплаты:</label>
-                <div class="dropdown" data-name="">
+                <div class="dropdown" data-name="payment_type">
                 <div class="dropdown-toggle form-input">Выберите тип выплаты</div>
                     <div class="dropdown-menu">
                         {% for payment_type in payment_types %}
@@ -341,8 +341,8 @@
     <div class="table-column table-column--date" id="dateColumn">
         <div class="table-head table-head--date">
             <span class="head-title">Дата ОДДС</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -351,8 +351,8 @@
     <div class="table-column table-column--project" id="projectColumn">
         <div class="table-head table-head--project">
             <span class="head-title">Проект</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -361,8 +361,8 @@
     <div class="table-column table-column--payer" id="payerColumn">
         <div class="table-head table-head--payer">
             <span class="head-title">Плательщик ОТКУДА</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -371,8 +371,8 @@
     <div class="table-column table-column--recipient" id="recipientColumn">
         <div class="table-head table-head--recipient">
             <span class="head-title">Получатель КУДА</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -381,8 +381,8 @@
     <div class="table-column table-column--depart" id="departColumn">
         <div class="table-head table-head--depart">
             <span class="head-title">Отдел</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -391,8 +391,8 @@
     <div class="table-column table-column--employee" id="employeeColumn">
         <div class="table-head table-head--employee">
             <span class="head-title">Сотрудник</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -401,8 +401,8 @@
     <div class="table-column table-column--type" id="typeColumn">
         <div class="table-head table-head--type">
             <span class="head-title">Тип выплаты</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -411,8 +411,8 @@
     <div class="table-column table-column--amount" id="amountColumn">
         <div class="table-head table-head--amount">
             <span class="head-title">Сумма выплаты</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -421,8 +421,8 @@
     <div class="table-column table-column--comment" id="commentColumn">
         <div class="table-head table-head--comment">
             <span class="head-title">Комментарий</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -431,8 +431,8 @@
     <div class="table-column table-column--accrual-period" id="accrualPeriodColumn">
         <div class="table-head table-head--accrual-period">
             <span class="head-title">Наислено за период</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -441,8 +441,8 @@
     <div class="table-column table-column--deduction-period" id="deductionPeriodColumn">
         <div class="table-head table-head--deduction-period">
             <span class="head-title">Остаток к выплате за период</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -451,8 +451,8 @@
     <div class="table-column table-column--month" id="monthColumn">
         <div class="table-head table-head--month">
             <span class="head-title">Месяц ОДДС</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -461,8 +461,8 @@
     <div class="table-column table-column--accrual-all" id="accrualAllColumn">
         <div class="table-head table-head--accrual-all">
             <span class="head-title">Начислено за весь период</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>
@@ -471,8 +471,8 @@
     <div class="table-column table-column--deduction-all" id="deductionAllColumn">
         <div class="table-head table-head--deduction-all">
             <span class="head-title">Остаток к выплате за весь период</span>
-            <svg class="table-icon" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 9H13M7 5H11M7 1H9M1 2.58333L2.00345 1.45445C2.53384 0.857762 3.46616 0.857761 3.99655 1.45445L5 2.58333M3 1V9" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>
         </div>
     </div>

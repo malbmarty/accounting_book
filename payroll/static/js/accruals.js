@@ -1,3 +1,53 @@
+function loadEmployeesForDepartment(departmentId, formSelector) {
+    const form = document.querySelector(formSelector);
+    const employeeDropdown = form.querySelector('.dropdown[data-name="employee"]');
+    const toggle = employeeDropdown.querySelector('.dropdown-toggle');
+    const menu = employeeDropdown.querySelector('.dropdown-menu');
+    const hiddenInput = employeeDropdown.querySelector('input[type="hidden"]');
+
+    // Сбрасываем dropdown
+    hiddenInput.value = '';
+    toggle.textContent = toggle.dataset.placeholder || 'Выберите сотрудника';
+    menu.innerHTML = '';
+
+    if (!departmentId) return;
+
+    fetch(`/payroll/api/employees/?department=${departmentId}`)
+        .then(response => response.json())
+        .then(employees => {
+            employees.forEach(emp => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.dataset.value = emp.id;
+                item.textContent = emp.full_name;
+
+                item.addEventListener('click', () => {
+                    hiddenInput.value = emp.id;
+                    toggle.textContent = emp.full_name;
+                    menu.classList.remove('open');
+                    toggle.classList.remove('active');
+                });
+
+                menu.appendChild(item);
+            });
+        });
+}
+
+
+document.querySelectorAll('.dropdown[data-name="department"] .dropdown-menu').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        const item = e.target.closest('.dropdown-item');
+        if (!item) return;
+
+        const form = item.closest('form');
+        const departmentId = item.dataset.value;
+
+        // Подгружаем сотрудников для текущей формы
+        loadEmployeesForDepartment(departmentId, `#${form.id}`);
+    });
+});
+
+
 // Загрузка таблицы сотрудников 
 function loadAccruals(sortField = '', sortDirection = '') {
     // Формируем URL с параметрами сортировки
@@ -57,12 +107,14 @@ function loadAccruals(sortField = '', sortDirection = '') {
         col.querySelectorAll('.table-cell').forEach(cell => cell.remove());
     });
 
+
     // Заполняем колонки данными
     data.forEach(accrual => {
-
+        let [year, month, day] = accrual.date.split('-');
+        let formattedDate = `${day}.${month}.${year}`;
         columns.date.innerHTML += `
           <div class="table-cell table-cell--date">
-            <span class="cell-title" title="${accrual.date}">${accrual.date}</span>  
+            <span class="cell-title" title="${formattedDate}">${formattedDate}</span>  
           </div>
         `;
 
@@ -228,6 +280,17 @@ document.getElementById('createAccrualForm').addEventListener('submit', function
     })
     .then(data => {
         this.reset(); // Очищаем форму
+        this.querySelectorAll('.dropdown').forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+            
+            // Сброс значения
+            if (hiddenInput) hiddenInput.value = '';
+
+            // Восстановление исходного текста
+            const placeholder = toggle.dataset.placeholder || 'Выберите из списка';
+            toggle.textContent = placeholder;
+        });
         // Закрываем модальное окно
         document.getElementById('createAccrualModal').style.display = 'none';
         document.getElementById('modalBackdrop').style.display = 'none';

@@ -13,16 +13,19 @@
 
 
 /* Стилизация скроллбара для контейнера */
+.dropdown-menu::-webkit-scrollbar,
 .table-container::-webkit-scrollbar {
     width: 2px; /* Для вертикального скролла */
     height: 2px; /* Для горизонтального скролла */
 }
 
+.dropdown-menu::-webkit-scrollbar-track,
 .table-container::-webkit-scrollbar-track {
     background: #DFDEE5;
     border-radius: 3px;
 }
 
+.dropdown-menu::-webkit-scrollbar-thumb,
 .table-container::-webkit-scrollbar-thumb {
     background: rgba(40, 37, 51, 0.14);
     border-radius: 3px;
@@ -167,7 +170,9 @@
     display: none;
     flex-direction: column;
     z-index: 10;
-    overflow: hidden;
+
+    max-height: 400px;
+    overflow-y: auto;
 }
 
 .dropdown-menu.open {
@@ -277,7 +282,8 @@
     border-width: 1px 1px 1px 0px;
     border-style: solid;
     border-color: #DFDEE5;
-    
+    position: sticky;
+    top: 0;
 }
 
 .table-head--check {
@@ -387,7 +393,7 @@
 }
 
 /* Скругляем только последние ячейки в колонке */
-.table-column--employee .table-cell--employee:last-child {
+.table-column--employee .table-cell--date:last-child {
     border-bottom-left-radius: 12px;
 }
 

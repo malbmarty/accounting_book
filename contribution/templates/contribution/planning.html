@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_tags %}
 
 {% block title %}Планирование{% endblock %}
 
@@ -9,99 +10,466 @@
 
 {% block content %}
 {% load static %}
-<h2>Планирование</h2>
+<div id="itemsColorsData" 
+     data-colors='{{ items_colors|json_serialize }}'
+     style="display: none;">
+</div>
+<div class="table-top">
+    <h2 class="table-title">Планирование</h2>
+    <div class="table-active">
+        <!-- <select class="sort" name="sort" required>
+                <option value="">Сортировать:</option>
+        </select> -->
+        <div class="dropdown" data-name="sort">
+        <div class="dropdown-toggle select-sort">Сортировать:</div>
+            <div class="dropdown-menu">
+                {% for column_name in column_names %}
+                <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="asc">
+                    {{ column_name.display }} ↑
+                </div>
+                <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="desc">
+                    {{ column_name.display }} ↓
+                </div>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="column_name" value="">
+             <input type="hidden" name="sort_direction" value="">
+        </div>
+        
+        <!-- <select class="filter" name="filter" required>
+                <option value="">Все категории:</option>
+        </select> -->
+        <div class="dropdown" data-name="filter">
+        <div class="dropdown-toggle select-filter">Все категории: </div>
+            <div class="dropdown-menu">
+                <!-- {% for column_name in column_names %}
+                    <div class="dropdown-item" data-value="{{ column_name }}">{{ column_name }}</div>
+                {% endfor %} -->
+            </div>
+            <input type="hidden" name="filter" value="">
+        </div>
 
-<h3>Создание новой записи</h3>
+        <button class="new-record-button" type="submit">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
 
-<form id="createPlannigForm">
-    {% csrf_token %}
+            <span class="button-text">Новая запись</span>
+        </button>
+    </div>
+</div>
 
-    <div class="form-group">
-        <label>Дата ОДДС:</label>
-        <input type="date" name="date" id = "date">
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="createPlanningModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление записи</h2>
+            <h3 class="create-instruction">Внесите информацию</h3>
+        </div>
+
+        <form id="createPlanningForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Дата ОДДС:</label>
+                <input class="form-input" type="date" name="date" id = "currentDate" required>
+            </div>
+
+            <div class="form-group">
+                 <label class="form-label">Проект:</label>
+                <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle form-input">Выберите проект</div>
+                    <div class="dropdown-menu">
+                        {% for project in projects %}
+                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="project" value="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Статья:</label>
+                <div class="dropdown" data-name="item">
+                <div class="dropdown-toggle form-input">Выберите статью</div>
+                    <div class="dropdown-menu">
+                        {% for item in items %}
+                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="item" value="">
+                </div>
+            </div>    
+
+            <div class="form-group">
+                <label class="form-label">Сумма:</label>
+                <input class="form-input" type="number" name="payment_amount" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Частота платежа:</label>
+                <div class="dropdown" data-name="frequency">
+                <div class="dropdown-toggle form-input">Выберите частоту платежа</div>
+                    <div class="dropdown-menu">
+                        {% for frequency in frequency_choices %}
+                            <div class="dropdown-item" data-value="{{ frequency.id }}">{{ frequency.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="frequency" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий:</label>
+                <textarea class="form-input" name="comment" rows="3"></textarea>
+            </div>
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить запись</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="editPlanningModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Редактирование записи</h2>
+            <h3 class="create-instruction">Внесите изменения в информацию</h3>
+        </div>
+
+        <form id="editPlanningForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Дата ОДДС:</label>
+                <input class="form-input" type="date" name="date" id = "currentDate" required>
+            </div>
+
+            <div class="form-group">
+                 <label class="form-label">Проект:</label>
+                <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle form-input">Выберите проект</div>
+                    <div class="dropdown-menu">
+                        {% for project in projects %}
+                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="project" value="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Статья:</label>
+                <div class="dropdown" data-name="item">
+                <div class="dropdown-toggle form-input">Выберите статью</div>
+                    <div class="dropdown-menu">
+                        {% for item in items %}
+                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="item" value="">
+                </div>
+            </div>    
+
+            <div class="form-group">
+                <label class="form-label">Сумма:</label>
+                <input class="form-input" type="number" name="payment_amount" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Частота платежа:</label>
+                <div class="dropdown" data-name="frequency">
+                <div class="dropdown-toggle form-input">Выберите частоту платежа</div>
+                    <div class="dropdown-menu">
+                        {% for frequency in frequency_choices %}
+                            <div class="dropdown-item" data-value="{{ frequency.id }}">{{ frequency.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="frequency" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий:</label>
+                <textarea class="form-input" name="comment" rows="3"></textarea>
+            </div>
+
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Изменить запись</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+<div id="deleteConfirmModal" class="modal-delete">
+    <div class="modal-delete-content">
+        <h2 class="delete-title">Удалить запись?</h2>
+        <p class="delete-instruction">Это действие полностью удалит запись выбранной выплаты из системы.</p>
+    </div>
+    <div class="delete-active">
+        <button class="btn-cancel" id="cancelDelete">
+             <span class="btn-cancel-text">Нет, оставить</span>
+        </button>
+        <button class="button-delete" id="confirmDelete">
+            <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 4.98366C15.225 4.70866 12.4333 4.56699 9.65 4.56699C8 4.56699 6.35 4.65033 4.7 4.81699L3 4.98366M7.58333 4.14199L7.76667 3.05033C7.9 2.25866 8 1.66699 9.40833 1.66699H11.5917C13 1.66699 13.1083 2.29199 13.2333 3.05866L13.4167 4.14199M16.2083 7.61699L15.6667 16.0087C15.575 17.317 15.5 18.3337 13.175 18.3337H7.825C5.5 18.3337 5.425 17.317 5.33333 16.0087L4.79167 7.61699M9.10833 13.7503H11.8833M8.41667 10.417H12.5833" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="button-delete-text">Да, удалить</span>
+        </button>
+    </div>
+</div>
+
+<div id="planningTable" class="table-container">
+    
+    <!-- Столбец Дата ОДДС -->
+    <div class="table-column table-column--date" id="dateColumn">
+        <div class="table-head table-head--date">
+            <span class="head-title">Дата ОДДС</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Проект:</label>
-        <select name="project">
-            <option value="">Выберите проект</option>
-            {% for project in projects %}
-            <option value="{{ project.id }}" >{{ project.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Проект -->
+    <div class="table-column table-column--project" id="projectColumn">
+        <div class="table-head table-head--project">
+            <span class="head-title">Проект</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Статья:</label>
-        <select name="item" required>
-            <option value="">Выберите статью</option>
-            {% for item in items %}
-            <option value="{{ item.id }}" >{{ item.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Статья -->
+    <div class="table-column table-column--item" id="itemColumn">
+        <div class="table-head table-head--item">
+            <span class="head-title">Статья</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Сумма платежа -->
+    <div class="table-column table-column--payment-amount" id="paymentAmountColumn">
+        <div class="table-head table-head--payment-amount">
+            <span class="head-title">Сумма платежа</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
 
-    <div class="form-group">
-        <label>Сумма:</label>
-        <input type="number" name="payment_amount" step="0.01">
+    <!-- Столбец Частота платежа -->
+    <div class="table-column table-column--frequency" id="frequencyColumn">
+        <div class="table-head table-head--frequency">
+            <span class="head-title">Частота платежа</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Частота платежа:</label>
-        <select name="frequency" id="frequency" required>
-            <option value="">Выберите частоту</option>
-            {% for frequency in frequency_choices %}
-                <option value="{{ frequency.id }}">
-                    {{ frequency.name }}
-                </option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Ежемесячно до даты -->
+    <div class="table-column table-column--last-date" id="lastDateColumn">
+        <div class="table-head table-head--last-date">
+            <span class="head-title">Ежемесячно до даты</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Комментарий:</label>
-        <textarea name="comment" rows="3"></textarea>
+    
+
+    <!-- Столбец Приход/Расход  -->
+    <div class="table-column table-column--flow-type" id="flowTypeColumn">
+        <div class="table-head table-head--flow-type">
+            <span class="head-title">Приход/Расход</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <button type="submit">Внести</button>
+    
 
-</form>
+    <!-- Столбец Платеж №2 -->
+    <div class="table-column table-column--pay" id="pay2Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №2</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
 
+    <!-- Столбец Платеж №3 -->
+    <div class="table-column table-column--pay" id="pay3Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №3</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
 
+    <!-- Столбец Платеж №4 -->
+    <div class="table-column table-column--pay" id="pay4Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №4</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
 
+    <!-- Столбец Платеж №5 -->
+    <div class="table-column table-column--pay" id="pay5Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №5</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
 
-<div id="planningTable"  style="max-height: 400px; overflow: auto;">
-    <table style="border-collapse: collapse; min-width: 1200px;">
-        <thead>
-            <tr>
-                <th>Дата ОДДС</th>
-                <th>Проект</th>
-                <th>Статья</th>
-                <th>Сумма</th>
-                <th>Частота платежа</th>
-                <th>Комментарий</th>
-                <th>Ежемесячно до даты</th>
-                <th>Приход/Расход</th>
-                <th>Платёж 2</th>
-                <th>Платёж 3</th>
-                <th>Платёж 4</th>
-                <th>Платёж 5</th>
-                <th>Платёж 6</th>
-                <th>Платёж 7</th>
-                <th>Платёж 8</th>
-                <th>Платёж 9</th>
-                <th>Платёж 10</th>
-                <th>Платёж 11</th>
-                <th>Платёж 12</th>
-                <th>Сумма всех платежей</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody id="planningBody">
-            <!-- Данные будут загружены через JavaScript -->
-        </tbody>
-    </table>
+    <!-- Столбец Платеж №6 -->
+    <div class="table-column table-column--pay" id="pay6Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №6</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платеж №7 -->
+    <div class="table-column table-column--pay" id="pay7Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №7</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платеж №8 -->
+    <div class="table-column table-column--pay" id="pay8Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №8</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платеж №9 -->
+    <div class="table-column table-column--pay" id="pay9Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №9</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платеж №10 -->
+    <div class="table-column table-column--pay" id="pay10Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №10</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платеж №11 -->
+    <div class="table-column table-column--pay" id="pay11Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №11</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платеж №12 -->
+    <div class="table-column table-column--pay" id="pay12Column">
+        <div class="table-head table-head--pay">
+            <span class="head-title">Платеж №12</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Сумма всех платежей -->
+    <div class="table-column table-column--total" id="totalColumn">
+        <div class="table-head table-head--total">
+            <span class="head-title">Сумма всех платежей</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+    
+    <!-- Столбец кнопки редактировать -->
+    <div class="table-column table-column--edit" id="editColumn">
+            <div class="table-head table-head--edit">
+                <span class="head-title"></span>
+            </div>
+    </div>
+
+    <!-- Столбец кнопки удалить -->
+    <div class="table-column table-column--delete" id="deleteColumn">
+            <div class="table-head table-head--delete">
+                <span class="head-title"></span>
+            </div>
+    </div>
+
 </div>
 <script src="{% static 'js/planning.js' %}"></script>
 {% endblock %}

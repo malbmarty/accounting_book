@@ -1,20 +1,18 @@
-body {
-    font-family: Arial, sans-serif; 
+body { font-family: Arial, sans-serif; 
     margin: 0;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding-top: 120px !important;
-    min-height: 100%; /* Возвращаем min-height */
+    min-height: 100vh;
+    background: #EAE9F0;
+    /* padding-top: 120px !important; */
+    margin: 0;
+    overflow: auto;
 }
-
 .content {
-    width: 100%;
-    padding: 0 100px;
+    width: 100%;  /* растягиваем на всю ширину */
     box-sizing: border-box;
-    flex-grow: 1; /* Заставляет контент растягиваться */
-    overflow-y: auto; /* Разрешаем скролл внутри контента если нужно */
 }
 
 table { width: 100%; border-collapse: collapse; margin: 20px 0; }

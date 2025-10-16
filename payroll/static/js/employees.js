@@ -198,6 +198,18 @@ document.getElementById('createEmployeeForm').addEventListener('submit', functio
     })
     .then(data => {
         this.reset(); // Очищаем форму
+        this.querySelectorAll('.dropdown').forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+            
+            // Сброс значения
+            if (hiddenInput) hiddenInput.value = '';
+
+            // Восстановление исходного текста
+            const placeholder = toggle.dataset.placeholder || 'Выберите из списка';
+            toggle.textContent = placeholder;
+        });
+
         // Закрываем модальное окно
         document.getElementById('createEmployeeModal').style.display = 'none';
         document.getElementById('modalBackdrop').style.display = 'none';

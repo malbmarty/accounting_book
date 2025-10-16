@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_tags %}
 
 {% block title %}Оперативный учет{% endblock %}
 
@@ -9,128 +10,472 @@
 
 {% block content %}
 {% load static %}
-<h2>Оперативный учет</h2>
+<div id="itemsColorsData" 
+     data-colors='{{ items_colors|json_serialize }}'
+     style="display: none;">
+</div>
 
-<h3>Создание новой записи</h3>
+<div class="table-top">
+    <h2 class="table-title">Оперативный учет</h2>
+    <div class="table-active">
+        <!-- <select class="sort" name="sort" required>
+                <option value="">Сортировать:</option>
+        </select> -->
+        <div class="dropdown" data-name="sort">
+        <div class="dropdown-toggle select-sort">Сортировать:</div>
+            <div class="dropdown-menu">
+                {% for column_name in column_names %}
+                <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="asc">
+                    {{ column_name.display }} ↑
+                </div>
+                <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="desc">
+                    {{ column_name.display }} ↓
+                </div>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="column_name" value="">
+             <input type="hidden" name="sort_direction" value="">
+        </div>
+        
+        <!-- <select class="filter" name="filter" required>
+                <option value="">Все категории:</option>
+        </select> -->
+        <div class="dropdown" data-name="filter">
+        <div class="dropdown-toggle select-filter">Все категории: </div>
+            <div class="dropdown-menu">
+                <!-- {% for column_name in column_names %}
+                    <div class="dropdown-item" data-value="{{ column_name }}">{{ column_name }}</div>
+                {% endfor %} -->
+            </div>
+            <input type="hidden" name="filter" value="">
+        </div>
 
-<form id="createOperAccForm">
-    {% csrf_token %}
+        <button class="new-record-button" type="submit">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
 
-    <div class="form-group">
-        <label>Дата платежа (ОДДС):</label>
-        <input type="date" name="payment_date" id = "paymentDate">
+            <span class="button-text">Новая запись</span>
+        </button>
+    </div>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="createOperAccModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление записи</h2>
+            <h3 class="create-instruction">Внесите информацию</h3>
+        </div>
+
+        <form id="createOperAccForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Дата платежа (ОДДС):</label>
+                <input class="form-input" type="date" name="payment_date" id = "paymentDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Дата признания (ОПУ):</label>
+                <input class="form-input" type="date" name="recognition_date" id = "recognitionDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Плательщик ОТКУДА:</label>
+                <div class="dropdown" data-name="payer">
+                <div class="dropdown-toggle form-input">Выберите плательщика</div>
+                    <div class="dropdown-menu">
+                        {% for payer in participants %}
+                            <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="payer" value="">
+                </div>
+
+                <label class="form-label">Получатель КУДА:</label>
+                <div class="dropdown" data-name="recipient">
+                <div class="dropdown-toggle form-input">Выберите получателя</div>
+                    <div class="dropdown-menu">
+                        {% for recipient in participants %}
+                            <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="recipient" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Статья:</label>
+                <div class="dropdown" data-name="item">
+                <div class="dropdown-toggle form-input">Выберите статью</div>
+                    <div class="dropdown-menu">
+                        {% for item in items %}
+                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="item" value="">
+                </div>
+
+                <label class="form-label">Плтаежная система:</label>
+                <div class="dropdown" data-name="payment_system">
+                <div class="dropdown-toggle form-input">Выберите платежную систему</div>
+                    <div class="dropdown-menu">
+                        {% for payment_system in payment_systems %}
+                            <div class="dropdown-item" data-value="{{ payment_system.id }}">{{ payment_system.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="payment_system" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                 <label class="form-label">Проект:</label>
+                <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle form-input">Выберите проект</div>
+                    <div class="dropdown-menu">
+                        {% for project in projects %}
+                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="project" value="">
+                </div>
+            </div> 
+
+            <div class="form-group">
+                <label class="form-label">Сумма оплаты:</label>
+                <input class="form-input" type="number" name="payment_amount" step="0.01">
+            </div>
+            
+            <div class="form-group">
+                 <label class="form-label">Контрагент:</label>
+                <div class="dropdown" data-name="counterparty">
+                <div class="dropdown-toggle form-input">Выберите контрагента</div>
+                    <div class="dropdown-menu">
+                        {% for counterparty in counterparties %}
+                            <div class="dropdown-item" data-value="{{ counterparty.id }}">{{ counterparty.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="counterparty" value="">
+                </div>
+            </div> 
+
+            <div class="form-group">
+                <label class="form-label">Сумма комиссии:</label>
+                <input class="form-input" type="number" name="commission_amount" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий:</label>
+                <textarea class="form-input" name="comment" rows="3"></textarea>
+            </div>
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить запись</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"></div> <!-- затемнение -->
+<div id="editOperAccModal" class="modal">
+    
+    <div class="modal-content">
+        <span class="modal-close">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <div class="modal-content-head">
+            <h2 class="create-title">Редактирование записи</h2>
+            <h3 class="create-instruction">Внесите изменения в информацию</h3>
+        </div>
+
+        <form id="editOperAccForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Дата платежа (ОДДС):</label>
+                <input class="form-input" type="date" name="payment_date" id = "paymentDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Дата признания (ОПУ):</label>
+                <input class="form-input" type="date" name="recognition_date" id = "recognitionDate" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Плательщик ОТКУДА:</label>
+                <div class="dropdown" data-name="payer">
+                <div class="dropdown-toggle form-input">Выберите плательщика</div>
+                    <div class="dropdown-menu">
+                        {% for payer in participants %}
+                            <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="payer" value="">
+                </div>
+
+                <label class="form-label">Получатель КУДА:</label>
+                <div class="dropdown" data-name="recipient">
+                <div class="dropdown-toggle form-input">Выберите получателя</div>
+                    <div class="dropdown-menu">
+                        {% for recipient in participants %}
+                            <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="recipient" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Статья:</label>
+                <div class="dropdown" data-name="item">
+                <div class="dropdown-toggle form-input">Выберите статью</div>
+                    <div class="dropdown-menu">
+                        {% for item in items %}
+                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="item" value="">
+                </div>
+
+                <label class="form-label">Плтаежная система:</label>
+                <div class="dropdown" data-name="payment_system">
+                <div class="dropdown-toggle form-input">Выберите платежную систему</div>
+                    <div class="dropdown-menu">
+                        {% for payment_system in payment_systems %}
+                            <div class="dropdown-item" data-value="{{ payment_system.id }}">{{ payment_system.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="payment_system" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                 <label class="form-label">Проект:</label>
+                <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle form-input">Выберите проект</div>
+                    <div class="dropdown-menu">
+                        {% for project in projects %}
+                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="project" value="">
+                </div>
+            </div> 
+
+            <div class="form-group">
+                <label class="form-label">Сумма оплаты:</label>
+                <input class="form-input" type="number" name="payment_amount" step="0.01">
+            </div>
+            
+            <div class="form-group">
+                 <label class="form-label">Контрагент:</label>
+                <div class="dropdown" data-name="counterparty">
+                <div class="dropdown-toggle form-input">Выберите контрагента</div>
+                    <div class="dropdown-menu">
+                        {% for counterparty in counterparties %}
+                            <div class="dropdown-item" data-value="{{ counterparty.id }}">{{ counterparty.name }}</div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="counterparty" value="">
+                </div>
+            </div> 
+
+            <div class="form-group">
+                <label class="form-label">Сумма комиссии:</label>
+                <input class="form-input" type="number" name="commission_amount" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий:</label>
+                <textarea class="form-input" name="comment" rows="3"></textarea>
+            </div>
+
+
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Изменить запись</span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal-delete">
+    <div class="modal-delete-content">
+        <h2 class="delete-title">Удалить запись?</h2>
+        <p class="delete-instruction">Это действие полностью удалит запись выбранной выплаты из системы.</p>
+    </div>
+    <div class="delete-active">
+        <button class="btn-cancel" id="cancelDelete">
+             <span class="btn-cancel-text">Нет, оставить</span>
+        </button>
+        <button class="button-delete" id="confirmDelete">
+            <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 4.98366C15.225 4.70866 12.4333 4.56699 9.65 4.56699C8 4.56699 6.35 4.65033 4.7 4.81699L3 4.98366M7.58333 4.14199L7.76667 3.05033C7.9 2.25866 8 1.66699 9.40833 1.66699H11.5917C13 1.66699 13.1083 2.29199 13.2333 3.05866L13.4167 4.14199M16.2083 7.61699L15.6667 16.0087C15.575 17.317 15.5 18.3337 13.175 18.3337H7.825C5.5 18.3337 5.425 17.317 5.33333 16.0087L4.79167 7.61699M9.10833 13.7503H11.8833M8.41667 10.417H12.5833" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="button-delete-text">Да, удалить</span>
+        </button>
+    </div>
+</div>
+
+<div id="operAccTable" class="table-container">
+    
+    <!-- Столбец Дата ОДДС -->
+    <div class="table-column table-column--payment-date" id="paymentDateColumn">
+        <div class="table-head table-head--payment-date">
+            <span class="head-title">Дата платежа (ОДДС)</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Дата признания (ОПУ):</label>
-        <input type="date" name="recognition_date" id = "recognitionDate">
+    <!-- Столбец Признания ОПУ -->
+    <div class="table-column table-column--recognition-date" id="recognitionDateColumn">
+        <div class="table-head table-head--recognition-date">
+            <span class="head-title">Дата признания (ОПУ)</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Плательщик -->
+    <div class="table-column table-column--payer" id="payerColumn">
+        <div class="table-head table-head--payer">
+            <span class="head-title">Плательщик ОТКУДА</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Получатель -->
+    <div class="table-column table-column--recipient" id="recipientColumn">
+        <div class="table-head table-head--recipient">
+            <span class="head-title">Получатель КУДА</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Статья -->
+    <div class="table-column table-column--item" id="itemColumn">
+        <div class="table-head table-head--item">
+            <span class="head-title">Статья</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Платежная система -->
+    <div class="table-column table-column--payment-system" id="paymentSystemColumn">
+        <div class="table-head table-head--payment-system">
+            <span class="head-title">Платежная система</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Столбец Проект -->
+    <div class="table-column table-column--project" id="projectColumn">
+        <div class="table-head table-head--project">
+            <span class="head-title">Проект</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
 
-    <div class="form-group">
-        <label>Плательщик ОТКУДА:</label>
-        <select name="payer" id="payer">
-            <option value="">Выберите плательщика</option>
-            {% for payer in participants %}
-            <option value="{{ payer.id }}" >{{ payer.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Сумма оплаты -->
+    <div class="table-column table-column--payment-amount" id="paymentAmountColumn">
+        <div class="table-head table-head--payment-amount">
+            <span class="head-title">Сумма оплаты</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Получатель КУДА:</label>
-        <select name="recipient" id="recipient" required>
-            <option value="">Выберите получателя</option>
-            {% for recipient in participants %}
-            <option value="{{ recipient.id }}" >{{ recipient.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Контрагент -->
+    <div class="table-column table-column--counterparty" id="counterpartyColumn">
+        <div class="table-head table-head--counterparty">
+            <span class="head-title">Контрагент</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Статья:</label>
-        <select name="item" required>
-            <option value="">Выберите статью</option>
-            {% for item in items %}
-            <option value="{{ item.id }}" >{{ item.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Сумма коммиссии -->
+    <div class="table-column table-column--commission-amount" id="commissionAmountColumn">
+        <div class="table-head table-head--commission-amount">
+            <span class="head-title">Сумма коммиссии</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Платежная система:</label>
-        <select name="payment_system" required>
-            <option value="">Выберите платежную систему</option>
-            {% for payment_system in payment_systems %}
-            <option value="{{ payment_system.id }}" >{{ payment_system.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец Комментарий -->
+    <div class="table-column table-column--comment" id="commentColumn">
+        <div class="table-head table-head--comment">
+            <span class="head-title">Комментарий</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+    
+    <!-- Столбец кнопки редактировать -->
+    <div class="table-column table-column--edit" id="editColumn">
+            <div class="table-head table-head--edit">
+                <span class="head-title"></span>
+            </div>
     </div>
 
-    <div class="form-group">
-        <label>Проект:</label>
-        <select name="project">
-            <option value="">Выберите проект</option>
-            {% for project in projects %}
-            <option value="{{ project.id }}" >{{ project.name }}</option>
-            {% endfor %}
-        </select>
+    <!-- Столбец кнопки удалить -->
+    <div class="table-column table-column--delete" id="deleteColumn">
+            <div class="table-head table-head--delete">
+                <span class="head-title"></span>
+            </div>
     </div>
 
-    <div class="form-group">
-        <label>Сумма оплаты:</label>
-        <input type="number" name="payment_amount" step="0.01">
-    </div>
-
-    <div class="form-group">
-        <label>Контрагент:</label>
-        <select name="counterparty" id="counterparty" required>
-            <option value="">Выберите контрагента</option>
-            {% for counterparty in counterparties %}
-            <option value="{{ counterparty.id }}" >{{ counterparty.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-
-    <div class="form-group">
-        <label>Сумма комиссии:</label>
-        <input type="number" name="commission_amount" step="0.01">
-    </div>
-
-    <div class="form-group">
-        <label>Комментарий:</label>
-        <textarea name="comment" rows="3"></textarea>
-    </div>
-
-    <button type="submit">Внести</button>
-
-</form>
-
-
-
-
-<div id="operAccTable">
-    <table>
-        <thead>
-            <tr>
-                <th>Дата платежа (ОДДС)</th>
-                <th>Дата признания (ОПУ)</th>
-                <th>Плательщик</th>
-                <th>Получатель</th>
-                <th>Статья</th>
-                <th>Платежная система</th>
-                <th>Проект</th>
-                <th>Сумма оплаты</th>
-                <th>Контрагент</th>
-                <th>Сумма комиссии</th>
-                <th>Комментарий</th>
-            </tr>
-        </thead>
-        <tbody id="operAccBody">
-            <!-- Данные будут загружены через JavaScript -->
-        </tbody>
-    </table>
 </div>
 <script src="{% static 'js/oper_accounting.js' %}"></script>
 {% endblock %}

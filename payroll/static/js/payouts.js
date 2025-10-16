@@ -1,3 +1,49 @@
+function loadEmployeesForDepartment(departmentId) {
+    const employeeDropdown = document.querySelector('.dropdown[data-name="employee"]');
+    const toggle = employeeDropdown.querySelector('.dropdown-toggle');
+    const menu = employeeDropdown.querySelector('.dropdown-menu');
+    const hiddenInput = employeeDropdown.querySelector('input[type="hidden"]');
+
+    // Сбрасываем dropdown
+    hiddenInput.value = '';
+    toggle.textContent = toggle.dataset.placeholder || 'Выберите сотрудника';
+    menu.innerHTML = '';
+
+    if (!departmentId) return;
+
+    fetch(`/payroll/api/employees/?department=${departmentId}`)
+        .then(response => response.json())
+        .then(employees => {
+            employees.forEach(emp => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.dataset.value = emp.id;
+                item.textContent = emp.full_name;
+
+                // Навешиваем обработчик клика на новый item
+                item.addEventListener('click', () => {
+                    hiddenInput.value = emp.id;
+                    toggle.textContent = emp.full_name;
+                    menu.classList.remove('open');
+                    toggle.classList.remove('active');
+                });
+
+                menu.appendChild(item);
+            });
+        });
+}
+
+document.querySelector('.dropdown[data-name="department"] .dropdown-menu')
+    .addEventListener('click', function(e) {
+        const item = e.target.closest('.dropdown-item');
+        if (!item) return;
+
+        const departmentId = item.dataset.value;
+
+        // Подгружаем сотрудников
+        loadEmployeesForDepartment(departmentId);
+    });
+
 // Загрузка таблицы сотрудников 
 function loadPayout(sortField = '', sortDirection = '') {
     // Формируем URL с параметрами сортировки
@@ -59,12 +105,16 @@ function loadPayout(sortField = '', sortDirection = '') {
         col.querySelectorAll('.table-cell').forEach(cell => cell.remove());
     });
 
+    
+
     // Заполняем колонки данными
     data.forEach(payout => {
+        let [year, month, day] = payout.date.split('-');
+        let formattedDate = `${day}.${month}.${year}`;
 
         columns.date.innerHTML += `
           <div class="table-cell table-cell--date">
-            <span class="cell-title" title="${payout.date}">${payout.date}</span>  
+            <span class="cell-title" title="${formattedDate}">${formattedDate}</span>  
           </div>
         `;
 
@@ -111,7 +161,7 @@ function loadPayout(sortField = '', sortDirection = '') {
 
         columns.type.innerHTML += `
           <div class="table-cell table-cell--type">
-            <span class="cell-title" title="${payout.payment_type}">${payout.payment_type_name}</span>
+            <span class="cell-title" title="${payout.payment_type_name}">${payout.payment_type_name}</span>
           </div>
         `;
 
@@ -245,6 +295,17 @@ document.getElementById('createPayoutForm').addEventListener('submit', function(
     })
     .then(data => {
         this.reset(); // Очищаем форму
+        this.querySelectorAll('.dropdown').forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const hiddenInput = dropdown.querySelector('input[type="hidden"]');
+            
+            // Сброс значения
+            if (hiddenInput) hiddenInput.value = '';
+
+            // Восстановление исходного текста
+            const placeholder = toggle.dataset.placeholder || 'Выберите из списка';
+            toggle.textContent = placeholder;
+        });
         // Закрываем модальное окно
         document.getElementById('createPayoutModal').style.display = 'none';
         document.getElementById('modalBackdrop').style.display = 'none';

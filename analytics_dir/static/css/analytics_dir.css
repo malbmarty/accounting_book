@@ -1,145 +1,865 @@
-body { font-family: Arial, sans-serif; 
-    margin: 0;
-    padding: 20px;
+.table-container {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    min-height: 100vh;
-    background: #EAE9F0;
-    /* padding-top: 120px !important; */
-    margin: 0;
-    overflow: auto;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    isolation: isolate;
+    width: 100%;
+    max-height: 500px;
+    border-radius: 12px;
+    overflow-x: auto; 
+    overflow-y: auto; 
 }
-.content {
-    width: 100%;  /* растягиваем на всю ширину */
+
+/* Стилизация скроллбара для контейнера */
+.table-container::-webkit-scrollbar {
+    width: 2px; /* Для вертикального скролла */
+    height: 2px; /* Для горизонтального скролла */
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #DFDEE5;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(40, 37, 51, 0.14);
+    border-radius: 3px;
+    
+}
+
+.table-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 20px 0;
+}
+
+
+.table-title {
+    margin: 0;
+    height: 35px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 110%;
+    /* or 35px */
+    color: #282533;
+    white-space: nowrap;
+    margin: 0;
+}
+
+
+.table-active {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+    margin: 0;
+    width: 604px;
+    height: 40px;
+}
+
+
+.position {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px 10px 14px;
+    gap: 6px;
+    width: 220px;
+    height: 40px;
+    background: #F6F5FA;
+    border-radius: 10px;
+
+    /* Title Text */
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+
+    color: rgba(40, 37, 51, 0.9);
+
+}
+
+
+.dropdown {
+    position: relative;
+    width: 400px;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.dropdown-toggle {
+    background: #F6F5FA;
+    border-radius: 10px;
+    padding: 10px 12px 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 140%;
+    color: rgba(40, 37, 51, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     box-sizing: border-box;
 }
-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-th { background-color: #f2f2f2; }
-.filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
-.form-group { margin: 8px 0; }
-#editAccrualForm,
-#editOperAccForm,
-#editPlanningForm,
-#editEmployeeForm, 
-#editPayoutForm {
-    max-width: 600px;   /* ограничиваем ширину */
-    margin: 0 auto;     /* центрируем по горизонтали */
-}
-/* Форма */
 
-#paymentCalendarForm {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-toggle::after {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M3.13263 5.02888C3.04707 4.92961 3 4.80291 3 4.67185C3 4.36983 3.24483 4.125 3.54685 4.125H8.45315C8.75517 4.125 9 4.36983 9 4.67185C9 4.80291 8.95293 4.92961 8.86737 5.02888L6.5994 7.66017C6.45692 7.82546 6.24952 7.92051 6.0313 7.92051H5.9687C5.75048 7.92051 5.54308 7.82546 5.4006 7.66017L3.13263 5.02888Z' fill='%23282533' fill-opacity='0.7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s;
 }
 
-#createAccrualForm {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    padding: 8px;
+    left: 0;
+    width: 100%;
+    background: #F6F5FA;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(40, 37, 51, 0.1);
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+    overflow: hidden;
 }
 
-#createPayoutForm {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-menu.open {
+    display: flex;
 }
 
-#createOperAccForm {
-    display: grid;
-    grid-template-columns: repeat(11, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-#createPlannigForm {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 6 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-item:hover {
+    background: rgba(40, 37, 51, 0.05);
 }
 
-#createEmployeeForm {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-item.active {
+    background: rgba(40, 37, 51, 0.08);
+    font-weight: 400;
 }
 
-#paymentCalendarForm .form-group,
-#createPlannigForm .form-group,
-#createOperAccForm .form-group,
-#createAccrualForm .form-group,
-#createPayoutForm .form-group,
-#createEmployeeForm .form-group {
-    margin: 0;
+.modal-backdrop {
+    display: none; /* скрыт по умолчанию */
+    position: fixed;
+    z-index: 999; /* ниже окна */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Фон модального окна */
+.modal {
+    display: none; /* скрыто по умолчанию */
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px;
+    box-sizing: border-box;
+    gap: 32px;
+    isolation: isolate;
+
+    position: fixed;
+    left: calc(50% - 440px/2);
+    top: calc(50% - 648px/2);
+    z-index: 1000;
+
+    background: #F6F5FA;
+    border-radius: 24px;
+    align-items: center;
+}
+
+.modal--project {
+    width: 440px;
+    height: 234px;
+}
+
+.modal--participant {
+    width: 440px;
+    height: 251px;
+}
+
+.modal--system {
+    width: 440px;
+    height: 234px;
+}
+
+.modal--counterparty {
+    width: 440px;
+    height: 234px;
+}
+
+.modal--group {
+    width: 440px;
+    height: 234px;
+}
+
+.modal--type {
+    width: 440px;
+    height: 234px;
+}
+
+.modal--var {
+    width: 440px;
+    height: 299px;
+}
+
+.modal--item {
+    width: 440px;
+    height: 429px;
+}
+
+.modal--freq {
+    width: 440px;
+    height: 234px;
+}
+
+/* Контент окна */
+.modal-content {
     display: flex;
     flex-direction: column;
-    grid-row: span 2; /* Занимает 2 строки в grid */
-    height: auto;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 20px;
+
+    width: 400px;
+    height: 536px;
 }
 
-#paymentCalendarForm label,
-#createPlannigForm label,
-#createOperAccForm label,
-#createAccrualForm label,
-#createPayoutForm label,
-#createEmployeeForm label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 4px;
-    font-size: 16px;
+
+/* Кнопка закрытия */
+.modal-close {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 416px;
+    top: 16px;
+}
+
+/* эффект при наведении */
+.modal-close:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+.modal-content-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 6px;
+
+    width: 400px;
+    height: 45px;
+    align-self: flex-start;
+}
+
+.create-title {
+    margin: 0;
     white-space: nowrap;
+    height: 22px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 110%;
+    /* identical to box height, or 22px */
+
+    color: #282533;
+}
+
+.create-instruction {
+    margin: 0;
+    white-space: nowrap;
+    height: 17px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 124%;
+    /* or 17px */
+
+    color: #282533;
+
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 6px;
+
+    width: 400px;
+    height: 57px;
+    align-self: flex-start;
+    margin-bottom: 16px;
+}
+
+.form-group.form-group--fio {
+    height: 57px;
+}
+
+.form-label {
+    margin: 0;
+    white-space: nowrap;
+    height: 15px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 124%;
+    /* identical to box height, or 15px */
+
+    color: #282533;
+}
+
+.form-input {
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 6px;
+
+    width: 400px;
+    height: 40px;
+
+    background: #F6F5FA;
+    border: 1px solid rgba(40, 37, 51, 0.08);
+    border-radius: 10px;
+
+    /* Title Text */
+    white-space: nowrap;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+
+}
+
+.option-text {
+    white-space: nowrap;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.create-active {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 8px;
+    margin-top: 30px;
+
+    width: 400px;
+    height: 40px;
+}
+
+.button-cancel {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 16px;
+    gap: 6px;
+
+    width: 85px;
+    height: 40px;
+
+    border: 1px solid rgba(40, 37, 51, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.button-add {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    gap: 6px;
+
+    width: 284px;
+    height: 40px;
+
+    background: #FF3C3F;
+    border-radius: 12px;
+    border: none;       /* убираем стандартную рамку */
+    outline: none;      /* убираем обводку при фокусе, если нужно */
+    cursor: pointer;    /* курсор при наведении */
+
+
+}
+
+.button-add-text {
+ 
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #F6F5FA;
+
+
+}
+
+.button-cancel-text {
+
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #282533;
+
+}
+
+/* Hover для кнопки "Отмена" */
+.button-cancel:hover {
+    outline: 2px solid rgba(40, 37, 51, 0.2);
+}
+
+/* Hover для кнопки "Добавить" */
+.button-add:hover {
+    outline: 2px solid #FFB3B5;
+}
+
+.button-cancel:focus {
+    outline: rgba(40, 37, 51, 0.2);
+}
+
+/* Hover для кнопки "Добавить" */
+.button-add:focus {
+    outline: 2px solid #FFB3B5;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.edit-button:hover svg path {
+  stroke: #1E34FF; /* немного темнее при наведении */
+}
+
+.edit-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.delete-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.delete-button:hover svg path {
+  stroke: #a2092f; /* немного темнее при наведении */
+}
+
+.delete-button:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+.modal-delete {
+    display: none; /* скрыто по умолчанию */
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    box-sizing: border-box;
+    position: fixed;
+    width: 448px;
+    height: 170px;
+    left: calc(50% - 448px/2);
+    top: calc(50% - 170px/2);
+    z-index: 1000;
+}
+
+.modal-delete-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px 20px 12px;
+    box-sizing: border-box;
+    gap: 10px;
+
+    width: 448px;
+    height: 98px;
+
+    background: #F6F5FA;
+    border-radius: 24px 24px 0px 0px;
+}
+
+
+.delete-title {
+    margin: 0;
+    height: 22px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 110%;
+    /* identical to box height, or 22px */
+
+    color: #282533;
+}
+
+.delete-instruction {
+    margin: 0;
+    height: 34px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 124%;
+    /* or 17px */
+
+    color: rgba(40, 37, 51, 0.8);
+}
+
+.delete-active {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 12px 20px 20px;
+    box-sizing: border-box;
+    gap: 8px;
+
+    width: 448px;
+    height: 72px;
+
+    background: #F6F5FA;
+    border-radius: 0px 0px 24px 24px;
+}
+
+.button-delete {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 14px;
+    gap: 6px;
+
+    width: 267px;
+    height: 40px;
+
+    background: #BD0A37;
+    border-radius: 12px;
+}
+
+.button-delete-text {
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #F6F5FA;
+}
+
+
+.button-delete:hover {
+    outline: 2px solid #FFB3B5;
+}
+
+.button-delete:focus {
+    outline: 2px solid #FFB3B5;
+}
+
+.btn-cancel {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    gap: 6px;
+
+    width: 133px;
+    height: 40px;
+
+    border: 1px solid rgba(40, 37, 51, 0.08);
+    border-radius: 12px;
+}
+
+.btn-cancel-text {
+    margin: 0;
+    white-space: nowrap;
+    height: 20px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #282533;
+}
+
+.btn-cancel:hover {
+    outline: 2px solid rgba(40, 37, 51, 0.2);
+}
+
+
+.btn-cancel:focus {
+    outline: rgba(40, 37, 51, 0.2);
+}
+
+.table-column {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* чтобы .table-cell растягивалась по ширине колонки */
+    flex-shrink: 0;       /* колонка не сжимается */
+    flex-grow: 0;         /* колонка не растёт сверх своей ширины */
+    padding: 0px;
+    isolation: isolate;
+}
+
+.table-column--fio { width: 18%; flex: 0 0 18%; }
+.table-column--position { width: 12%; flex: 0 0 12%; }
+.table-column--depart { width: 12%; flex: 0 0 12%; }
+.table-column--status { width: 9%; flex: 0 0 9%; }
+.table-column--type { width: 14%; flex: 0 0 14%; }
+.table-column--bank { width: 12%; flex: 0 0 12%; }
+.table-column--card { width: 17%; flex: 0 0 17%;}
+.table-column--edit { width: 3%; flex: 0 0 3%; }
+.table-column--delete { width: 3%; flex: 0 0 3%; }
+
+
+.table-head {
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 14px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 0px;
+    border-style: solid;
+    border-color: #DFDEE5;
+
+    position: sticky;
+    top: 0;
+    
+}
+
+.table-head--check {
+    padding: 0px 4px;
+} 
+.table-head--edit {
+    padding: 0px 4px;
+} 
+.table-head--delete {
+    padding: 0px 4px;
+} 
+
+
+/* .table-head--fio { width: 20%; }
+.table-head--position { width: 16%; }
+.table-head--depart { width: 14%; }
+.table-head--status { width: 12%; }
+.table-head--type { width: 16%; }
+.table-head--bank { width: 14%; }
+.table-head--card { width: 20%; } */
+
+.head-title {
+    margin: 0;
+    /* width: 35px;
+    height: 16px; */
+    white-space: nowrap;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+
+}
+
+.table-icon {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.table-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    gap: 6px;
+
     overflow: hidden;
     text-overflow: ellipsis;
-}
+    white-space: nowrap;
 
-#paymentCalendarForm input,
-#createPlannigForm input,
-#createOperAccForm input,
-#createAccrualForm input,
-#createPayoutForm input,
-#createEmployeeForm input,
-#paymentCalendarForm select,
-#createPlannigForm select,
-#createOperAccForm select,
-#createAccrualForm select,
-#createPayoutForm select,
-#createEmployeeForm select,
-#paymentCalendarForm textarea,
-#createPlannigForm textarea
-#createOperAccForm textarea,
-#createAccrualForm textarea,
-#createPayoutForm textarea, 
-#createEmployeeForm textarea {
     width: 100%;
-    box-sizing: border-box;
-    padding: 8px;
-    font-size: 16px;
-    min-height: 36px;
+    height: 40px;
+
+    background: rgba(246, 245, 250, 0.4);
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
 }
 
-label { display: block; margin-bottom: 5px; font-size: 16px;}
-input, select, textarea { width: 80%; padding: 10px; font-size: 16px;}
-button { padding: 10px 15px; background: #3386d8; color: white; border: none; cursor: pointer; font-size: 16px;}
-button:hover { background: #0056b3; }
-.icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 8px;
-    font-size: 16px;
+.table-cell--fio {
+  padding: 8px;
+}
+
+.table-cell--depart {
+  padding: 8px;
+}
+
+.table-cell--edit {
+  justify-content: center;
+  padding: 8px;
+}
+
+.table-cell--delete {
+  justify-content: center;
+  padding: 8px;
+}
+
+
+.women_portrait {
+    width: 24px;
+    height: 24px;
+    background: url("/static/images/woman_portrait.png") center/cover no-repeat;
     border-radius: 4px;
-    transition: background-color 0.2s;
+}
+
+.cell-title {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;             /* скрывать лишнее */
+    text-overflow: ellipsis;      /* троеточие */
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+    color: #282533;
+    display: block;               /* важно для text-overflow */
+    max-width: 100%;              /* чтобы ограничивалось шириной родителя */
+}
+
+/* Скругляем только последние ячейки в колонке */
+.table-column--fio .table-cell--fio:last-child {
+    border-bottom-left-radius: 12px;
+}
+
+.table-column--delete .table-cell--delete:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+.cell-depart {
+    box-sizing: border-box;
+
+    /* Auto layout */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 6px;
+    gap: 4px;
+
+    height: 25px;
+
+    /* background: rgba(87, 210, 30, 0.12);
+    border: 1px solid rgba(87, 210, 30, 0.16); */
+    border-radius: 6px;
 }

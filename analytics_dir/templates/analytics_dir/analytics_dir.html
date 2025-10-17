@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load analytics_dir_custom_tags %}
 
 {% block title %}Управление справочником для аналитики{% endblock %}
 
@@ -8,267 +9,521 @@
 {% endblock %}
 
 {% block content %}
-<h1>Управление справочником для аналитики</h1>
+<div id="itemsColorsData" 
+     data-colors='{{ items_colors|json_serialize }}'
+     style="display: none;">
+</div>
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-    
-    <!-- Проекты -->
-    <div>
-        <h3>Проекты</h3>
-        <form id="projectForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="projectId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
+<div class="table-top">
+    <h2 class="table-title">Справочник для аналитики</h2>
+    <div class="table-active">
+        <div class="dropdown" data-name="position">
+            <div class="dropdown-toggle select-position">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z"
+                          stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Добавить:
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('projectForm')">Отмена</button>
-        </form>
-        <ul id="projectList">
-            {% for project in projects %}
-            <li>
-                {{ project.name }}
-                <button class="icon-btn" onclick="editItem('project', '{{ project.id }}', '{{ project.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('projects', '{{ project.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+            <div class="dropdown-menu">
+                <div class="dropdown-item" data-modal="createProjectModal">Проект</div>
+                <div class="dropdown-item" data-modal="createParticipantModal">Плательщика/получателя</div>
+                <div class="dropdown-item" data-modal="createSystemModal">Платежную систему</div>
+                <div class="dropdown-item" data-modal="createCounterpartyModal">Контрагента</div>
+                <div class="dropdown-item" data-modal="createGroupModal">Группу</div>
+                <div class="dropdown-item" data-modal="createFlowTypeModal">Тип потока</div>
+                <div class="dropdown-item" data-modal="createVarModal">Изменчивость</div>
+                <div class="dropdown-item" data-modal="createItemModal">Статью</div>
+                <div class="dropdown-item" data-modal="createFreqModal">Частоту платежа</div>
+            </div>
+        </div>
     </div>
+</div>
 
-        <!-- Плательщики/Получатели -->
-    <div>
-        <h3>Плательщики/Получатели</h3>
-        <form id="participantForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="participantId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название/имя" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('participantForm')">Отмена</button>
-        </form>
-        <ul id="participantList">
-            {% for participant in participants %}
-            <li>
-                {{ participant.name }}
-                <button class="icon-btn" onclick="editItem('participant', '{{ participant.id }}', '{{ participant.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('participants', '{{ participant.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
+<div id="modalBackdrop" class="modal-backdrop"></div>
 
-        <!-- Платежные системы -->
-    <div>
-        <h3>Платежные системы</h3>
-        <form id="paymentSystemForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="paymentSystemId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('paymentSystemForm')">Отмена</button>
-        </form>
-        <ul id="paymentSystemList">
-            {% for payment_system in payment_systems %}
-            <li>
-                {{ payment_system.name }}
-                <button class="icon-btn" onclick="editItem('paymentSystem', '{{ payment_system.id }}', '{{ payment_system.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('payment-systems', '{{ payment_system.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+<div id="createProjectModal" class="modal modal--project">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление проекта</h2>
+        <h3 class="create-instruction">Внесите информацию о проекте</h3>
     </div>
-    
-        <!-- Контрагент -->
-    <div>
-        <h3>Контрагенты</h3>
-        <form id="counterpartyForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="counterpartyId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('counterpartyForm')">Отмена</button>
-        </form>
-        <ul id="counterpartyList">
-            {% for counterparty in counterparties %}
-            <li>
-                {{ counterparty.name }}
-                <button class="icon-btn" onclick="editItem('counterparty', '{{ counterparty.id }}', '{{ counterparty.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('counterparties', '{{ counterparty.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
+    <form id="projectForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="projectId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название проекта" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить проект</span>
+            </button>
+        </div>
+    </form>
+</div>
 
-    <!-- Группы -->
-    <div>
-        <h3>Группы</h3>
-        <form id="groupForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="groupId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('groupForm')">Отмена</button>
-        </form>
-        <ul id="groupList">
-            {% for group in groups %}
-            <li>
-                {{ group.name }}
-                <button class="icon-btn" onclick="editItem('group', '{{ group.id }}', '{{ group.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('groups', '{{ group.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+<div id="createParticipantModal" class="modal modal--participant">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление плательщика/получателя</h2>
+        <h3 class="create-instruction">Внесите информацию о плательщике/получателе</h3>
     </div>
+    <form id="participantForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="participantId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название Плательщика/получателя" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить плательщика/получателя</span>
+            </button>
+        </div>
+    </form>
+</div>
 
-        <!-- Тип потока -->
-    <div>
-        <h3>Тип потока</h3>
-        <form id="flowTypeForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="flowTypeId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('flowTypeForm')">Отмена</button>
-        </form>
-        <ul id="flowTypeList">
-            {% for flow_type in flow_types %}
-            <li>
-                {{ flow_type.name }}
-                <button class="icon-btn" onclick="editItem('flowType', '{{ flow_type.id }}', '{{ flow_type.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('flow-types', '{{ flow_type.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+<div id="createSystemModal" class="modal modal--system">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление платежной системы</h2>
+        <h3 class="create-instruction">Внесите информацию о платежной системе</h3>
     </div>
+    <form id="paymentSystemForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="paymentSystemId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название платежной системы" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить платежную систему</span>
+            </button>
+        </div>
+    </form>
+</div>
 
-    <!-- Изменчивость -->
-    <div>
-        <h3>Изменчивость</h3>
-        <form id="variabilityForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="variabilityId">
-            <div class="form-group">
-                <select name="flow_type" id="flowType" required>
-                    <option value="">Выберите тип потока</option>
-                    {% for flow_type in flow_types %}
-                    <option value="{{ flow_type.id }}">{{ flow_type.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название типа изменчивости" required>
-            </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('variabilityForm')">Отмена</button>
-        </form>
-        <ul id="variabilityList">
-            {% for variability in variabilities %}
-            <li>
-                [{{ variability.flow_type.name }}] {{ variability.name }}
-                <button class="icon-btn" onclick="editItem('variability', '{{ variability.id }}', '{{ variability.name }}', '', '{{ variability.flow_type.id }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('variabilities', '{{ variability.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+<div id="createCounterpartyModal" class="modal modal--counterparty">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление контрагента</h2>
+        <h3 class="create-instruction">Внесите информацию о контрагенте</h3>
     </div>
+    <form id="counterpartyForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="counterpartyId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название контрагента" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить контрагента</span>
+            </button>
+        </div>
+    </form>
+</div>
 
-   <!-- Статьи (Item) -->
-    <div>
-        <h3>Статьи</h3>
-        <form id="itemForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="itemId">
-            
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название статьи" required>
-            </div>
-            
-            <div class="form-group">
-                <select name="group" required>
-                    <option value="">Выберите группу</option>
-                    {% for group in groups %}
-                    <option value="{{ group.id }}">{{ group.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <select name="flow_type" id="itemFlowType" required>
-                    <option value="">Выберите тип потока</option>
-                    {% for flow_type in flow_types %}
-                    <option value="{{ flow_type.id }}">{{ flow_type.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <select name="variability" id="itemVariability">
-                    <option value="">Выберите изменчивость</option>
-                    {% for variability in variabilities %}
-                    <option value="{{ variability.id }}" data-flow-type="{{ variability.flow_type.id }}">
-                        {{ variability.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('itemForm')">Отмена</button>
-        </form>
+<div id="createGroupModal" class="modal modal--group">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление группы</h2>
+        <h3 class="create-instruction">Внесите информацию о группе</h3>
+    </div>
+    <form id="groupForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="groupId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название группы" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить группу</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="createFlowTypeModal" class="modal modal--type">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление типа потока</h2>
+        <h3 class="create-instruction">Внесите информацию о типе потока</h3>
+    </div>
+    <form id="flowTypeForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="flowTypeId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название типа потока" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить тип потока</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="createVarModal" class="modal modal--var">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление типа изменчивости</h2>
+        <h3 class="create-instruction">Внесите информацию о типе изменчивости</h3>
+    </div>
+    <form id="variabilityForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="variabilityId"> -->
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название изменчивости" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Тип потока:</label>
+            <select name="flow_type" id="flowType" required>
+                <option value="">Выберите тип потока</option>
+                {% for flow_type in flow_types %}
+                <option value="{{ flow_type.id }}">{{ flow_type.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
         
-        <ul id="itemList">
-            {% for item in items %}
-            <li>
-                <strong>{{ item.name }}</strong><br>
-                <small>
-                    Группа: {{ item.group.name }} | 
-                    Тип: {{ item.flow_type.name }} |
-                    {% if item.variability %}Изменчивость: {{ item.variability.name }}{% endif %}
-                </small>
-                <button class="icon-btn" onclick="editItem('item', 
-                    '{{ item.id }}', 
-                    '{{ item.name }}', 
-                    '{{ item.group.id }}',
-                    '{{ item.flow_type.id }}',
-                    '{{ item.variability.id }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('items', '{{ item.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить тип изменчивости</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="createItemModal" class="modal modal--item">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление статьи</h2>
+        <h3 class="create-instruction">Внесите информацию о статье</h3>
+    </div>
+    <form id="itemForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="itemId"> -->
+        
+        <div class="form-group">
+            <label class="form-label">Название:</label>
+            <input class="form-input" type="text" name="name" placeholder="Название статьи" required>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Группа:</label>
+            <div class="dropdown" data-name="group">
+            <div class="dropdown-toggle form-input">Выберите группу</div>
+                <div class="dropdown-menu">
+                    {% for group in groups %}
+                        <div class="dropdown-item" data-value="{{ group.id }}">{{ group.name }}</div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="group" value="">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Тип потока:</label>
+            <div class="dropdown" data-name="flow_type">
+            <div class="dropdown-toggle form-input">Выберите тип потока</div>
+                <div class="dropdown-menu">
+                    {% for flow_type in flow_types %}
+                        <div class="dropdown-item" data-value="{{ flow_type.id }}">{{ flow_type.name }}</div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="flow_type" value="">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Тип изменчивости:</label>
+            <div class="dropdown" data-name="variability">
+            <div class="dropdown-toggle form-input">Выберите тип изменчивости</div>
+                <div class="dropdown-menu">
+                    {% for variability in variabilities %}
+                        <div class="dropdown-item" data-value="{{ variability.id }}">{{ variability.name }}</div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="variability" value="">
+            </div>
+        </div>
+        
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить статью</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="createFreqModal" class="modal modal--freq">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content-head">
+        <h2 class="create-title">Добавление частоты платежа</h2>
+        <h3 class="create-instruction">Внесите информацию о частоте платежа</h3>
+    </div>
+    <form id="frequencyForm">
+        {% csrf_token %}
+        <!-- <input type="hidden" name="id" id="frequencyId"> -->
+        <div class="form-group">
+            <input class="form-input" type="text" name="name" placeholder="Название" required>
+        </div>
+        <div class="create-active">
+            <button type="button" class="button-cancel">
+                <span class="button-cancel-text">Отмена</span>
+            </button>
+            <button type="submit" class="button-add">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="button-add-text">Добавить частоту</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div id="dirTable" class="table-container">
+
+    <div class="table-column table-column" id="projectColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Проекты</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for project in projects %}
+            <div class="table-cell">
+                <span class="cell-title">{{ project.name }}</span>
+            </div>
+        {% endfor %}
     </div>
 
-    <!-- Частота -->
-    <div>
-        <h3>Частота платежа</h3>
-        <form id="frequencyForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="frequencyId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название" required>
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Плательщики/получатели</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for participant in participants %}
+            <div class="table-cell">
+                <span class="cell-title">{{ participant.name }}</span>
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('frequencyForm')">Отмена</button>
-        </form>
-        <ul id="frequencyList">
-            {% for frequency in frequencies %}
-            <li>
-                {{ frequency.name }}
-                <button class="icon-btn" onclick="editItem('frequency', '{{ frequency.id }}', '{{ frequency.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('frequencies', '{{ frequency.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Платежные системы</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for payment_system in payment_systems %}
+            <div class="table-cell">
+                <span class="cell-title">{{ payment_system.name }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Контрагенты</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for counterparty in counterparties %}
+            <div class="table-cell">
+                <span class="cell-title">{{ counterparty.name }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Группы</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for group in groups %}
+            <div class="table-cell">
+                <span class="cell-title">{{ group.name }}</span>{{ group.name }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Типы потока</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for flow_type in flow_types %}
+            <div class="table-cell">
+                <span class="cell-title">{{ flow_type.name }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Типы изменчивости</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for variability in variabilities %}
+            <div class="table-cell">
+                <span class="cell-title">[{{ variability.flow_type.name }}] {{ variability.name }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Статьи</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for item in items %}
+            <div class="table-cell">
+                <span class="cell-title">{{ item.group.name }} | {{ item.flow_type.name }} | {% if item.variability %}Изменчивость: {{ item.variability.name }}{% endif %}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-column table-column" id="participantColumn">
+        <div class="table-head table-head">
+            <span class="head-title">Частоты</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for frequency in frequencies %}
+            <div class="table-cell">
+                <span class="cell-title">{{ frequency.name }}</span>
+            </div>
+        {% endfor %}
     </div>
 
 </div>
+
 <script src="{% static 'js/analytics_dir.js' %}"></script>
 {% endblock %}

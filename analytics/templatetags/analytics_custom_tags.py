@@ -14,4 +14,6 @@ def dict_get(d, key):
     """Возвращает значение словаря по ключу или None, если ключа нет"""
     return d.get(key)
 
-
+@register.simple_tag
+def zip_lists(list1, list2):
+    return zip(list1, list2)

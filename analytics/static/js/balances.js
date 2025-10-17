@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll('.incoming-balance').forEach(input => {
+    document.querySelectorAll('.input-balance').forEach(input => {
         input.addEventListener('change', function() {
             const counterpartyId = this.dataset.counterparty;
             const amount = this.value;
@@ -29,6 +29,39 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(err => console.error("Ошибка:", err));
         });
     });
+
+    // === 2. Dropdown для выбора года ===
+    const dropdown = document.querySelector('.dropdown');
+    if (dropdown) {  // на случай, если блок отсутствует на странице
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        const items = dropdown.querySelectorAll('.dropdown-item');
+        const hiddenInput = document.getElementById('year-input');
+        const form = dropdown.closest('form');
+
+        // показать/скрыть меню
+        toggle.addEventListener('click', () => {
+            menu.classList.toggle('open');
+        });
+
+        // выбор года
+        items.forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.getAttribute('data-value');
+                hiddenInput.value = value;
+                toggle.textContent = `Год: ${value}`;
+                menu.classList.remove('open');
+                form.submit(); // отправка формы
+            });
+        });
+
+        // закрытие по клику вне
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target)) {
+                menu.classList.remove('open');
+            }
+        });
+    }
 });
 
 /**

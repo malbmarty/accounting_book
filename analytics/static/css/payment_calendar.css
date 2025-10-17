@@ -1,146 +1,732 @@
-body { font-family: Arial, sans-serif; 
-    margin: 0;
-    padding: 20px;
+
+
+
+.summary-top {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    min-height: 100vh;
-    background: #EAE9F0;
-    /* padding-top: 120px !important; */
-    margin: 0;
-    overflow: auto;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px;
+
+    width: 100%;
+    height: 40px;
 }
-.content {
-    width: 100%;  /* растягиваем на всю ширину */
+
+.summary-head {
+    margin: 0;
+    white-space: nowrap;
+    height: 35px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 110%;
+    /* or 35px */
+
+    color: #282533;
+}
+
+.form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+
+    margin: 0;
+    height: 40px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px 10px 14px;
+    box-sizing: border-box;
+    gap: 2px;
+
+    /* width: 178px; */
+    height: 40px;
+
+    background: #F6F5FA;
+    border-radius: 10px;
+
+    
+}
+
+/* Frame 2087328211 */
+
+/* Auto layout */
+/* display: flex;
+flex-direction: row;
+align-items: center;
+padding: 10px 12px 10px 14px;
+gap: 6px;
+
+width: 178px;
+height: 40px;
+
+background: #F6F5FA;
+border-radius: 10px; */
+
+
+
+.form-group--period {
+    width: 178px;
+}
+
+.form-group--project {
+    width: 160px;
+}
+
+.form-group--interval {
+    width: 178px;
+}
+
+
+.form-input {
+    width: 100%;
+    height: 20px; /* чуть выше для лучшей кликабельности */
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px;
+    margin: 0;
+    white-space: nowrap;
+    font-family: 'Mulish', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 140%;
+    color: rgba(40, 37, 51, 0.9);
+
+    border: 0px solid #ccc;
+    border-radius: 4px;
+    background: #F6F5FA;
+
+    box-sizing: border-box;
+
+    /* для кросс-браузерной корректности */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    cursor: pointer;
+}
+
+
+
+.form-input::-webkit-inner-spin-button,
+.form-input::-webkit-calendar-picker-indicator {
+    display: block; /* календарь виден */
+    cursor: pointer;
+}
+
+
+.form-input::-webkit-calendar-picker-indicator {
+    background: center / 12px no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path fill-rule='evenodd' clip-rule='evenodd' d='M3.13263 5.02888C3.04707 4.92961 3 4.80291 3 4.67185C3 4.36983 3.24483 4.125 3.54685 4.125H8.45315C8.75517 4.125 9 4.36983 9 4.67185C9 4.80291 8.95293 4.92961 8.86737 5.02888L6.5994 7.66017C6.45692 7.82546 6.24952 7.92051 6.0313 7.92051H5.9687C5.75048 7.92051 5.54308 7.82546 5.4006 7.66017L3.13263 5.02888Z' fill='%23282533' fill-opacity='0.7'/></svg>");
+    color: transparent;
+    background-size: 12px 12px; 
+    opacity: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+}
+
+
+.form-input::-webkit-calendar-picker-indicator {
+    color: #333;
+    opacity: 0.6;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #666;
+    box-shadow: 0 0 0 2px rgba(100, 100, 100, 0.2);
+}
+
+.btn_build {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 14px 10px 12px;
+    box-sizing: border-box;
+    gap: 6px;
+
+    width: 178px;
+    height: 40px;
+
+    background: #FF3C3F;
+    border-radius: 10px;
+    border-width: 0;
+
+    margin: 0;
+    white-space: nowrap;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 140%;
+    /* identical to box height, or 20px */
+    text-align: center;
+
+    color: #F6F5FA;
+
+}
+
+.dropdown {
+    position: relative;
+    width: 220px;
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.dropdown-toggle {
+    background: #F6F5FA;
+    border-radius: 10px;
+    padding: 10px 0px 10px 0px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 140%;
+    color: rgba(40, 37, 51, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     box-sizing: border-box;
 }
 
-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-th { background-color: #f2f2f2; }
-.filters { background: #f9f9f9; padding: 15px; margin: 20px 0; }
-.form-group { margin: 8px 0; }
-#editAccrualForm,
-#editOperAccForm,
-#editPlanningForm,
-#editEmployeeForm, 
-#editPayoutForm {
-    max-width: 600px;   /* ограничиваем ширину */
-    margin: 0 auto;     /* центрируем по горизонтали */
-}
-/* Форма */
-
-#paymentCalendarForm {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-toggle::after {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M3.13263 5.02888C3.04707 4.92961 3 4.80291 3 4.67185C3 4.36983 3.24483 4.125 3.54685 4.125H8.45315C8.75517 4.125 9 4.36983 9 4.67185C9 4.80291 8.95293 4.92961 8.86737 5.02888L6.5994 7.66017C6.45692 7.82546 6.24952 7.92051 6.0313 7.92051H5.9687C5.75048 7.92051 5.54308 7.82546 5.4006 7.66017L3.13263 5.02888Z' fill='%23282533' fill-opacity='0.7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s;
 }
 
-#createAccrualForm {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: #F6F5FA;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(40, 37, 51, 0.1);
+    display: none;
+    flex-direction: column;
+    z-index: 60;
+    overflow: hidden;
 }
 
-#createPayoutForm {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-menu.open {
+    display: flex;
 }
 
-#createOperAccForm {
-    display: grid;
-    grid-template-columns: repeat(11, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-#createPlannigForm {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* 6 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-item:hover {
+    background: rgba(40, 37, 51, 0.05);
 }
 
-#createEmployeeForm {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 полей как 7 столбцов таблицы */
-    gap: 5px; /* без промежутков, чтобы совпадало с таблицей */
-    margin-bottom: 20px;
-    align-items: start;
+.dropdown-item.active {
+    background: rgba(40, 37, 51, 0.08);
+    font-weight: 400;
 }
 
-#paymentCalendarForm .form-group,
-#createPlannigForm .form-group,
-#createOperAccForm .form-group,
-#createAccrualForm .form-group,
-#createPayoutForm .form-group,
-#createEmployeeForm .form-group {
+.table-container {
+    width: 100%;
+    max-height: 560px;
+    margin-top: 20px;
+    overflow: auto;
+    padding-top: 20px;
+    padding-bottom: 8px;
+    padding-right: 8px;
+    overflow-x: auto; /* горизонтальная прокрутка */
+    overflow-y: auto; /* вертикальная прокрутка */
+}
+
+.flow-info {
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px 14px 10px;
+
+    width: 100%;
+    height: 44px;
+
+    background: #F6F5FA;
+    border: 1px solid rgba(40, 37, 51, 0.06);
+    border-radius: 12px;
+}
+
+.flow-name {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 6px;
+
     margin: 0;
+    width: 66px;
+    height: 16px;
+
+    /* Title Text */
+
+    margin: 0;
+    white-space: nowrap;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+
+}
+
+.data-column {
     display: flex;
     flex-direction: column;
-    grid-row: span 2; /* Занимает 2 строки в grid */
+    align-items: flex-start;
+    padding: 0px;
+    gap: 6px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    height: 150px;
+}
+
+
+.table-head {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 56px;
+    gap: 6px;
+}
+
+.head-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+}
+
+.head-period {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    isolation: isolate;
+}
+
+.head-column {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+
+    background: #F6F5FA;
+    border: 1px solid #DFDEE5;
+}
+
+.head-column--item { 
+    width: 362px; 
+    height: 56px; 
+    border-radius: 12px 12px 12px 12px; 
+    padding: 20px 14px;
+    box-sizing: border-box;
+}
+
+.head-column--interval { 
+    width: 330px; 
+    height: 28px; 
+    border-radius: 12px 12px 0px 0px; 
+    /* padding: 6px 14px;
+    box-sizing: border-box; */
+}
+
+.head-column--total { 
+    width: 330px; 
+    height: 28px; 
+    border-radius: 12px 12px 0px 0px; 
+    padding: 6px 14px;
+    box-sizing: border-box;
+}
+
+.head-column--finance { 
+    width: 330px;  
+    height: 28px; 
+    border-radius: 0px 0px 12px 12px; 
+    /* padding: 6px 14px;
+    box-sizing: border-box; */
+}
+
+.finance-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 14px;
+    box-sizing: border-box;
+    gap: 10px;
+
+    width: 110px;
+    height: 28px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.interval-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 14px;
+    box-sizing: border-box;
+    gap: 10px;
+
+    width: 110px;
+    height: 28px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.interval-head--start {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 12px 0px 0px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.interval-head--end {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 0px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.interval-head--interval {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 12px 0px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.finance-head--plan {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 0px 12px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.finance-head--fact {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 0px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.finance-head--var {
+    background: #F6F5FA;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 0px 0px 12px 0px; 
+    border-style: solid;
+    border-color: #DFDEE5;
+}
+
+.head-title {
+    margin: 0;
+    white-space: nowrap;
+    height: 16px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.data-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    gap: 6px;
+
+    width: auto;
     height: auto;
 }
 
-#paymentCalendarForm label,
-#createPlannigForm label,
-#createOperAccForm label,
-#createAccrualForm label,
-#createPayoutForm label,
-#createEmployeeForm label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 4px;
-    font-size: 16px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-#paymentCalendarForm input,
-#createPlannigForm input,
-#createOperAccForm input,
-#createAccrualForm input,
-#createPayoutForm input,
-#createEmployeeForm input,
-#paymentCalendarForm select,
-#createPlannigForm select,
-#createOperAccForm select,
-#createAccrualForm select,
-#createPayoutForm select,
-#createEmployeeForm select,
-#paymentCalendarForm textarea,
-#createPlannigForm textarea
-#createOperAccForm textarea,
-#createAccrualForm textarea,
-#createPayoutForm textarea, 
-#createEmployeeForm textarea {
-    width: 100%;
+.item-data {
+    display: flex;
     box-sizing: border-box;
-    padding: 8px;
-    font-size: 16px;
-    min-height: 36px;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+
+    width: 362px;
+    height: auto;
+    border-radius: 12px;
+    overflow: hidden; /*скрывает выходящее за скругленные углы */
+    border: 1px solid #DFDEE5;
 }
 
-label { display: block; margin-bottom: 5px; font-size: 16px;}
-input, select, textarea { width: 80%; padding: 10px; font-size: 16px;}
-button { padding: 10px 15px; background: #3386d8; color: white; border: none; cursor: pointer; font-size: 16px;}
-button:hover { background: #0056b3; }
-.icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 8px;
-    font-size: 16px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+.item-data-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    isolation: isolate;
+
+    width: 362px;
+    height: 44px;
 }
+
+.data-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    gap: 6px;
+
+    height: 44px;
+
+    /* background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5; */
+
+    /* Title Text */
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.data-cell--item {
+    width: 362px;
+    background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5;
+    /* border-radius: 12px 0px 0px 0px; */
+}
+
+.data-cell--plan,
+.data-cell--fact,
+.data-cell--var
+{
+    width: 110px;
+    padding: 14px 16px;
+    gap: 10px;
+    border: 1px solid #DFDEE5;
+}
+
+.data-cell--int-total-income
+{
+    width: 110px;
+    padding: 14px 16px;
+    gap: 10px;
+
+
+    background: rgba(189, 10, 55, 0.02);
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+    /* border-radius: 0px 0px 12px 12px; */
+
+}
+
+.data-cell--int-total-expense
+{
+    width: 110px;
+    padding: 14px 16px;
+    gap: 10px;
+
+
+    background: rgba(87, 210, 30, 0.04);
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+    /* border-radius: 0px 0px 12px 12px; */
+}
+
+
+.data-cell--total-income {
+    width: 362px;
+    background: rgba(189, 10, 55, 0.02);
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+    /* border-radius: 0px 0px 12px 12px; */
+}
+
+.data-cell--total-expense {
+    width: 362px;
+    background: rgba(87, 210, 30, 0.04);
+    border-width: 0px 1px 1px 1px;
+    border-style: solid;
+    border-color: #DFDEE5;
+    /* border-radius: 0px 0px 12px 12px; */
+}
+
+
+.title-text {
+    margin: 0;
+    white-space: nowrap;
+    height: 16px;
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+.period-data {
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+    isolation: isolate;
+
+    width: 330px;
+    height: auto;
+    border-radius: 12px;
+    overflow: hidden; /* скрывает выходящее за скругленные углы */
+    border: 1px solid #DFDEE5;
+    background: rgba(246, 245, 250, 0.6);
+    border: 1px solid #DFDEE5;
+}
+
+.period-data--cashflow {
+    background: rgba(189, 10, 55, 0.02) !important;
+}
+
+.period-data-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+    isolation: isolate;
+
+    width: 330px;
+    height: 44px;
+}
+
+.data-row--total { margin-top: 10px; }
+
+/* === Фиксация верхней шапки === */
+.table-head {
+  position: sticky;
+  top: 0;
+  /* background: #DFDEE5; */
+  z-index: 50; /* выше, чем фиксированные колонки */
+}
+
+/* === Фиксация первых двух колонок === */
+.item-data {
+  position: sticky; 
+  left: 0;
+  z-index: 40;
+  background: rgba(246, 245, 250, 0.6);
+}
+
+.cashflow-data {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 12px;
+
+    width: auto;
+    height: 220px;
+}
+
+.cashflow-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+
+    width: 362px;
+    height: 220px;
+
+    border-radius: 12px 12px 12px 12px;
+    overflow: hidden; /*скрывает выходящее за скругленные углы */
+}
+
+.indicator{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 10px;
+    isolation: isolate;
+
+    width: 362px;
+    height: 44px;
+
+
+    background: rgba(189, 10, 55, 0.02);
+    border: 1px solid #DFDEE5;
+    /* border-radius: 12px 12px 0px 0px; */
+
+    /* Title Text */
+
+    font-family: 'Mulish';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 116%;
+    /* or 16px */
+
+    color: #282533;
+}
+
+

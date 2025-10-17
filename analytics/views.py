@@ -42,6 +42,8 @@ class PaymentCalendarPageView(TemplateView):
         if start_date and end_date:
             context.update(payment_calendar.PaymentCalendarService(start_date, end_date, project_id, period_type).build_context())
 
+        print(context)
+
         return context
 
 

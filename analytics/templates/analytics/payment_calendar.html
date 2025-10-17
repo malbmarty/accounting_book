@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load analytics_custom_tags %}
+{% block title %}Платежный календарь{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/payment_calendar.css' %}">
@@ -8,47 +9,257 @@
 
 {% block content %}
 {% load static %}
+<div class="summary-top">
+    <h2 class="summary-head">Платежный календарь</h2>
 
-<h2>Платежный календарь</h2>
+    <form id="paymentCalendarForm" method="get" class="form">
+        {% csrf_token %}
+        <div class="form-group form-group--period">
+            <input class="form-input" type="date" name="start_date" required value="{{ form_values.start_date }}">
+        </div>
 
-<form id="paymentCalendarForm" method="get">
-    {% csrf_token %}
-    <div class="form-group">
-        <label>Начало периода:</label>
-        <input type="date" name="start_date" required value="{{ form_values.start_date }}">
+        <div class="form-group form-group--period">
+            <input class="form-input" type="date" name="end_date" required value="{{ form_values.end_date }}">
+        </div>
+        <div class="form-group form-group--project">
+            <div class="dropdown" data-name="project">
+                <div class="dropdown-toggle">
+                    {% if form_values.project %}
+                        {% if form_values.project == 'all' %}
+                            Все проекты
+                        {% else %}
+                            {{ projects|get_project_name:form_values.project }}
+                        {% endif %}
+                    {% else %}
+                        Выберите проект
+                    {% endif %}
+                </div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" data-value="all">Все проекты</div>
+                    {% for project in projects %}
+                        <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="project" value="{{ form_values.project|default:'' }}">
+            </div>
+        </div>
+
+        <div class="form-group form-group--interval">
+            <div class="dropdown" data-name="period_type">
+                <div class="dropdown-toggle">
+                    {% if form_values.period_type %}
+                        {% if form_values.period_type == 'day' %}День{% endif %}
+                        {% if form_values.period_type == 'month' %}Месяц{% endif %}
+                        {% if form_values.period_type == 'quarter' %}Квартал{% endif %}
+                        {% if form_values.period_type == 'year' %}Год{% endif %}
+                    {% else %}
+                        Выберите интервал
+                    {% endif %}
+                </div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" data-value="day">День</div>
+                    <div class="dropdown-item" data-value="month">Месяц</div>
+                    <div class="dropdown-item" data-value="quarter">Квартал</div>
+                    <div class="dropdown-item" data-value="year">Год</div>
+                </div>
+                <input type="hidden" name="period_type" value="{{ form_values.period_type|default:'' }}">
+            </div>
+        </div>
+        <button type="submit" class="btn_build">Построить календарь</button>     
+    </form>
+</div>
+<div class="table-container">
+    <div class="flow-info">
+        <div class="flow-name">
+            <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="3" cy="3" r="3" fill="#282533" fill-opacity="0.6"/>
+            </svg>
+            <span>Приход</span>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.17684 9.29483C4.06276 9.42719 4 9.59612 4 9.77086C4 10.1736 4.32644 10.5 4.72914 10.5H11.2709C11.6736 10.5 12 10.1736 12 9.77087C12 9.59612 11.9372 9.42719 11.8232 9.29483L8.79919 5.78644C8.60923 5.56605 8.33269 5.43932 8.04173 5.43932H7.95827C7.66731 5.43932 7.39077 5.56605 7.20081 5.78644L4.17684 9.29483Z" fill="#282533" fill-opacity="0.6"/>
+        </svg>
     </div>
-
-    <div class="form-group">
-        <label>Окончание периода:</label>
-        <input type="date" name="end_date" required value="{{ form_values.end_date }}">
-    </div>
-
-    <div class="form-group">
-        <label>Проект:</label>
-        <select name="project" required>
-            <option value="">Выберите проект</option>
-            <option value="all" {% if form_values.project == 'all' %}selected{% endif %}>Все проекты</option>
-            {% for project in projects %}
-                <option value="{{ project.id }}" {% if project.id == form_values.project %}selected{% endif %}>{{ project.name }}</option>
+    <div class="data-column">
+        <div class="table-head">
+            <div class="head-info">
+                <div class="head-column head-column--item">
+                <span class="head-title">Статья</span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                </div>
+            </div>
+            {% for h in headers %}
+            <div class="head-period">
+                <div class="head-column head-column--interval">
+                    <div class="interval-head interval-head--start">{{ h.start }}</div>
+                    <div class="interval-head interval-head--end">{{ h.end }}</div>
+                    <div class="interval-head interval-head--interval">{{ h.label }}</div>
+                </div>
+                <div class="head-column head-column--finance">
+                    <div class="finance-head finance-head--plan">План</div>
+                    <div class="finance-head finance-head--fact">Фактически</div>
+                    <div class="finance-head finance-head--var">Отклонение</div>
+                </div>
+            </div>
             {% endfor %}
-        </select>
+        </div>
+        <div class="data-row">
+            <div class="item-data">
+                {% for item_name, values in calendar_data.Приход.items %}
+                <div class="item-data-row">
+                    <div class="data-cell data-cell--item">
+                        <span class="title-text">{{ item_name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="item-data-row">
+                    <div class="data-cell data-cell--total-income">
+                        <svg width="7" height="7" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="3" cy="3" r="3" fill="#282533"/>
+                        </svg>
+                        <span class="title-text">Итого по приходу</span>
+                    </div>
+                </div>
+            </div>
+
+            {% for h in headers %}
+            <div class="period-data">
+                {% for item_name, values in calendar_data.Приход.items %}
+                <div class="period-data-row">
+                    {% with cell=values|get_item:h.key %}
+                    <div class="data-cell data-cell--plan">
+                        {{ cell.plan|default:0|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--fact">
+                        {{ cell.fact|default:0|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--var">
+                        {{ cell.var|default:0|stringformat:".2f" }}
+                    </div>
+                    {% endwith %}
+                </div>
+                {% endfor %}
+                <div class="period-data-row">
+                {% with cell=flow_totals|get_item:"Приход"|get_item:h.key %}
+                    <div class="data-cell data-cell--int-total-income">
+                        {{ cell.plan|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--int-total-income">
+                        {{ cell.fact|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--int-total-income">
+                        {{ cell.var|stringformat:".2f" }}
+                    </div>
+                {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>    
     </div>
 
-    <div class="form-group">
-        <label>Интервал:</label>
-        <select name="period_type" required>
-            <option value="day" {% if form_values.period_type == 'day' %}selected{% endif %}>День</option>
-            <option value="month" {% if form_values.period_type == 'month' %}selected{% endif %}>Месяц</option>
-            <option value="quarter" {% if form_values.period_type == 'quarter' %}selected{% endif %}>Квартал</option>
-            <option value="year" {% if form_values.period_type == 'year' %}selected{% endif %}>Год</option>
-        </select>
+    <div class="flow-info">
+        <div class="flow-name">
+            <svg width="6" height="6" viewBox="0 0 6 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="3" cy="3" r="3" fill="#282533" fill-opacity="0.6"/>
+            </svg>
+            <span>Расход</span>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.17684 9.29483C4.06276 9.42719 4 9.59612 4 9.77086C4 10.1736 4.32644 10.5 4.72914 10.5H11.2709C11.6736 10.5 12 10.1736 12 9.77087C12 9.59612 11.9372 9.42719 11.8232 9.29483L8.79919 5.78644C8.60923 5.56605 8.33269 5.43932 8.04173 5.43932H7.95827C7.66731 5.43932 7.39077 5.56605 7.20081 5.78644L4.17684 9.29483Z" fill="#282533" fill-opacity="0.6"/>
+        </svg>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Построить календарь</button>
-</form>
+    <div class="data-column">
+        <div class="data-row">
+            <div class="item-data">
+                {% for item_name, values in calendar_data.Расход.items %}
+                <div class="item-data-row">
+                    <div class="data-cell data-cell--item">
+                        <span class="title-text">{{ item_name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="item-data-row">
+                    <div class="data-cell data-cell--total-expense">
+                        <svg width="7" height="7" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="3" cy="3" r="3" fill="#282533"/>
+                        </svg>
+                        <span class="title-text">Итого по расходу</span>
+                    </div>
+                </div>
+            </div>
 
-{% if headers and calendar_data %}
-<div class="table-container mt-4">
+            {% for h in headers %}
+            <div class="period-data">
+                {% for item_name, values in calendar_data.Расход.items %}
+                <div class="period-data-row">
+                    {% with cell=values|get_item:h.key %}
+                    <div class="data-cell data-cell--plan">
+                        {{ cell.plan|default:0|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--fact">
+                        {{ cell.fact|default:0|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--var">
+                        {{ cell.var|default:0|stringformat:".2f" }}
+                    </div>
+                    {% endwith %}
+                </div>
+                {% endfor %}
+                <div class="period-data-row">
+                {% with cell=flow_totals|get_item:"Расход"|get_item:h.key %}
+                    <div class="data-cell data-cell--int-total-expense">
+                        {{ cell.plan|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--int-total-expense">
+                        {{ cell.fact|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--int-total-expense">
+                        {{ cell.var|stringformat:".2f" }}
+                    </div>
+                {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>   
+    </div>
+    <div class="data-column">
+        <div class="data-row">
+            <div class="cashflow-head">
+                {% for indicator in cash_flow_indicators %}
+                <div class="indicator">
+                    <span>{{ indicator }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% for h in headers %}
+            <div class="period-data period-data--cashflow">
+                {% for indicator in cash_flow_indicators %}
+                <div class="period-data-row">
+                    {% with cell=cash_flow_calendar|get_item:h.key|get_item:indicator %}
+                    <div class="data-cell data-cell--plan">
+                        {{ cell.plan|default:0|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--fact">
+                        {{ cell.fact|default:0|stringformat:".2f" }}
+                    </div>
+                    <div class="data-cell data-cell--var">
+                        {{ cell.var|default:0|stringformat:".2f" }}
+                    </div>
+                    {% endwith %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<!-- {% if headers and calendar_data %}
+<div class="table-container">
     <table class="summary-table table table-bordered table-sm text-center align-middle">
         <thead>
             <tr>
@@ -69,12 +280,11 @@
         </thead>
         <tbody>
             {% for flow_type, items in calendar_data.items %}
-                <!-- ===== Тип потока ===== -->
+
                 <tr class="flow-type-row">
                     <td class="left" colspan="{{ headers|length|add:1 }}"><b>{{ flow_type|upper }}</b></td>
                 </tr>
 
-                <!-- ===== Статьи ===== -->
                 {% for item_name, values in items.items %}
                     <tr>
                         <td class="left">{{ item_name }}</td>
@@ -90,7 +300,6 @@
                     </tr>
                 {% endfor %}
 
-                <!-- ===== ИТОГО по типу потока ===== -->
                 <tr class="flow-total-row">
                     <td class="left">ИТОГО {{ flow_type|upper }}</td>
                     {% for h in headers %}
@@ -102,11 +311,9 @@
                     {% endfor %}
                 </tr>
             {% endfor %}
-            <!-- ===== Разделитель между блоками ===== -->
             <tr class="block-separator">
                 <td colspan="{{ headers|length|add:1 }}"></td>
             </tr>
-            <!-- ===== Кассовые потоки ===== -->
             {% if cash_flow_calendar %}
                 {% for indicator in cash_flow_indicators %}
                     <tr class="cash-flow-row">
@@ -127,79 +334,9 @@
 </div>
 {% else %}
     <p class="text-muted mt-4">Выберите период и нажмите “Построить календарь”.</p>
-{% endif %}
+{% endif %} -->
 
-<style>
-.table-container {
-    overflow: auto;
-    width: 100%;
-    max-height: 80vh; /* Вертикальный скролл */
-}
 
-.summary-table {
-    border-collapse: collapse;
-    min-width: 1400px; /* Горизонтальный скролл */
-}
-
-.summary-table th,
-.summary-table td {
-    border: 1px solid #999;
-    padding: 6px;
-    white-space: nowrap;
-}
-
-.summary-table th {
-    background-color: #f2f2f2;
-    position: sticky;
-    top: 0;
-    z-index: 3;
-}
-
-td.left, th.left {
-    text-align: left;
-    padding-left: 8px;
-    position: sticky;
-    left: 0;
-    background-color: #f9f9f9;
-    z-index: 2;
-}
-
-/* Пересечение шапки и левой колонки */
-thead th.left {
-    z-index: 6;
-}
-
-/* Цвет строки типа потока */
-.flow-type-row {
-    background-color: #e29977;
-    font-weight: bold;
-}
-
-/* Цвет строки ИТОГО по типу потока */
-.flow-total-row {
-    background-color: #d6e9c6;
-    font-weight: bold;
-}
-
-.cash-flow-row {
-    background-color: #d45b5b91; /* светло-жёлтый, можно изменить */
-    font-weight: bold;
-}
-
-.block-separator td {
-  
-    height: 40px; /* высота разделителя */
-    padding: 0;
-    border: none;
-}
-
-/* Отрицательная вариация */
-.negative {
-    color: red;
-    font-weight: bold;
-}
-
-</style>
 
 <script src="{% static 'js/payment_calendar.js' %}"></script>
 {% endblock %}

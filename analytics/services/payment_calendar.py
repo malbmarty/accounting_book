@@ -1,14 +1,10 @@
-import pandas as pd
+
+from collections import defaultdict
+from decimal import Decimal
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
-
-from analytics_dir.models import (
-    Project
-)
-from ..models import CounterpartyOpeningBalance
-from contribution.models import (
-    OperationalAccounting, Planning
-)
+from analytics_dir.models import Project
+from contribution.models import OperationalAccounting, Planning
 
 
 class PaymentCalendarService:
@@ -19,54 +15,71 @@ class PaymentCalendarService:
         self.period_type = period_type
 
     def build_context(self):
-        project_filter = self._get_project_filter()
-        
-        plan_qs = Planning.objects.filter(**project_filter)
-        fact_qs = OperationalAccounting.objects.filter(payment_date__range=[self.start_date, self.end_date], **project_filter)
+        project_filter = self.get_project_filter()
 
-        plan_df = self._build_plan_dataframe(plan_qs)
-        fact_df = self._build_fact_dataframe(fact_qs)
-        
-        df = self._merge_and_process_data(plan_df, fact_df)
-        grouped = self._group_data_by_period(df)
-        
-        headers = self._build_headers()
-        calendar_data = self._build_calendar_data(grouped)
-        flow_totals = self._calculate_flow_totals(calendar_data, headers)
-        
-        initial_plan_balance, initial_fact_balance = self._calculate_initial_balances(plan_qs, fact_qs)
-        cash_flow_calendar = self._build_cash_flow_calendar(df, headers, initial_plan_balance, initial_fact_balance)
+        plan_qs = Planning.objects.filter(**project_filter)
+        fact_qs = OperationalAccounting.objects.filter(
+            payment_date__range=[self.start_date, self.end_date], **project_filter
+        )
+
+        plans = self.get_plan_data(plan_qs)
+        facts = self.get_fact_data(fact_qs)
+
+        grouped = self.group_data(plans, facts)
+        headers = self.build_headers()
+
+        calendar_data = self.build_calendar_data(grouped)
+        calendar_data = self.order_flows(calendar_data) 
+        flow_totals = self.build_flow_totals(calendar_data, headers)
+        flow_totals = self.order_flows(flow_totals)
+
+        initial_plan, initial_fact = self.get_initial_balances(plan_qs, fact_qs)
+        cash_flow_calendar = self.build_cash_flow_calendar(grouped, headers, initial_plan, initial_fact)
 
         return {
-            'headers': headers,
-            'calendar_data': calendar_data,
-            'flow_totals': flow_totals,
-            'cash_flow_calendar': cash_flow_calendar,
-            'cash_flow_indicators': [
-                'Остаток на начало',
-                'Положительный денежный поток',
-                'Отрицательный денежный поток',
-                'Чистый денежный поток',
-                'Остаток на конец'
-            ]
+            "headers": headers,
+            "calendar_data": self.to_dict(calendar_data),
+            "flow_totals": self.to_dict(flow_totals),
+            "cash_flow_calendar": self.to_dict(cash_flow_calendar),
+            "cash_flow_indicators": [
+                "Остаток на начало",
+                "Положительный денежный поток",
+                "Отрицательный денежный поток",
+                "Чистый денежный поток",
+                "Остаток на конец",
+            ],
         }
+    
+    @staticmethod
+    def order_flows(data):
+        order = ["Приход", "Расход"]
+        ordered = {}
+        for key in order:
+            if key in data:
+                ordered[key] = data[key]
+        for key in data:
+            if key not in ordered:
+                ordered[key] = data[key]
+        return ordered
 
-    def _get_project_filter(self):
-        project_filter = {}
-        if self.project_id and self.project_id != 'all':
-            project_filter['project_id'] = int(self.project_id)
-        return project_filter
+    @staticmethod
+    def to_dict(obj):
+        # Рекурсивное приведение defaultdict → dict
+        if isinstance(obj, dict):
+            return {k: PaymentCalendarService.to_dict(v) for k, v in obj.items()}
+        return obj
 
-    def _build_plan_dataframe(self, plan_qs):
-        plan_records = []
-        for p in plan_qs:
+    def get_project_filter(self):
+        if self.project_id and self.project_id != "all":
+            return {"project_id": int(self.project_id)}
+        return {}
+
+    def get_plan_data(self, qs):
+        # Создание записей планов с учетом частоты
+        records = []
+        for p in qs:
             if self.start_date <= p.date <= self.end_date:
-                plan_records.append({
-                    'period': p.date,
-                    'item__name': p.item.name,
-                    'item__flow_type__name': p.item.flow_type.name,
-                    'plan': p.payment_amount
-                })
+                records.append(self._record(p.date, p))
             freq_name = p.frequency.name.strip().lower()
             if freq_name != "разово":
                 try:
@@ -74,148 +87,199 @@ class PaymentCalendarService:
                     for i in range(1, months):
                         next_date = p.date + relativedelta(months=i)
                         if self.start_date <= next_date <= self.end_date:
-                            plan_records.append({
-                                'period': next_date,
-                                'item__name': p.item.name,
-                                'item__flow_type__name': p.item.flow_type.name,
-                                'plan': p.payment_amount
-                            })
+                            records.append(self._record(next_date, p))
                 except ValueError:
-                    pass
+                    continue
+        return records
 
-        plan_df = pd.DataFrame(plan_records)
-        if plan_df.empty:
-            plan_df = pd.DataFrame(columns=['period', 'item__name', 'item__flow_type__name', 'plan'])
-        return plan_df
+    def get_fact_data(self, qs):
+        # Фактические записи по оплатам
+        return [
+            {
+                "period": f.payment_date,
+                "item__name": f.item.name,
+                "item__flow_type__name": f.item.flow_type.name,
+                "fact": Decimal(f.payment_amount or 0),
+            }
+            for f in qs
+        ]
 
-    def _build_fact_dataframe(self, fact_qs):
-        fact_df = pd.DataFrame(fact_qs.values('payment_date', 'item__name', 'item__flow_type__name', 'payment_amount'))
-        if not fact_df.empty:
-            fact_df.rename(columns={'payment_date': 'period', 'payment_amount': 'fact'}, inplace=True)
-        else:
-            fact_df = pd.DataFrame(columns=['period', 'item__name', 'item__flow_type__name', 'fact'])
-        return fact_df
+    @staticmethod
+    def _record(date, plan):
+        return {
+            "period": date,
+            "item__name": plan.item.name,
+            "item__flow_type__name": plan.item.flow_type.name,
+            "plan": Decimal(plan.payment_amount or 0),
+        }
 
-    def _merge_and_process_data(self, plan_df, fact_df):
-        df = pd.merge(plan_df, fact_df, on=['period', 'item__name', 'item__flow_type__name'], how='outer')
-        df['plan'] = df['plan'].fillna(0)
-        df['fact'] = df['fact'].fillna(0)
-        df['variance'] = df['fact'] - df['plan']
-        return df
+    def group_data(self, plans, facts):
+        # Объединение плановых и фактических данных по периодам
+        grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: {"plan": Decimal("0.00"), "fact": Decimal("0.00")})))
 
-    def _group_data_by_period(self, df):
-        df['period'] = pd.to_datetime(df['period'])
-        if self.period_type == 'day':
-            df['period_group'] = df['period'].dt.to_period('D').dt.to_timestamp()
-        elif self.period_type == 'month':
-            df['period_group'] = df['period'].dt.to_period('M').dt.to_timestamp()
-        elif self.period_type == 'quarter':
-            df['period_group'] = df['period'].dt.to_period('Q').dt.to_timestamp()
-        elif self.period_type == 'year':
-            df['period_group'] = df['period'].dt.to_period('Y').dt.to_timestamp()
+        for p in plans:
+            period_key = self._get_period_key(p["period"])
+            item = p["item__name"]
+            flow_type = p["item__flow_type__name"]
+            grouped[flow_type][item][period_key]["plan"] += p["plan"]
 
-        grouped = df.groupby(['item__flow_type__name', 'item__name', 'period_group']).agg({
-            'plan': 'sum', 'fact': 'sum', 'variance': 'sum'
-        }).reset_index()
+        for f in facts:
+            period_key = self._get_period_key(f["period"])
+            item = f["item__name"]
+            flow_type = f["item__flow_type__name"]
+            grouped[flow_type][item][period_key]["fact"] += f["fact"]
+
+        # добавляем разницу
+        for flow_type, items in grouped.items():
+            for item, periods in items.items():
+                for period_key, values in periods.items():
+                    values["var"] = values["fact"] - values["plan"]
+
         return grouped
 
-    def _build_headers(self):
+    def _get_period_key(self, date):
+        # Группировка по выбранному типу периода
+        if self.period_type == "day":
+            return date
+        elif self.period_type == "month":
+            return date.replace(day=1)
+        elif self.period_type == "quarter":
+            month = ((date.month - 1) // 3) * 3 + 1
+            return date.replace(month=month, day=1)
+        elif self.period_type == "year":
+            return date.replace(month=1, day=1)
+        return date
+
+    def build_headers(self):
         headers = []
-        if self.period_type == 'day':
-            periods = pd.date_range(self.start_date, self.end_date, freq='D')
-            for d in periods:
-                label = d.strftime("%d.%m.%Y")
-                headers.append({'key': d.date(), 'start': label, 'end': label, 'label': label})
-        elif self.period_type == 'month':
-            periods = pd.period_range(self.start_date, self.end_date, freq='M')
-            for p in periods:
-                start = p.start_time.date()
-                end = p.end_time.date()
-                label = p.strftime("%b %Y").capitalize()
-                headers.append({'key': start, 'start': start.strftime("%d.%m.%Y"), 'end': end.strftime("%d.%m.%Y"), 'label': label})
-        elif self.period_type == 'quarter':
-            periods = pd.period_range(self.start_date, self.end_date, freq='Q')
-            for p in periods:
-                start = p.start_time.date()
-                end = p.end_time.date()
-                q = p.quarter
-                yy = str(p.year)[2:]
-                label = f"{q} кв {yy}"
-                headers.append({'key': start, 'start': start.strftime("%d.%m.%Y"), 'end': end.strftime("%d.%m.%Y"), 'label': label})
-        elif self.period_type == 'year':
-            periods = pd.period_range(self.start_date, self.end_date, freq='Y')
-            for p in periods:
-                start = p.start_time.date()
-                end = p.end_time.date()
-                label = f"{p.year} год"
-                headers.append({'key': start, 'start': start.strftime("%d.%m.%Y"), 'end': end.strftime("%d.%m.%Y"), 'label': label})
+        current = self.start_date
+
+        while current <= self.end_date:
+            if self.period_type == "day":
+                start, end = current, current
+                label = current.strftime("%d.%m.%Y")
+                step = relativedelta(days=1)
+
+            elif self.period_type == "month":
+                start = current.replace(day=1)
+                end = (start + relativedelta(months=1)) - relativedelta(days=1)
+                label = start.strftime("%b %Y").capitalize()
+                step = relativedelta(months=1)
+
+            elif self.period_type == "quarter":
+                q = (current.month - 1) // 3 + 1
+                start = current.replace(month=(q - 1) * 3 + 1, day=1)
+                end = start + relativedelta(months=3, days=-1)
+                label = f"{q} кв {str(start.year)[2:]}"
+                step = relativedelta(months=3)
+
+            elif self.period_type == "year":
+                start = current.replace(month=1, day=1)
+                end = current.replace(month=12, day=31)
+                label = f"{start.year} год"
+                step = relativedelta(years=1)
+
+            headers.append({
+                "key": start,
+                "start": start.strftime("%d.%m.%Y"),
+                "end": end.strftime("%d.%m.%Y"),
+                "label": label,
+            })
+            current += step
+
         return headers
 
-    def _build_calendar_data(self, grouped):
-        calendar_data = {}
-        for _, row in grouped.iterrows():
-            flow_type = row['item__flow_type__name']
-            item = row['item__name']
-            period = row['period_group'].date()
-            if flow_type not in calendar_data:
-                calendar_data[flow_type] = {}
-            if item not in calendar_data[flow_type]:
-                calendar_data[flow_type][item] = {}
-            calendar_data[flow_type][item][period] = {'plan': round(row['plan'],2), 'fact': round(row['fact'],2), 'var': round(row['variance'],2)}
-        return calendar_data
+    def build_calendar_data(self, grouped):
+        # Формирует таблицу вида: {flow_type: {item: {period: {...}}}}
+        calendar_data = defaultdict(lambda: defaultdict(dict))
+        for flow_type, items in grouped.items():
+            for item, periods in items.items():
+                for period, values in periods.items():
+                    calendar_data[flow_type][item][period] = {
+                        "plan": round(values["plan"], 2),
+                        "fact": round(values["fact"], 2),
+                        "var": round(values["var"], 2),
+                    }
+        return dict(calendar_data)
 
-    def _calculate_flow_totals(self, calendar_data, headers):
-        flow_totals = {}
+    def build_flow_totals(self, calendar_data, headers):
+        flow_totals = defaultdict(dict)
         for flow_type, items in calendar_data.items():
-            flow_totals[flow_type] = {}
             for h in headers:
-                plan_sum = sum(values.get(h['key'], {}).get('plan',0) for values in items.values())
-                fact_sum = sum(values.get(h['key'], {}).get('fact',0) for values in items.values())
-                var_sum = fact_sum - plan_sum
-                flow_totals[flow_type][h['key']] = {'plan': round(plan_sum,2), 'fact': round(fact_sum,2), 'var': round(var_sum,2)}
-        return flow_totals
+                key = h["key"]
+                plan_sum = sum(values.get(key, {}).get("plan", 0) for values in items.values())
+                fact_sum = sum(values.get(key, {}).get("fact", 0) for values in items.values())
+                flow_totals[flow_type][key] = {
+                    "plan": round(plan_sum, 2),
+                    "fact": round(fact_sum, 2),
+                    "var": round(fact_sum - plan_sum, 2),
+                }
+        return dict(flow_totals)
 
-    def _calculate_initial_balances(self, plan_qs, fact_qs):
-        initial_plan_balance = 0
-        initial_fact_balance = fact_qs.filter(payment_date__lt=self.start_date).aggregate(total=Sum('payment_amount'))['total'] or 0
+    def get_initial_balances(self, plan_qs, fact_qs):
+        plan_balance = Decimal("0.00")
+        fact_balance = Decimal(fact_qs.filter(payment_date__lt=self.start_date)
+                               .aggregate(total=Sum("payment_amount"))["total"] or 0)
+
         for p in plan_qs:
-            if p.date < self.start_date:
-                initial_plan_balance += p.payment_amount or 0
             freq_name = p.frequency.name.strip().lower()
+            if p.date < self.start_date:
+                plan_balance += Decimal(p.payment_amount or 0)
             if freq_name != "разово":
                 try:
                     months = int(freq_name)
                     for i in range(1, months):
                         next_date = p.date + relativedelta(months=i)
                         if next_date < self.start_date:
-                            initial_plan_balance += p.payment_amount or 0
+                            plan_balance += Decimal(p.payment_amount or 0)
                 except ValueError:
-                    pass
-        return initial_plan_balance, initial_fact_balance
+                    continue
+        return plan_balance, fact_balance
 
-    def _build_cash_flow_calendar(self, df, headers, initial_plan_balance, initial_fact_balance):
-        periods = [h['key'] for h in headers]
-        cash_flow_calendar = {}
-        prev_plan_balance = initial_plan_balance
-        prev_fact_balance = initial_fact_balance
+    def build_cash_flow_calendar(self, grouped, headers, init_plan, init_fact):
+        periods = [h["key"] for h in headers]
+        cash_calendar = {}
+
+        prev_plan = init_plan
+        prev_fact = init_fact
+
         for p in periods:
-            period_key = pd.Timestamp(p)
-            period_data = df[df['period_group'] == period_key]
-            inflow_plan = period_data[period_data['item__flow_type__name']=='Приход']['plan'].sum()
-            inflow_fact = period_data[period_data['item__flow_type__name']=='Приход']['fact'].sum()
-            outflow_plan = period_data[period_data['item__flow_type__name']=='Расход']['plan'].sum()
-            outflow_fact = period_data[period_data['item__flow_type__name']=='Расход']['fact'].sum()
+            inflow_plan = self._sum_by_flow_type(grouped, "Приход", p, "plan")
+            inflow_fact = self._sum_by_flow_type(grouped, "Приход", p, "fact")
+            outflow_plan = self._sum_by_flow_type(grouped, "Расход", p, "plan")
+            outflow_fact = self._sum_by_flow_type(grouped, "Расход", p, "fact")
+
             net_plan = inflow_plan - outflow_plan
             net_fact = inflow_fact - outflow_fact
-            closing_plan = net_plan
-            closing_fact = net_fact
-            cash_flow_calendar[p] = {
-                'Остаток на начало': {'plan': round(prev_plan_balance,2),'fact': round(prev_fact_balance,2),'var': round(prev_fact_balance-prev_plan_balance,2)},
-                'Положительный денежный поток': {'plan': round(inflow_plan,2),'fact': round(inflow_fact,2),'var': round(inflow_fact-inflow_plan,2)},
-                'Отрицательный денежный поток': {'plan': round(outflow_plan,2),'fact': round(outflow_fact,2),'var': round(outflow_fact-outflow_plan,2)},
-                'Чистый денежный поток': {'plan': round(net_plan,2),'fact': round(net_fact,2),'var': round(net_fact-net_plan,2)},
-                'Остаток на конец': {'plan': round(closing_plan,2),'fact': round(closing_fact,2),'var': round(closing_fact-closing_plan,2)}
+
+            cash_calendar[p] = {
+                "Остаток на начало": self._balance_record(prev_plan, prev_fact),
+                "Положительный денежный поток": self._balance_record(inflow_plan, inflow_fact),
+                "Отрицательный денежный поток": self._balance_record(outflow_plan, outflow_fact),
+                "Чистый денежный поток": self._balance_record(net_plan, net_fact),
+                "Остаток на конец": self._balance_record(net_plan, net_fact),
             }
-            prev_plan_balance = closing_plan
-            prev_fact_balance = closing_fact
-        return cash_flow_calendar
+
+            prev_plan = net_plan
+            prev_fact = net_fact
+
+        return cash_calendar
+
+    @staticmethod
+    def _sum_by_flow_type(grouped, flow_type, period, field):
+        # Суммирует значения по типу потока (Приход/Расход)
+        total = Decimal("0.00")
+        if flow_type not in grouped:
+            return total
+        for item_data in grouped[flow_type].values():
+            total += item_data.get(period, {}).get(field, Decimal("0.00"))
+        return total
+
+    @staticmethod
+    def _balance_record(plan, fact):
+        return {
+            "plan": round(plan, 2),
+            "fact": round(fact, 2),
+            "var": round(fact - plan, 2),
+        }
+

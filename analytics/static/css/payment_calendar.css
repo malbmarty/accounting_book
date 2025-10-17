@@ -258,6 +258,23 @@ border-radius: 10px; */
     overflow-y: auto; /* вертикальная прокрутка */
 }
 
+/* Стилизация скроллбара для контейнера */
+.table-container::-webkit-scrollbar {
+    width: 2px; /* Для вертикального скролла */
+    height: 2px; /* Для горизонтального скролла */
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #DFDEE5;
+    border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: rgba(40, 37, 51, 0.14);
+    border-radius: 3px;
+    
+}
+
 .flow-info {
     box-sizing: border-box;
 
@@ -382,7 +399,7 @@ border-radius: 10px; */
 }
 
 .finance-head {
-    display: flex;
+    flex: 0 0 110px;
     flex-direction: row;
     align-items: center;
     padding: 6px 14px;
@@ -403,7 +420,7 @@ border-radius: 10px; */
 }
 
 .interval-head {
-    display: flex;
+    flex: 0 0 110px;
     flex-direction: row;
     align-items: center;
     padding: 6px 14px;

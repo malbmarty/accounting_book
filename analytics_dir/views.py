@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 from django.views.generic import TemplateView
+from django_filters import FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import (
     ProjectSerializer, ParticipantSerializer, PaymentSystemSerializer,
@@ -63,9 +65,22 @@ class FlowTypeViewSet(viewsets.ModelViewSet):
     queryset = FlowType.objects.all()
     serializer_class = FlowTypeSerializer
 
+# Фильтр для изменчивости
+class VariabilityFilter(FilterSet):
+    
+    class Meta:
+        model = Variability
+        fields = {
+            'flow_type': ['exact'],
+        }
+
 class VariabilityViewSet(viewsets.ModelViewSet):
     queryset = Variability.objects.all()
     serializer_class = VariabilitySerializer
+
+    filterset_class = VariabilityFilter
+    filter_backends = [DjangoFilterBackend]
+
 
 class ItemViewSet(viewsets.ModelViewSet):
     queryset = Item.objects.all()

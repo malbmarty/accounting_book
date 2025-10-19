@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_tags %}
 
 {% block title %}Управление справочником для Зарплатной ведомости{% endblock %}
 
@@ -8,125 +9,316 @@
 {% endblock %}
 
 {% block content %}
-<h1>Управление справочником для зарплатной ведомости</h1>
+<div class="table-top">
+    <h2 class="table-title">Справочник для зарплатной ведомости</h2>
+    <div class="table-active">
+        <div class="dropdown dropdown--add" data-name="position">
+            <div class="dropdown-toggle dropdown-toggle--add select-position">
+                <div class="btn-text">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.00004 14.6673C11.6667 14.6673 14.6667 11.6673 14.6667 8.00065C14.6667 4.33398 11.6667 1.33398 8.00004 1.33398C4.33337 1.33398 1.33337 4.33398 1.33337 8.00065C1.33337 11.6673 4.33337 14.6673 8.00004 14.6673Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 10.6673V5.33398" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Добавить:</span>
+                </div>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M3.13263 5.02888C3.04707 4.92961 3 4.80291 3 4.67185C3 4.36983 3.24483 4.125 3.54685 4.125H8.45315C8.75517 4.125 9 4.36983 9 4.67185C9 4.80291 8.95293 4.92961 8.86737 5.02888L6.5994 7.66017C6.45692 7.82546 6.24952 7.92051 6.0313 7.92051H5.9687C5.75048 7.92051 5.54308 7.82546 5.4006 7.66017L3.13263 5.02888Z" fill="#F6F5FA"/>
+                </svg>
+            </div>
+            <div class="dropdown-menu dropdown-menu--add">
+                <div class="dropdown-item" data-modal="createPositionModal">Должность</div>
+                <div class="dropdown-item" data-modal="createDepartmentModal">Отдел</div>
+                <div class="dropdown-item" data-modal="createStatusModal">Статус сотрудника</div>
+                <div class="dropdown-item" data-modal="createEmployeeTypeModal">Тип сотрудника</div>
+                <div class="dropdown-item" data-modal="createPaymentTypeModal">Тип выплат</div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-    
-    <!-- Должности -->
-    <div>
-        <h3>Должности</h3>
+<div id="modalBackdrop" class="modal-backdrop"></div>
+
+<div id="createPositionModal" class="modal modal--position">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content">
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление должности</h2>
+            <h3 class="create-instruction">Внесите информацию о должности</h3>
+        </div>
         <form id="positionForm">
             {% csrf_token %}
-            <input type="hidden" name="id" id="positionId">
+            <!-- <input type="hidden" name="id" id="projectId"> -->
             <div class="form-group">
-                <input type="text" name="name" placeholder="Название должности" required>
+                <label class="form-label">Название:</label>
+                <input class="form-input" type="text" name="name" placeholder="Название должности" required>
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('positionForm')">Отмена</button>
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить должность</span>
+                </button>
+            </div>
         </form>
-        <ul id="positionList">
-            {% for position in positions %}
-            <li>
-                {{ position.name }}
-                <button class="icon-btn" onclick="editItem('position', '{{ position.id }}', '{{ position.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('positions', '{{ position.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
     </div>
+</div>
 
-        <!-- Отделы -->
-    <div>
-        <h3>Отделы</h3>
+<div id="createDepartmentModal" class="modal modal--department">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content">
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление отдела</h2>
+            <h3 class="create-instruction">Внесите информацию об отделе</h3>
+        </div>
         <form id="departmentForm">
             {% csrf_token %}
-            <input type="hidden" name="id" id="departmentId">
+            <!-- <input type="hidden" name="id" id="projectId"> -->
             <div class="form-group">
-                <input type="text" name="name" placeholder="Название отдела" required>
+                <label class="form-label">Название:</label>
+                <input class="form-input" type="text" name="name" placeholder="Название отдела" required>
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('positionForm')">Отмена</button>
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить отдел</span>
+                </button>
+            </div>
         </form>
-        <ul id="departmentList">
-            {% for department in departments %}
-            <li>
-                {{ department.name }}
-                <button class="icon-btn" onclick="editItem('department', '{{ department.id }}', '{{ department.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('departments', '{{ department.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
     </div>
+</div>
 
-    <!-- Статусы сотрудников -->
-    <div>
-        <h3>Статусы сотрудников</h3>
+<div id="createStatusModal" class="modal modal--status">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content">
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление статуса сотрудника</h2>
+            <h3 class="create-instruction">Внесите информацию о статусе</h3>
+        </div>
         <form id="statusForm">
             {% csrf_token %}
-            <input type="hidden" name="id" id="statusId">
+            <!-- <input type="hidden" name="id" id="projectId"> -->
             <div class="form-group">
-                <input type="text" name="name" placeholder="Название статуса" required>
+                <label class="form-label">Название:</label>
+                <input class="form-input" type="text" name="name" placeholder="Название статуса" required>
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('statusForm')">Отмена</button>
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить статус</span>
+                </button>
+            </div>
         </form>
-        <ul id="statusList">
-            {% for status in statuses %}
-            <li>
-                {{ status.name }}
-                <button class="icon-btn" onclick="editItem('status', '{{ status.id }}', '{{ status.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('statuses', '{{ status.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
     </div>
+</div>
 
-    <!-- Типы сотрудников -->
-    <div>
-        <h3>Типы сотрудников</h3>
+<div id="createEmployeeTypeModal" class="modal modal--employee-type">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content">
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление типа сотрудника</h2>
+            <h3 class="create-instruction">Внесите информацию о типе сотрудника</h3>
+        </div>
         <form id="employeeTypeForm">
             {% csrf_token %}
-            <input type="hidden" name="id" id="employeeTypeId">
+            <!-- <input type="hidden" name="id" id="projectId"> -->
             <div class="form-group">
-                <input type="text" name="name" placeholder="Название типа" required>
+                <label class="form-label">Название:</label>
+                <input class="form-input" type="text" name="name" placeholder="Название типа сотрудника" required>
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('employeeTypeForm')">Отмена</button>
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить тип сотрудника</span>
+                </button>
+            </div>
         </form>
-        <ul id="employeeTypeList">
-            {% for employee_type in employee_types %}
-            <li>
-                {{ employee_type.name }}
-                <button class="icon-btn" onclick="editItem('employeeType', '{{ employee_type.id }}', '{{ employee_type.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('employee-types', '{{ employee_type.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+    </div>
+</div>
+
+<div id="createPaymentTypeModal" class="modal modal--payment-type">
+    <span class="modal-close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 12L12 4M12 12L4 4" stroke="#282533" stroke-opacity="0.6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </span>
+    <div class="modal-content">
+        <div class="modal-content-head">
+            <h2 class="create-title">Добавление типа выплаты</h2>
+            <h3 class="create-instruction">Внесите информацию о типе выплаты</h3>
+        </div>
+        <form id="paymentTypeForm">
+            {% csrf_token %}
+            <!-- <input type="hidden" name="id" id="projectId"> -->
+            <div class="form-group">
+                <label class="form-label">Название:</label>
+                <input class="form-input" type="text" name="name" placeholder="Название типа выплаты" required>
+            </div>
+            <div class="create-active">
+                <button type="button" class="button-cancel">
+                    <span class="button-cancel-text">Отмена</span>
+                </button>
+                <button type="submit" class="button-add">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.00004 14.6663C11.6667 14.6663 14.6667 11.6663 14.6667 7.99967C14.6667 4.33301 11.6667 1.33301 8.00004 1.33301C4.33337 1.33301 1.33337 4.33301 1.33337 7.99967C1.33337 11.6663 4.33337 14.6663 8.00004 14.6663Z" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M5.33337 8H10.6667" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 10.6663V5.33301" stroke="#F6F5FA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="button-add-text">Добавить тип выплаты</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% equalize_columns positions departments statuses employee_types payment_types as equalized %}
+
+<div id="dirTable" class="table-container">
+
+    <!-- Должности -->
+    <div class="table-column" id="positionColumn">
+        <div class="table-head">
+            <span class="head-title">Должности</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12"
+                      stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for item in equalized.0 %}
+            <div class="table-cell">
+                {% if item %}
+                    <span class="cell-title">{{ item.name }}</span>
+                {% else %}
+                    <span class="cell-title">&nbsp;</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Отделы -->
+    <div class="table-column" id="departmentColumn">
+        <div class="table-head">
+            <span class="head-title">Отделы</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12"
+                      stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for item in equalized.1 %}
+            <div class="table-cell">
+                {% if item %}
+                    <span class="cell-title">{{ item.name }}</span>
+                {% else %}
+                    <span class="cell-title">&nbsp;</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Статусы сотрудника -->
+    <div class="table-column" id="statusColumn">
+        <div class="table-head">
+            <span class="head-title">Статусы сотрудника</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12"
+                      stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for item in equalized.2 %}
+            <div class="table-cell">
+                {% if item %}
+                    <span class="cell-title">{{ item.name }}</span>
+                {% else %}
+                    <span class="cell-title">&nbsp;</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Типы сотрудника -->
+    <div class="table-column" id="employeeTypeColumn">
+        <div class="table-head">
+            <span class="head-title">Типы сотрудника</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12"
+                      stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for item in equalized.3 %}
+            <div class="table-cell">
+                {% if item %}
+                    <span class="cell-title">{{ item.name }}</span>
+                {% else %}
+                    <span class="cell-title">&nbsp;</span>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 
     <!-- Типы выплат -->
-    <div>
-        <h3>Типы выплат</h3>
-        <form id="paymentTypeForm">
-            {% csrf_token %}
-            <input type="hidden" name="id" id="paymentTypeId">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Название типа" required>
+    <div class="table-column" id="paymentTypeColumn">
+        <div class="table-head">
+            <span class="head-title">Типы выплат</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12"
+                      stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        {% for item in equalized.4 %}
+            <div class="table-cell">
+                {% if item %}
+                    <span class="cell-title">{{ item.name }}</span>
+                {% else %}
+                    <span class="cell-title">&nbsp;</span>
+                {% endif %}
             </div>
-            <button type="submit">Сохранить</button>
-            <button type="button" onclick="clearForm('paymentTypeForm')">Отмена</button>
-        </form>
-        <ul id="paymentTypeList">
-            {% for payment_type in payment_types %}
-            <li>
-                {{ payment_type.name }}
-                <button class="icon-btn" onclick="editItem('paymentType', '{{ payment_type.id }}', '{{ payment_type.name }}')">✏️</button>
-                <button class="icon-btn" onclick="deleteItem('payment-types', '{{ payment_type.id }}')">❌</button>
-            </li>
-            {% endfor %}
-        </ul>
+        {% endfor %}
     </div>
 
 </div>
+
 <script src="{% static 'js/payroll_dir.js' %}"></script>
 {% endblock %}

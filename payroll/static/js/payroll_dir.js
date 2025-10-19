@@ -1,129 +1,112 @@
-// Общие функции для всех справочников
-function editItem(type, id, name) {
-    document.getElementById(`${type}Id`).value = id;
-    document.querySelector(`#${type}Form input[name="name"]`).value = name;
-    document.querySelector(`#${type}Form`).scrollIntoView();
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdowns = document.querySelectorAll('.dropdown');
+    const backdrop = document.getElementById('modalBackdrop');
+    const modals = document.querySelectorAll('.modal');
+    const items = document.querySelectorAll('.dropdown-item[data-modal]');
 
-// Отчистка формы
-function clearForm(formId) {
-    document.getElementById(formId).reset();
-    document.getElementById(formId).querySelector('input[type="hidden"]').value = '';
-}
+    // Дропдауны
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
 
-// Удаление записи выбранной записи из справочника
-function deleteItem(endpoint, id) {
-    if (confirm('Удалить запись?')) {
-        fetch(`/payroll/api/${endpoint}/${id}/`, {
-            method: 'DELETE',
-            // headers: {
-            //     'X-CSRFToken': getCookie('csrftoken')
-            // }
-        })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert('Ошибка при удалении');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Ошибка при удалении');
+        toggle.addEventListener('click', e => {
+            e.stopPropagation();
+            const isOpen = menu.classList.contains('open');
+            document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
+            if (!isOpen) menu.classList.add('open');
         });
-    }
-}
 
-
-// Обработчики форм
-document.addEventListener('DOMContentLoaded', function() {
-    // Должности
-    document.getElementById('positionForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveItem('positions', this);
-    });
-
-    // Отделы
-    document.getElementById('departmentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveItem('departments', this);
-    });
-
-    // Статусы
-    document.getElementById('statusForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveItem('statuses', this);
-    });
-
-    // Типы сотрудников
-    document.getElementById('employeeTypeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveItem('employee-types', this);
-    });
-
-    // Типы выплат
-    document.getElementById('paymentTypeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveItem('payment-types', this);
-    });
-
-
-});
-
-// Загрузка и редактирование записи
-function saveItem(endpoint, form) {
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    const id = data.id;
-    const url = id ? `/payroll/api/${endpoint}/${id}/` : `/payroll/api/${endpoint}/`;
-    const method = id ? 'PUT' : 'POST';
-
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            // 'X-CSRFToken': getCSRFToken(),
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (response.ok) {
-            location.reload();
-        } else {
-            return response.json().then(errorData => {
-                throw new Error(errorData.detail || 'Ошибка сохранения');
+        dropdown.querySelectorAll('.dropdown-item[data-value]').forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.getAttribute('data-value');
+                const text = item.textContent;
+                dropdown.querySelector('.dropdown-toggle').textContent = text;
+                dropdown.querySelector('input[type="hidden"]').value = value;
+                dropdown.querySelector('.dropdown-menu').classList.remove('open');
             });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Ошибка при сохранении: ' + error.message);
+        });
     });
-}
 
-// function getCSRFToken() {
-//     return document.querySelector('[name=csrfmiddlewaretoken]').value;
-// }
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu.open').forEach(menu => menu.classList.remove('open'));
+    });
 
-// Функция для получения CSRF токена
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
+    // Открытие модалок
+    items.forEach(item => {
+        item.addEventListener('click', () => {
+            const modalId = item.getAttribute('data-modal');
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            modals.forEach(m => m.style.display = 'none');
+            modal.style.display = 'flex';
+            backdrop.style.display = 'block';
+            const menu = item.closest('.dropdown-menu');
+            if (menu) menu.classList.remove('open');
+        });
+    });
+
+    function closeAllModals() {
+        modals.forEach(m => m.style.display = 'none');
+        backdrop.style.display = 'none';
+    }
+
+    backdrop.addEventListener('click', closeAllModals);
+    modals.forEach(modal => {
+        const closeBtn = modal.querySelector('.modal-close');
+        const cancelBtn = modal.querySelector('.button-cancel');
+        if (closeBtn) closeBtn.addEventListener('click', closeAllModals);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeAllModals);
+    });
+
+    // Функция для получения URL API по id формы
+    function getApiUrl(formId) {
+        switch(formId) {
+            case 'positionForm': return '/payroll/api/positions/';
+            case 'departmentForm': return '/payroll/api/departments/';
+            case 'statusForm': return '/payroll/api/statuses/';
+            case 'employeeTypeForm': return '/payroll/api/employee-types/';
+            case 'paymentTypeForm': return '/payroll/api/payment-types/';
+
+            default: return null;
         }
     }
-    return cookieValue;
-}
 
-Инициализация
-document.addEventListener('DOMContentLoaded', function() {
+    // Отправка форм на DRF endpoints
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const url = getApiUrl(form.id);
+            if (!url) return console.error('Unknown form id:', form.id);
 
+            const formData = new FormData(form);
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) { // DRF возвращает объект с id при успешном создании
+                    // alert('Добавлено успешно!');
+                    closeAllModals();
+                    form.reset();
+                    location.reload();
+                    // TODO: Динамически обновить таблицу без перезагрузки
+                } else {
+                    alert('Ошибка: ' + JSON.stringify(data));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ошибка при отправке формы');
+            });
+        });
+    });
+
+    
 });
+

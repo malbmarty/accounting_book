@@ -23,7 +23,7 @@
         </select> -->
         <div class="dropdown" data-name="sort">
         <div class="dropdown-toggle select-sort">Сортировать:</div>
-            <div class="dropdown-menu">
+            <div class="dropdown-menu dropdown-menu--sort">
                 {% for column_name in column_names %}
                 <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="asc">
                     {{ column_name.display }} ↑
@@ -79,103 +79,109 @@
         <form id="createOperAccForm">
             {% csrf_token %}
 
-            <div class="form-group">
-                <label class="form-label">Дата платежа (ОДДС):</label>
-                <input class="form-input" type="date" name="payment_date" id = "paymentDate" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Дата признания (ОПУ):</label>
-                <input class="form-input" type="date" name="recognition_date" id = "recognitionDate" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Плательщик ОТКУДА:</label>
-                <div class="dropdown" data-name="payer">
-                <div class="dropdown-toggle form-input">Выберите плательщика</div>
-                    <div class="dropdown-menu">
-                        {% for payer in participants %}
-                            <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="payer" value="">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Дата платежа (ОДДС):</label>
+                    <input class="form-input" type="date" name="payment_date" id="paymentDate" required>
                 </div>
 
-                <label class="form-label">Получатель КУДА:</label>
-                <div class="dropdown" data-name="recipient">
-                <div class="dropdown-toggle form-input">Выберите получателя</div>
-                    <div class="dropdown-menu">
-                        {% for recipient in participants %}
-                            <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="recipient" value="">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Статья:</label>
-                <div class="dropdown" data-name="item">
-                <div class="dropdown-toggle form-input">Выберите статью</div>
-                    <div class="dropdown-menu">
-                        {% for item in items %}
-                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="item" value="">
+                <div class="form-group">
+                    <label class="form-label">Дата признания (ОПУ):</label>
+                    <input class="form-input" type="date" name="recognition_date" id="recognitionDate" required>
                 </div>
 
-                <label class="form-label">Плтаежная система:</label>
-                <div class="dropdown" data-name="payment_system">
-                <div class="dropdown-toggle form-input">Выберите платежную систему</div>
-                    <div class="dropdown-menu">
-                        {% for payment_system in payment_systems %}
-                            <div class="dropdown-item" data-value="{{ payment_system.id }}">{{ payment_system.name }}</div>
-                        {% endfor %}
+                <div class="form-group">
+                    <label class="form-label">Плательщик ОТКУДА:</label>
+                    <div class="dropdown" data-name="payer">
+                        <div class="dropdown-toggle form-input">Выберите плательщика</div>
+                        <div class="dropdown-menu">
+                            {% for payer in participants %}
+                                <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payer" value="">
                     </div>
-                    <input type="hidden" name="payment_system" value="">
                 </div>
-            </div>
 
-            <div class="form-group">
-                 <label class="form-label">Проект:</label>
-                <div class="dropdown" data-name="project">
-                <div class="dropdown-toggle form-input">Выберите проект</div>
-                    <div class="dropdown-menu">
-                        {% for project in projects %}
-                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
-                        {% endfor %}
+                <div class="form-group">
+                    <label class="form-label">Получатель КУДА:</label>
+                    <div class="dropdown" data-name="recipient">
+                        <div class="dropdown-toggle form-input">Выберите получателя</div>
+                        <div class="dropdown-menu">
+                            {% for recipient in participants %}
+                                <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="recipient" value="">
                     </div>
-                    <input type="hidden" name="project" value="">
                 </div>
-            </div> 
 
-            <div class="form-group">
-                <label class="form-label">Сумма оплаты:</label>
-                <input class="form-input" type="number" name="payment_amount" step="0.01">
-            </div>
-            
-            <div class="form-group">
-                 <label class="form-label">Контрагент:</label>
-                <div class="dropdown" data-name="counterparty">
-                <div class="dropdown-toggle form-input">Выберите контрагента</div>
-                    <div class="dropdown-menu">
-                        {% for counterparty in counterparties %}
-                            <div class="dropdown-item" data-value="{{ counterparty.id }}">{{ counterparty.name }}</div>
-                        {% endfor %}
+                <div class="form-group">
+                    <label class="form-label">Статья:</label>
+                    <div class="dropdown" data-name="item">
+                        <div class="dropdown-toggle form-input">Выберите статью</div>
+                        <div class="dropdown-menu">
+                            {% for item in items %}
+                                <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="item" value="">
                     </div>
-                    <input type="hidden" name="counterparty" value="">
                 </div>
-            </div> 
 
-            <div class="form-group">
-                <label class="form-label">Сумма комиссии:</label>
-                <input class="form-input" type="number" name="commission_amount" step="0.01">
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Платёжная система:</label>
+                    <div class="dropdown" data-name="payment_system">
+                        <div class="dropdown-toggle form-input">Выберите платежную систему</div>
+                        <div class="dropdown-menu">
+                            {% for payment_system in payment_systems %}
+                                <div class="dropdown-item" data-value="{{ payment_system.id }}">{{ payment_system.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payment_system" value="">
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Комментарий:</label>
-                <textarea class="form-input" name="comment" rows="3"></textarea>
+                <div class="form-group">
+                    <label class="form-label">Проект:</label>
+                    <div class="dropdown" data-name="project">
+                        <div class="dropdown-toggle form-input">Выберите проект</div>
+                        <div class="dropdown-menu">
+                            {% for project in projects %}
+                                <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="project" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Контрагент:</label>
+                    <div class="dropdown" data-name="counterparty">
+                        <div class="dropdown-toggle form-input">Выберите контрагента</div>
+                        <div class="dropdown-menu">
+                            {% for counterparty in counterparties %}
+                                <div class="dropdown-item" data-value="{{ counterparty.id }}">{{ counterparty.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="counterparty" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сумма оплаты:</label>
+                    <input class="form-input" type="number" name="payment_amount" step="0.01" placeholder="Сумма оплаты">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сумма комиссии:</label>
+                    <input class="form-input" type="number" name="commission_amount" step="0.01" placeholder="Сумма комиссии">
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Комментарий:</label>
+                    <textarea class="form-input" name="comment" rows="3" placeholder="Текст комментария"></textarea>
+                </div>
             </div>
 
             <div class="create-active">
@@ -213,103 +219,109 @@
         <form id="editOperAccForm">
             {% csrf_token %}
 
-            <div class="form-group">
-                <label class="form-label">Дата платежа (ОДДС):</label>
-                <input class="form-input" type="date" name="payment_date" id = "paymentDate" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Дата признания (ОПУ):</label>
-                <input class="form-input" type="date" name="recognition_date" id = "recognitionDate" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Плательщик ОТКУДА:</label>
-                <div class="dropdown" data-name="payer">
-                <div class="dropdown-toggle form-input">Выберите плательщика</div>
-                    <div class="dropdown-menu">
-                        {% for payer in participants %}
-                            <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="payer" value="">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Дата платежа (ОДДС):</label>
+                    <input class="form-input" type="date" name="payment_date" id="paymentDate" required>
                 </div>
 
-                <label class="form-label">Получатель КУДА:</label>
-                <div class="dropdown" data-name="recipient">
-                <div class="dropdown-toggle form-input">Выберите получателя</div>
-                    <div class="dropdown-menu">
-                        {% for recipient in participants %}
-                            <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="recipient" value="">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Статья:</label>
-                <div class="dropdown" data-name="item">
-                <div class="dropdown-toggle form-input">Выберите статью</div>
-                    <div class="dropdown-menu">
-                        {% for item in items %}
-                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="item" value="">
+                <div class="form-group">
+                    <label class="form-label">Дата признания (ОПУ):</label>
+                    <input class="form-input" type="date" name="recognition_date" id="recognitionDate" required>
                 </div>
 
-                <label class="form-label">Плтаежная система:</label>
-                <div class="dropdown" data-name="payment_system">
-                <div class="dropdown-toggle form-input">Выберите платежную систему</div>
-                    <div class="dropdown-menu">
-                        {% for payment_system in payment_systems %}
-                            <div class="dropdown-item" data-value="{{ payment_system.id }}">{{ payment_system.name }}</div>
-                        {% endfor %}
+                <div class="form-group">
+                    <label class="form-label">Плательщик ОТКУДА:</label>
+                    <div class="dropdown" data-name="payer">
+                        <div class="dropdown-toggle form-input">Выберите плательщика</div>
+                        <div class="dropdown-menu">
+                            {% for payer in participants %}
+                                <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payer" value="">
                     </div>
-                    <input type="hidden" name="payment_system" value="">
                 </div>
-            </div>
 
-            <div class="form-group">
-                 <label class="form-label">Проект:</label>
-                <div class="dropdown" data-name="project">
-                <div class="dropdown-toggle form-input">Выберите проект</div>
-                    <div class="dropdown-menu">
-                        {% for project in projects %}
-                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
-                        {% endfor %}
+                <div class="form-group">
+                    <label class="form-label">Получатель КУДА:</label>
+                    <div class="dropdown" data-name="recipient">
+                        <div class="dropdown-toggle form-input">Выберите получателя</div>
+                        <div class="dropdown-menu">
+                            {% for recipient in participants %}
+                                <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="recipient" value="">
                     </div>
-                    <input type="hidden" name="project" value="">
                 </div>
-            </div> 
 
-            <div class="form-group">
-                <label class="form-label">Сумма оплаты:</label>
-                <input class="form-input" type="number" name="payment_amount" step="0.01">
-            </div>
-            
-            <div class="form-group">
-                 <label class="form-label">Контрагент:</label>
-                <div class="dropdown" data-name="counterparty">
-                <div class="dropdown-toggle form-input">Выберите контрагента</div>
-                    <div class="dropdown-menu">
-                        {% for counterparty in counterparties %}
-                            <div class="dropdown-item" data-value="{{ counterparty.id }}">{{ counterparty.name }}</div>
-                        {% endfor %}
+                <div class="form-group">
+                    <label class="form-label">Статья:</label>
+                    <div class="dropdown" data-name="item">
+                        <div class="dropdown-toggle form-input">Выберите статью</div>
+                        <div class="dropdown-menu">
+                            {% for item in items %}
+                                <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="item" value="">
                     </div>
-                    <input type="hidden" name="counterparty" value="">
                 </div>
-            </div> 
 
-            <div class="form-group">
-                <label class="form-label">Сумма комиссии:</label>
-                <input class="form-input" type="number" name="commission_amount" step="0.01">
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Платёжная система:</label>
+                    <div class="dropdown" data-name="payment_system">
+                        <div class="dropdown-toggle form-input">Выберите платежную систему</div>
+                        <div class="dropdown-menu">
+                            {% for payment_system in payment_systems %}
+                                <div class="dropdown-item" data-value="{{ payment_system.id }}">{{ payment_system.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payment_system" value="">
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Комментарий:</label>
-                <textarea class="form-input" name="comment" rows="3"></textarea>
+                <div class="form-group">
+                    <label class="form-label">Проект:</label>
+                    <div class="dropdown" data-name="project">
+                        <div class="dropdown-toggle form-input">Выберите проект</div>
+                        <div class="dropdown-menu">
+                            {% for project in projects %}
+                                <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="project" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Контрагент:</label>
+                    <div class="dropdown" data-name="counterparty">
+                        <div class="dropdown-toggle form-input">Выберите контрагента</div>
+                        <div class="dropdown-menu">
+                            {% for counterparty in counterparties %}
+                                <div class="dropdown-item" data-value="{{ counterparty.id }}">{{ counterparty.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="counterparty" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сумма оплаты:</label>
+                    <input class="form-input" type="number" name="payment_amount" step="0.01" placeholder="Сумма оплаты">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сумма комиссии:</label>
+                    <input class="form-input" type="number" name="commission_amount" step="0.01" placeholder="Сумма комиссии">
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label class="form-label">Комментарий:</label>
+                    <textarea class="form-input" name="comment" rows="3" placeholder="Текст комментария"></textarea>
+                </div>
             </div>
 
 
@@ -442,10 +454,10 @@
         </div>
     </div>
 
-    <!-- Столбец Сумма коммиссии -->
+    <!-- Столбец Сумма комиссии -->
     <div class="table-column table-column--commission-amount" id="commissionAmountColumn">
         <div class="table-head table-head--commission-amount">
-            <span class="head-title">Сумма коммиссии</span>
+            <span class="head-title">Сумма комиссии</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 12H14M8 8H12M8 4H10M2 5.58333L3.00345 4.45445C3.53384 3.85776 4.46616 3.85776 4.99655 4.45445L6 5.58333M4 4V12" stroke="#A5A5A5" stroke-width="1.2" stroke-linecap="round"/>
             </svg>

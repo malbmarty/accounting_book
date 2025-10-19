@@ -437,25 +437,23 @@
 
 /* Фон модального окна */
 .modal {
-    display: none; /* скрыто по умолчанию */
+    display: none;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: center;
     padding: 20px;
     box-sizing: border-box;
-    gap: 32px;
-    isolation: isolate;
-
     position: fixed;
-    width: 440px;
-    height: 700px;
-    left: calc(50% - 440px/2);
-    top: calc(50% - 648px/2);
+    width: 600px;
+    /* width: 90%; */
+    max-height: 90vh;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     z-index: 1000;
-
     background: #F6F5FA;
     border-radius: 24px;
-    align-items: center;
-    overflow-y: auto; 
+    overflow-y: auto;
+    overflow-x: hidden; /* Убираем горизонтальный скролл */
 }
 
 
@@ -464,13 +462,12 @@
 .modal-content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    /* align-items: flex-start; */
     padding: 0px;
     gap: 20px;
-
-    width: 400px;
-    height: 800px;
-    
+    width: 100%;
+    height: auto;
+    max-width: 100%; /* Ограничиваем максимальную ширину */
 }
 
 
@@ -481,12 +478,12 @@
     justify-content: center;
     align-items: center;
     padding: 0px;
-
     position: absolute;
     width: 16px;
     height: 16px;
-    left: 416px;
-    top: 16px;
+    right: 20px;
+    top: 20px;
+    cursor: pointer;
 }
 
 /* эффект при наведении */
@@ -501,10 +498,8 @@
     align-items: flex-start;
     padding: 0px;
     gap: 6px;
-
-    width: 400px;
-    height: 45px;
-    align-self: flex-start;
+    width: 100%;
+    height: auto;
 }
 
 
@@ -546,11 +541,9 @@
     align-items: flex-start;
     padding: 0px;
     gap: 6px;
-
-    width: 400px;
+    width: 100%;
     height: auto;
-    align-self: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 0;
 }
 
 .form-group.form-group--employee {
@@ -559,17 +552,36 @@
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 3px 20px; /* вертикальный и горизонтальный отступ */
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
     width: 100%;
 }
 
-.form-grid .form-group {
-    width: 100%;
+/* Для полей, которые должны занимать всю ширину */
+.form-group.full-width {
+    grid-column: 1 / -1;
 }
 
 .form-grid .form-input {
+    width: 100% !important; /* подстраивается под колонку */
+}
+
+.form-grid .form-input,
+.form-grid .dropdown {
+    width: 100% !important;      /* растягиваем под колонку */
+    min-width: 0 !important;     /* важно для flex/grid */
+    box-sizing: border-box;
+}
+
+/* для .dropdown-menu, чтобы меню тоже подстраивалось */
+.dropdown-menu {
     width: 100%;
+    max-height: 150px;
+}
+
+.dropdown-menu--sort {
+    width: 100%;
+    max-height: 300px;
 }
 
 
@@ -597,7 +609,7 @@
     padding: 10px 12px;
     gap: 6px;
 
-    width: 400px;
+    width: 100%;
     height: 40px;
 
     background: #F6F5FA;
@@ -617,6 +629,10 @@
 
 }
 
+.form-group--comment {
+    margin-top: 16px;
+}
+
 .option-text {
     white-space: nowrap;
     font-family: 'Mulish';
@@ -632,12 +648,12 @@
 .create-active {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    justify-content: flex-end;
     padding: 0px;
     gap: 8px;
     margin-top: 30px;
 
-    width: 400px;
+    width: 100%;
     height: 40px;
 }
 

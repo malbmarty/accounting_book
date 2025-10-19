@@ -22,7 +22,7 @@
         </select> -->
         <div class="dropdown" data-name="sort">
         <div class="dropdown-toggle select-sort">Сортировать:</div>
-            <div class="dropdown-menu">
+            <div class="dropdown-menu dropdown-menu--sort">
                 {% for column_name in column_names %}
                 <div class="dropdown-item" data-value="{{ column_name.field }}" data-direction="asc">
                     {{ column_name.display }} ↑
@@ -77,100 +77,101 @@
 
         <form id="createPayoutForm">
             {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Дата ОДДС:</label>
+                    <input class="form-input" type="date" name="date" id="currentDate" required>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">Дата ОДДС:</label>
-                <input class="form-input" type="date" name="date" id = "currentDate" required>
+                <div class="form-group">
+                    <label class="form-label">Проект:</label>
+                    <div class="dropdown" data-name="project">
+                        <div class="dropdown-toggle form-input">Выберите проект</div>
+                        <div class="dropdown-menu">
+                            {% for project in projects %}
+                                <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="project" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Плательщик ОТКУДА:</label>
+                    <div class="dropdown" data-name="payer">
+                        <div class="dropdown-toggle form-input">Выберите плательщика</div>
+                        <div class="dropdown-menu">
+                            {% for payer in participants %}
+                                <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payer" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Получатель КУДА:</label>
+                    <div class="dropdown" data-name="recipient">
+                        <div class="dropdown-toggle form-input">Выберите получателя</div>
+                        <div class="dropdown-menu">
+                            {% for recipient in participants %}
+                                <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="recipient" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Отдел:</label>
+                    <div class="dropdown" data-name="department">
+                        <div class="dropdown-toggle form-input">Выберите отдел</div>
+                        <div class="dropdown-menu">
+                            {% for department in departments %}
+                                <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="department" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сотрудник:</label>
+                    <div class="dropdown" data-name="employee">
+                        <div class="dropdown-toggle form-input">Выберите сотрудника</div>
+                        <div class="dropdown-menu">
+                            {% for employee in employees %}
+                                <div class="dropdown-item" data-value="{{ employee.id }}">{{ employee.full_name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="employee" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Тип выплаты:</label>
+                    <div class="dropdown" data-name="payment_type">
+                        <div class="dropdown-toggle form-input">Выберите тип выплаты</div>
+                        <div class="dropdown-menu">
+                            {% for payment_type in payment_types %}
+                                <div class="dropdown-item" data-value="{{ payment_type.id }}">{{ payment_type.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payment_type" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сумма выплаты:</label>
+                    <input class="form-input" type="number" name="amount" step="0.01" placeholder="Сумма выплаты">
+                </div>
             </div>
 
-
-            <div class="form-group">
-                <label class="form-label">Проект:</label>
-                <div class="dropdown" data-name="project">
-                <div class="dropdown-toggle form-input">Выберите проект</div>
-                    <div class="dropdown-menu">
-                        {% for project in projects %}
-                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="project" value="">
-                </div>
-                
-                <label class="form-label">Плательщик ОТКУДА:</label>
-                <div class="dropdown" data-name="payer">
-                <div class="dropdown-toggle form-input">Выберите плательщика</div>
-                    <div class="dropdown-menu">
-                        {% for payer in participants %}
-                            <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="payer" value="">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Получатель КУДА:</label>
-                <div class="dropdown" data-name="recipient">
-                <div class="dropdown-toggle form-input">Выберите получателя</div>
-                    <div class="dropdown-menu">
-                        {% for recipient in participants %}
-                            <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="recipient" value="">
-                </div>
-                
-                <label class="form-label">Отдел:</label>
-                <div class="dropdown" data-name="department">
-                <div class="dropdown-toggle form-input">Выберите отдел</div>
-                    <div class="dropdown-menu">
-                        {% for department in departments %}
-                            <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="department" value="">
-                </div>
-            </div>
-
-
-
-            <div class="form-group">
-                <label class="form-label">Сотрудник:</label>
-                <div class="dropdown" data-name="employee">
-                <div class="dropdown-toggle form-input">Выберите сотрудника</div>
-                    <div class="dropdown-menu">
-                        {% for employee in employees %}
-                            <!-- Сюда будем подгружать сотрудников динамически -->
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="employee" value="">
-                </div>
-
-                <label class="form-label">Тип выплаты:</label>
-                <div class="dropdown" data-name="">
-                <div class="dropdown-toggle form-input">Выберите тип выплаты</div>
-                    <div class="dropdown-menu">
-                        {% for payment_type in payment_types %}
-                            <div class="dropdown-item" data-value="{{ payment_type.id }}">{{ payment_type.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="payment_type" value="">
-                </div>
-            </div> 
-
-            
-            <div class="form-group">
-                <label class="form-label">Сумма выплаты:</label>
-                <input class="form-input" type="number" name="amount" step="0.01">
-            </div>
-
-
-            <div class="form-group">
+            <div class="form-group form-group--comment">
                 <label class="form-label">Комментарий:</label>
-                <textarea class="form-input" name="comment" rows="3"></textarea>
+                <textarea class="form-input" name="comment" rows="3" placeholder="Текст комментария"></textarea>
             </div>
-
-
+            
             <div class="create-active">
                 <button type="button" class="button-cancel">
                     <span class="button-cancel-text">Отмена</span>
@@ -184,8 +185,8 @@
                     <span class="button-add-text">Добавить запись</span>
                 </button>
             </div>
-
         </form>
+
     </div>
 </div>
 
@@ -206,98 +207,100 @@
         <form id="editPayoutForm">
             {% csrf_token %}
 
-            <div class="form-group">
-                <label class="form-label">Дата ОДДС:</label>
-                <input class="form-input" type="date" name="date" id = "currentDate" required>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Дата ОДДС:</label>
+                    <input class="form-input" type="date" name="date" id="currentDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Проект:</label>
+                    <div class="dropdown" data-name="project">
+                        <div class="dropdown-toggle form-input">Выберите проект</div>
+                        <div class="dropdown-menu">
+                            {% for project in projects %}
+                                <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="project" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Плательщик ОТКУДА:</label>
+                    <div class="dropdown" data-name="payer">
+                        <div class="dropdown-toggle form-input">Выберите плательщика</div>
+                        <div class="dropdown-menu">
+                            {% for payer in participants %}
+                                <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payer" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Получатель КУДА:</label>
+                    <div class="dropdown" data-name="recipient">
+                        <div class="dropdown-toggle form-input">Выберите получателя</div>
+                        <div class="dropdown-menu">
+                            {% for recipient in participants %}
+                                <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="recipient" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Отдел:</label>
+                    <div class="dropdown" data-name="department">
+                        <div class="dropdown-toggle form-input">Выберите отдел</div>
+                        <div class="dropdown-menu">
+                            {% for department in departments %}
+                                <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="department" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сотрудник:</label>
+                    <div class="dropdown" data-name="employee">
+                        <div class="dropdown-toggle form-input">Выберите сотрудника</div>
+                        <div class="dropdown-menu">
+                            {% for employee in employees %}
+                                <div class="dropdown-item" data-value="{{ employee.id }}">{{ employee.full_name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="employee" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Тип выплаты:</label>
+                    <div class="dropdown" data-name="payment_type">
+                        <div class="dropdown-toggle form-input">Выберите тип выплаты</div>
+                        <div class="dropdown-menu">
+                            {% for payment_type in payment_types %}
+                                <div class="dropdown-item" data-value="{{ payment_type.id }}">{{ payment_type.name }}</div>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="payment_type" value="">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сумма выплаты:</label>
+                    <input class="form-input" type="number" name="amount" step="0.01">
+                </div>
             </div>
 
-
-            <div class="form-group">
-                <label class="form-label">Проект:</label>
-                <div class="dropdown" data-name="project">
-                <div class="dropdown-toggle form-input">Выберите проект</div>
-                    <div class="dropdown-menu">
-                        {% for project in projects %}
-                            <div class="dropdown-item" data-value="{{ project.id }}">{{ project.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="project" value="">
-                </div>
-                
-                <label class="form-label">Плательщик ОТКУДА:</label>
-                <div class="dropdown" data-name="payer">
-                <div class="dropdown-toggle form-input">Выберите плательщика</div>
-                    <div class="dropdown-menu">
-                        {% for payer in participants %}
-                            <div class="dropdown-item" data-value="{{ payer.id }}">{{ payer.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="payer" value="">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Получатель КУДА:</label>
-                <div class="dropdown" data-name="recipient">
-                <div class="dropdown-toggle form-input">Выберите получателя</div>
-                    <div class="dropdown-menu">
-                        {% for recipient in participants %}
-                            <div class="dropdown-item" data-value="{{ recipient.id }}">{{ recipient.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="recipient" value="">
-                </div>
-                
-                <label class="form-label">Отдел:</label>
-                <div class="dropdown" data-name="department">
-                <div class="dropdown-toggle form-input">Выберите отдел</div>
-                    <div class="dropdown-menu">
-                        {% for department in departments %}
-                            <div class="dropdown-item" data-value="{{ department.id }}">{{ department.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="department" value="">
-                </div>
-            </div>
-
-
-
-            <div class="form-group">
-                <label class="form-label">Сотрудник:</label>
-                <div class="dropdown" data-name="employee">
-                <div class="dropdown-toggle form-input">Выберите сотрудника</div>
-                    <div class="dropdown-menu">
-                        {% for employee in employees %}
-                            <div class="dropdown-item" data-value="{{ employee.id }}">{{ employee.full_name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="employee" value="">
-                </div>
-
-                <label class="form-label">Тип выплаты:</label>
-                <div class="dropdown" data-name="payment_type">
-                <div class="dropdown-toggle form-input">Выберите тип выплаты</div>
-                    <div class="dropdown-menu">
-                        {% for payment_type in payment_types %}
-                            <div class="dropdown-item" data-value="{{ payment_type.id }}">{{ payment_type.name }}</div>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="payment_type" value="">
-                </div>
-            </div> 
-
-            
-            <div class="form-group">
-                <label class="form-label">Сумма выплаты:</label>
-                <input class="form-input" type="number" name="amount" step="0.01">
-            </div>
-
-
-            <div class="form-group">
+            <div class="form-group form-group--comment">
                 <label class="form-label">Комментарий:</label>
                 <textarea class="form-input" name="comment" rows="3"></textarea>
             </div>
-
 
             <div class="create-active">
                 <button type="button" class="button-cancel">
